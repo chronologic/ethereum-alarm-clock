@@ -27,7 +27,7 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
      */
     function TransactionRequest(address[4] addressArgs,
                                 uint[11] uintArgs,
-                                bytes callData) {
+                                bytes callData) payable {
         txnRequest.initialize(addressArgs, uintArgs, callData);
     }
 
