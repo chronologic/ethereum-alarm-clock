@@ -1,4 +1,4 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.15;
 
 import {RequestFactoryInterface} from "contracts/RequestFactoryInterface.sol";
 import {PaymentLib} from "contracts/PaymentLib.sol";
@@ -12,7 +12,7 @@ library SchedulerLib {
     using SafeSendLib for address;
     using MathLib for uint;
 
-    address constant DONATION_BENEFACTOR = 0xd3cda913deb6f67967b99d67acdfa1712c293601;
+    address constant DONATION_BENEFACTOR = 0xd3CdA913deB6f67967B99D67aCDFa1712C293601;
 
     struct FutureTransaction {
         uint donation;

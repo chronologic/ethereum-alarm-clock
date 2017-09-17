@@ -1,4 +1,4 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.15;
 
 import {GroveLib} from "contracts/GroveLib.sol";
 import {MathLib} from "contracts/MathLib.sol";

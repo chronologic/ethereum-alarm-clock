@@ -1,4 +1,4 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.15;
 
 
 import {RequestScheduleLib} from "contracts/RequestScheduleLib.sol";
@@ -16,5 +16,5 @@ contract TimestampScheduler is BaseScheduler {
 }
 
 
-contract TestnetTimestampScheduler is TimestampScheduler(0x6005cb5aa9c4774c9f1f46ef3323c1337809cdb0) {
+contract TestnetTimestampScheduler is TimestampScheduler(0x6005cb5aa9c4774c9F1f46EF3323c1337809cDb0) {
 }

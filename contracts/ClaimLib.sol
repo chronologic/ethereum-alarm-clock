@@ -1,4 +1,4 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.15;
 
 import {SafeSendLib} from "contracts/SafeSendLib.sol";
 import {MathLib} from "contracts/MathLib.sol";
