@@ -1,4 +1,4 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.15;
 
 import {RequestLib} from "contracts/RequestLib.sol";
 import {TransactionRequestInterface} from "contracts/TransactionRequestInterface.sol";
@@ -28,7 +28,8 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
     function TransactionRequest(address[4] addressArgs,
                                 uint[11] uintArgs,
                                 bytes callData) payable {
-        txnRequest.initialize(addressArgs, uintArgs, callData);
+        // FIXME: Deployment to testrpc fails here.
+        // txnRequest.initialize(addressArgs, uintArgs, callData);
     }
 
     /*

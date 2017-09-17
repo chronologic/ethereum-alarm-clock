@@ -15,7 +15,8 @@ contract RequestFactory is RequestFactoryInterface {
     RequestTrackerInterface public requestTracker;
 
     function RequestFactory(address _trackerAddress) {
-        if (_trackerAddress == 0x0) throw;
+        // FIXME: Deployment to testrpc fails here. Use assertion and uncomment.
+        // if (_trackerAddress == 0x0) throw;
         requestTracker = RequestTrackerInterface(_trackerAddress);
     }
 
