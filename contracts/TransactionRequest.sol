@@ -35,7 +35,7 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
      *  Allow receiving ether.  This is needed if there is a large increase in
      *  network gas prices.
      */
-    function() {
+    function() payable {
     }
 
     RequestLib.Request txnRequest;

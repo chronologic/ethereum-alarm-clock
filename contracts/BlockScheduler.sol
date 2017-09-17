@@ -2,7 +2,7 @@
 
 
 import {RequestScheduleLib} from "contracts/RequestScheduleLib.sol";
-import {BaseScheduler} from "contracts/Scheduler.sol";
+import {BaseScheduler} from "contracts/BaseScheduler.sol";
 
 
 contract BlockScheduler is BaseScheduler {
