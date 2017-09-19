@@ -28,8 +28,7 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
     function TransactionRequest(address[4] addressArgs,
                                 uint[11] uintArgs,
                                 bytes callData) payable {
-        // FIXME: Deployment to testrpc fails here.
-        // txnRequest.initialize(addressArgs, uintArgs, callData);
+        txnRequest.initialize(addressArgs, uintArgs, callData);
     }
 
     /*
