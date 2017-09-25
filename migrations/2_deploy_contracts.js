@@ -21,6 +21,8 @@ let BaseScheduler               = artifacts.require("./BaseScheduler.sol"),
     TransactionRequest          = artifacts.require("./TransactionRequest.sol"),
     TransactionRequestInterface = artifacts.require("./TransactionRequestInterface.sol");
 
+let TransactionRecorder = artifacts.require("./test/TransactionRecorder.sol");
+
 module.exports = function(deployer) {
 
     deployer.deploy(MathLib);
@@ -95,5 +97,7 @@ module.exports = function(deployer) {
     deployer.link(RequestTracker, RequestFactory);
     deployer.link(TransactionRequest, RequestFactory);
     deployer.deploy(RequestFactory);
+
+    deployer.deploy(TransactionRecorder);
 
 };

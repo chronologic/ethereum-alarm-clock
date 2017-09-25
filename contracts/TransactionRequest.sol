@@ -27,7 +27,7 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
      */
     function TransactionRequest(address[4] addressArgs,
                                 uint[11] uintArgs,
-                                bytes callData) payable {
+                                bytes32 callData) payable {
         txnRequest.initialize(addressArgs, uintArgs, callData);
     }
 
@@ -77,7 +77,7 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
         }
     }
 
-    function callData() constant returns (bytes) {
+    function callData() constant returns (bytes32) {
         return txnRequest.txnData.callData;
     }
 

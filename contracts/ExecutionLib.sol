@@ -7,7 +7,7 @@ library ExecutionLib {
         address toAddress;
 
         // The bytes value that will be sent with the txn.
-        bytes callData;
+        bytes32 callData;
 
         // The value in wei that will be sent with the txn.
         uint callValue;

@@ -63,7 +63,7 @@ library RequestLib {
      */
     function validate(address[4] addressArgs,
                       uint[11] uintArgs,
-                      bytes callData,
+                      bytes32 callData,
                       uint endowment) returns (bool[7] is_valid) {
         Request memory request;
 
@@ -133,7 +133,7 @@ library RequestLib {
     function initialize(Request storage self,
                         address[4] addressArgs,
                         uint[11] uintArgs,
-                        bytes callData) returns (bool) {
+                        bytes32 callData) returns (bool) {
         address[6] memory addressValues = [
             0x0,             // self.claimData.claimedBy
             addressArgs[0],  // self.meta.createdBy
@@ -231,7 +231,7 @@ library RequestLib {
                          bool[3] boolValues,
                          uint[15] uintValues,
                          uint8[1] uint8Values,
-                         bytes callData) returns (bool) {
+                         bytes32 callData) returns (bool) {
         // callData is special.
         self.txnData.callData = callData;
 
