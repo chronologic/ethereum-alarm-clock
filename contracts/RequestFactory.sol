@@ -40,7 +40,7 @@ contract RequestFactory is RequestFactoryInterface {
      */
     function createRequest(address[3] addressArgs,
                            uint[11] uintArgs,
-                           bytes callData) payable returns (address) {
+                           bytes32 callData) payable returns (address) {
         var request = (new TransactionRequest).value(msg.value)(
             [
                 msg.sender,
@@ -85,7 +85,7 @@ contract RequestFactory is RequestFactoryInterface {
      */
     function validateRequestParams(address[3] addressArgs,
                                    uint[11] uintArgs,
-                                   bytes callData,
+                                   bytes32 callData,
                                    uint endowment) returns (bool[7]) {
         return RequestLib.validate(
             [
@@ -108,7 +108,7 @@ contract RequestFactory is RequestFactoryInterface {
      */
     function createValidatedRequest(address[3] addressArgs,
                                     uint[11] uintArgs,
-                                    bytes callData) payable returns (address) {
+                                    bytes32 callData) payable returns (address) {
         var is_valid = validateRequestParams(addressArgs,
                                              uintArgs,
                                              callData,

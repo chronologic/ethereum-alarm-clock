@@ -47,7 +47,7 @@ contract SchedulerInterface {
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
-                                 bytes callData,
+                                 bytes32 callData,
                                  uint[4] uintArgs) doReset public returns (address);
 
     /*
@@ -64,6 +64,6 @@ contract SchedulerInterface {
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
-                                 bytes callData,
+                                 bytes32 callData,
                                  uint[7] uintArgs) doReset public returns (address);
 }

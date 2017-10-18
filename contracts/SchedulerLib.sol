@@ -24,7 +24,7 @@ library SchedulerLib {
 
         uint callGas;
         uint callValue;
-        bytes callData;
+        bytes32 callData;
         address toAddress;
         uint requiredStackDepth;
 

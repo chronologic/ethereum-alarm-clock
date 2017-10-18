@@ -10,7 +10,7 @@ contract TransactionRecorder {
 
     address public lastCaller;
 
-    bytes public lastCallData;
+    bytes32 public lastCallData;
 
     uint public lastCallGas;
 
@@ -20,7 +20,7 @@ contract TransactionRecorder {
 
     function() {
         lastCallGas = msg.gas;
-        lastCallData = msg.data;
+//        lastCallData = msg.data;
         lastCaller = msg.sender;
         lastCallValue = msg.value;
         wasCalled = true;

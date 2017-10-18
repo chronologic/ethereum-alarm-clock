@@ -32,7 +32,7 @@ contract('Request Creation', (accounts) => {
         
         let callData = "test-call-data";
         
-        console.log(accounts)
+        console.log(accounts);
         
         let request = await TransactionRequest.new([
             accounts[1],
