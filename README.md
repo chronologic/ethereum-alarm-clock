@@ -7,3 +7,4 @@ Source code for the [Ethereum Alarm Clock service](http://www.ethereum-alarm-clo
 
 ## Running the tests
 
+Tests are in the process of being ported over to ES6 JavaScript.
