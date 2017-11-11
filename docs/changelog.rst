@@ -4,10 +4,10 @@ Changelog
 0.9.0 (WIP)
 -----------
 
- - Full rewrite of all contracts to modern solidity syntax.
- - Upgraded pragma to ^0.4.18
- - Integrate Truffle framework for compiling and tests.
- - Port test suite from Python to ES6.
+ - Full rewrite of all contracts to modern solidity syntax. [wip]
+ - Upgraded pragma to ^0.4.18 [wip]
+ - Integrate Truffle framework for compiling and tests. [wip]
+ - Port test suite from Python to ES6. [wip]
 
 0.8.0 (unreleased)
 ------------------
