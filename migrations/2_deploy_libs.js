@@ -45,10 +45,11 @@ module.exports = function(deployer) {
                                                                     deployer.link(RequestScheduleLib, SchedulerLib)
                                                                     deployer.link(SafeSendLib, SchedulerLib)
                                                                     deployer.deploy(SchedulerLib).then(() => {
+                                                                        console.log(SchedulerLib)
                                                                         /// Now we can deploy the contract we want...
-                                                                        deployer.link(RequestScheduleLib, BlockScheduler).then(() => {
-                                                                            deployer.deploy(BlockScheduler)
-                                                                        })
+                                                                        deployer.link(SchedulerLib, BlockScheduler)
+                                                                        deployer.link(RequestScheduleLib, BlockScheduler)
+                                                                        deployer.deploy(BlockScheduler)
                                                                     })
                                                                 })
                                                             })

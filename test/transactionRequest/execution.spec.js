@@ -15,7 +15,7 @@ let config = require("../../config");
 contract('Request Execution', (accounts) => {
 
     it("should create a new request", async () => {
-        let txRecorder = await TransactionRecorder.deployed();
+        let txRecorder = await TransactionRecorder.new();
 
         let wasCalled     = await txRecorder.wasCalled();
         let lastCaller    = await txRecorder.lastCaller();
@@ -27,7 +27,7 @@ contract('Request Execution', (accounts) => {
         (lastCaller).should.be.exactly('0x0000000000000000000000000000000000000000');
         (lastCallValue.toNumber()).should.equal(0);
         (lastCallGas.toNumber()).should.equal(0);
-        (lastCallData).should.equal("0x");
+        (lastCallData).should.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
 
 
         await txRecorder.sendTransaction({
