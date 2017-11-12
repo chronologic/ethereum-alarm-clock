@@ -63,7 +63,7 @@ library SchedulerLib {
      * Set default values for block based scheduling.
      */
     function resetAsBlock(FutureTransaction storage self) public returns (bool) {
-        if (!resetCommon(self)) throw;
+        assert(resetCommon(self));
 
         if (self.windowSize != 255) {
             self.windowSize = 255;
@@ -88,7 +88,7 @@ library SchedulerLib {
      * Set default values for timestamp based scheduling.
      */
     function resetAsTimestamp(FutureTransaction storage self) public returns (bool) {
-        if (!resetCommon(self)) throw;
+        assert(resetCommon(self));
 
         if (self.windowSize != 60 minutes) {
             self.windowSize = 60 minutes;
@@ -113,7 +113,9 @@ library SchedulerLib {
      *  The low level interface for creating a transaction request.
      */
     function schedule(FutureTransaction storage self,
-                      address factoryAddress) public returns (address) {
+                      address factoryAddress) 
+        public returns (address) 
+    {
         var factory = RequestFactoryInterface(factoryAddress);
         var endowment = PaymentLib.computeEndowment(
             self.payment,

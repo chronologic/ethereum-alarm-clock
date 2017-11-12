@@ -7,15 +7,15 @@ import "contracts/Library/SchedulerLib.sol";
 contract SchedulerInterface {
     using SchedulerLib for SchedulerLib.FutureTransaction;
 
+    /// Public variables 
     address public factoryAddress;
-
     RequestScheduleLib.TemporalUnit public temporalUnit;
 
     /*
      * Local storage variable used to house the data for transaction
      * scheduling.
      */
-    SchedulerLib.FutureTransaction futureTransaction;
+    SchedulerLib.FutureTransaction public futureTransaction;
 
     /*
      * When applied to a function, causes the local futureTransaction to
@@ -30,7 +30,7 @@ contract SchedulerInterface {
         } else if (uint(temporalUnit) == 2) {
             futureTransaction.resetAsTimestamp();
         } else {
-            throw;
+            revert();
         }
         _;
     }
@@ -47,7 +47,7 @@ contract SchedulerInterface {
      */
     function scheduleTransaction(address toAddress,
                                  bytes32 callData,
-                                 uint[4] uintArgs) doReset public returns (address);
+                                 uint[4] uintArgs) doReset public payable returns (address);
 
     /*
      *  Full scheduling API exposing all fields.
@@ -64,5 +64,5 @@ contract SchedulerInterface {
      */
     function scheduleTransaction(address toAddress,
                                  bytes32 callData,
-                                 uint[7] uintArgs) doReset public returns (address);
+                                 uint[7] uintArgs) doReset public payable returns (address);
 }

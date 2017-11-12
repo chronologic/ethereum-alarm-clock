@@ -27,7 +27,7 @@ contract BaseScheduler is SchedulerInterface {
     function scheduleTransaction(address _toAddress,
                                  bytes32 callData,
                                  uint[4] uintArgs)
-        doReset public returns (address)
+        doReset public payable returns (address)
     {
         futureTransaction.toAddress = _toAddress;
         futureTransaction.callData = callData;
@@ -61,7 +61,7 @@ contract BaseScheduler is SchedulerInterface {
     function scheduleTransaction(address toAddress,
                                  bytes32 callData,
                                  uint[7] uintArgs)
-        doReset public returns (address)
+        doReset public payable returns (address)
     {
         futureTransaction.toAddress = toAddress;
         futureTransaction.callData = callData;

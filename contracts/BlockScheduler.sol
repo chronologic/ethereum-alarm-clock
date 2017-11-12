@@ -7,6 +7,7 @@ import "contracts/BaseScheduler.sol";
 
 
 contract BlockScheduler is BaseScheduler {
+    
     function BlockScheduler(address _factoryAddress) {
         // Set the type of time scheduling to blocks
         temporalUnit = RequestScheduleLib.TemporalUnit(1);
