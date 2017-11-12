@@ -1,6 +1,6 @@
 pragma solidity ^0.4.17;
 
-import {RequestLib} from "contracts/RequestLib.sol";
+import "contracts/Library/RequestLib.sol";
 
 import "contracts/Interface/TransactionRequestInterface.sol";
 

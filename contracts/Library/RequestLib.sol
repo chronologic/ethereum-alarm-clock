@@ -1,12 +1,14 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
 import {ExecutionLib} from "contracts/ExecutionLib.sol";
-import {RequestScheduleLib} from "contracts/Library/RequestScheduleLib.sol";
 import {ClaimLib} from "contracts/ClaimLib.sol";
 import {RequestMetaLib} from "contracts/RequestMetaLib.sol";
 import {PaymentLib} from "contracts/PaymentLib.sol";
+
 import {SafeSendLib} from "contracts/_deprecate/SafeSendLib.sol";
-import {MathLib} from "contracts/Library/MathLib.sol";
+
+import "contracts/Library/MathLib.sol";
+import "contracts/Library/RequestScheduleLib.sol";
 
 
 library RequestLib {
@@ -22,7 +24,7 @@ library RequestLib {
      *  This struct exists to circumvent an issue with returning multiple
      *  values from a library function.  I found through experimentation that I
      *  could not return more than 4 things from a library function, even if I
-     *  put them in arrays.
+     *  put them in arrays. - Piper
      */
     struct SerializedRequest {
         address[6] addressValues;
@@ -64,7 +66,9 @@ library RequestLib {
     function validate(address[4] addressArgs,
                       uint[11] uintArgs,
                       bytes callData,
-                      uint endowment) returns (bool[7] is_valid) {
+                      uint endowment) 
+        public returns (bool[7] is_valid)
+    {
         Request memory request;
 
         // callData is special.
@@ -133,7 +137,9 @@ library RequestLib {
     function initialize(Request storage self,
                         address[4] addressArgs,
                         uint[11] uintArgs,
-                        bytes callData) returns (bool) {
+                        bytes callData) 
+        public returns (bool)
+    {
         address[6] memory addressValues = [
             0x0,             // self.claimData.claimedBy
             addressArgs[0],  // self.meta.createdBy
@@ -184,7 +190,9 @@ library RequestLib {
      *  experimentation that I was unable to return more than 4 things, even if
      *  I used the trick of returning arrays of items.
      */
-    function serialize(Request storage self) returns (bool) {
+    function serialize(Request storage self) 
+        internal returns (bool) // TODO internal or public?
+    {
         // Address values
         self.serializedValues.addressValues[0] = self.claimData.claimedBy;
         self.serializedValues.addressValues[1] = self.meta.createdBy;
@@ -231,7 +239,9 @@ library RequestLib {
                          bool[3] boolValues,
                          uint[15] uintValues,
                          uint8[1] uint8Values,
-                         bytes callData) returns (bool) {
+                         bytes callData)
+        internal returns (bool) // TODO public or internal?
+    {
         // callData is special.
         self.txnData.callData = callData;
 
@@ -267,9 +277,13 @@ library RequestLib {
 
         // Uint8 values
         self.claimData.paymentModifier = uint8Values[0];
+
+        return true;
     }
 
-    function execute(Request storage self) returns (bool) {
+    function execute(Request storage self) 
+        public returns (bool)
+    {
         /*
          *  Execute the TransactionRequest
          *
@@ -338,10 +352,12 @@ library RequestLib {
                    self.schedule.inReservedWindow()) {
             Aborted(uint8(AbortReason.ReservedForClaimer));
             return false;
-        } else if (msg.sender != tx.origin && !self.txnData.stackCanBeExtended()) {
-            Aborted(uint8(AbortReason.StackTooDeep));
-            return false;
-        }
+        } else { continue; }
+        //else if (msg.sender != tx.origin && !self.txnData.stackCanBeExtended()) {
+        //    Aborted(uint8(AbortReason.StackTooDeep));
+        //    return false;
+        //}
+        // ABOVE NO LONGER NEEDED
 
         // +--------------------+
         // | End: Authorization |
@@ -350,7 +366,7 @@ library RequestLib {
         // | Begin: Execution |
         // +------------------+
 
-        // Mark as being called before sending transaction to prevent re-entrance
+        // Mark as being called before sending transaction to prevent re-entrance.
         self.meta.wasCalled = true;
 
         // Send the transaction
@@ -422,13 +438,17 @@ library RequestLib {
     // This is the amount of gas that it takes to enter from the
     // `TransactionRequest.execute()` contract into the `RequestLib.execute()`
     // method at the point where the gas check happens.
-    uint constant _PRE_EXECUTION_GAS = 25000;
+    uint private constant _PRE_EXECUTION_GAS = 25000;   // TODO is this number still accurate?
 
-    function PRE_EXECUTION_GAS() returns (uint) {
+    function PRE_EXECUTION_GAS()
+        public constant returns (uint)
+    {
         return _PRE_EXECUTION_GAS;
     }
 
-    function requiredExecutionGas(Request storage self) returns (uint) {
+    function requiredExecutionGas(Request storage self) 
+        public returns (uint)
+    {
         var requiredGas = self.txnData.callGas.safeAdd(_EXECUTION_GAS_OVERHEAD);
 
         if (msg.sender != tx.origin) {
@@ -444,9 +464,11 @@ library RequestLib {
      * The amount of gas needed to complete the execute method after
      * the transaction has been sent.
      */
-    uint constant _EXECUTION_GAS_OVERHEAD = 180000;
+    uint private constant _EXECUTION_GAS_OVERHEAD = 180000; // TODO check accuracy of this number
 
-    function EXECUTION_GAS_OVERHEAD() returns (uint) {
+    function EXECUTION_GAS_OVERHEAD()
+        public constant returns (uint)
+    {
         return _EXECUTION_GAS_OVERHEAD;
     }
 
@@ -455,9 +477,11 @@ library RequestLib {
      *  The amount of gas used by the portion of the `execute` function
      *  that cannot be accounted for via gas tracking.
      */
-    uint constant _EXECUTE_EXTRA_GAS = 90000;
+    uint private constant  _EXECUTE_EXTRA_GAS = 90000; // Check accuracy
 
-    function EXECUTE_EXTRA_GAS() returns (uint) {
+    function EXECUTE_EXTRA_GAS() 
+        public constant returns (uint)
+    {
         return _EXECUTE_EXTRA_GAS;
     }
 
@@ -470,7 +494,9 @@ library RequestLib {
      *    * not wasCalled && afterExecutionWindow
      *    * not claimed && beforeFreezeWindow && msg.sender == owner
      */
-    function isCancellable(Request storage self) returns (bool) {
+    function isCancellable(Request storage self) 
+        public returns (bool)
+    {
         if (self.meta.isCancelled) {
             return false;
         } else if (!self.meta.wasCalled && self.schedule.isAfterWindow()) {
@@ -486,9 +512,11 @@ library RequestLib {
      *  Constant value to account for the gas usage that cannot be accounted
      *  for using gas-tracking within the `cancel` function.
      */
-    uint constant _CANCEL_EXTRA_GAS = 85000;
+    uint private constant _CANCEL_EXTRA_GAS = 85000; // Check accuracy
 
-    function CANCEL_EXTRA_GAS() returns (uint) {
+    function CANCEL_EXTRA_GAS() 
+        public constant returns (uint)
+    {
         return _CANCEL_EXTRA_GAS;
     }
 
@@ -498,12 +526,15 @@ library RequestLib {
      *  payment is issued to the party that cancels the request if they are not
      *  the owner.
      */
-    function cancel(Request storage self) returns (bool) {
+    function cancel(Request storage self) 
+        public returns (bool)
+    {
         uint startGas = msg.gas;
         uint rewardPayment;
         uint measuredGasConsumption;
 
         if (!isCancellable(self)) {
+            // revert(); ?
             return false;
         }
 
@@ -546,7 +577,9 @@ library RequestLib {
     /*
      * Return boolean as to whether the request may be claimed.
      */
-    function isClaimable(Request storage self) returns (bool) {
+    function isClaimable(Request storage self) 
+        public returns (bool)
+    {
         if (self.claimData.isClaimed()) {
             return false;
         } else if (self.meta.isCancelled) {
@@ -563,12 +596,14 @@ library RequestLib {
     /*
      * Claim the request
      */
-    function claim(Request storage self) returns (bool) {
+    function claim(Request storage self) 
+        public returns (bool)
+    {
         if (!isClaimable(self)) {
-            if (msg.sender.sendOrThrow(msg.value)) {
+            if (msg.sender.sendOrThrow(msg.value)) {    // TODO: change this to transfer
                 return false;
             }
-            throw;
+            revert();
         }
         self.claimData.claim(self.schedule.computePaymentModifier());
         Claimed();
@@ -578,7 +613,9 @@ library RequestLib {
     /*
      * Refund claimer deposit.
      */
-    function refundClaimDeposit(Request storage self) returns (bool) {
+    function refundClaimDeposit(Request storage self)
+        public returns (bool)
+    {
         if (self.meta.isCancelled || self.schedule.isAfterWindow()) {
             return self.claimData.refundDeposit(0);
         }
@@ -588,7 +625,9 @@ library RequestLib {
     /*
      * Send donation
      */
-    function sendDonation(Request storage self) returns (bool) {
+    function sendDonation(Request storage self) 
+        public returns (bool)
+    {
         if (self.schedule.isAfterWindow()) {
             return self.paymentData.sendDonation(0);
         }
@@ -598,7 +637,9 @@ library RequestLib {
     /*
      * Send payment
      */
-    function sendPayment(Request storage self) returns (bool) {
+    function sendPayment(Request storage self) 
+        public returns (bool)
+    {
         if (self.schedule.isAfterWindow()) {
             return self.paymentData.sendPayment(0);
         }
@@ -608,11 +649,15 @@ library RequestLib {
     /*
      * Send all extra ether in the request contract back to the owner.
      */
-    function sendOwnerEther(Request storage self) returns (bool) {
+    function sendOwnerEther(Request storage self) 
+        public returns (bool)
+    {
         return sendOwnerEther(self, SafeSendLib.DEFAULT_SEND_GAS());
     }
 
-    function sendOwnerEther(Request storage self, uint sendGas) returns (bool) {
+    function sendOwnerEther(Request storage self, uint sendGas) 
+        internal returns (bool)
+    {
         if (self.meta.isCancelled || self.schedule.isAfterWindow()) {
             var ownerRefund = this.balance.flooredSub(self.claimData.claimDeposit)
                                           .flooredSub(self.paymentData.paymentOwed)

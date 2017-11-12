@@ -3,7 +3,7 @@
 import {RequestFactoryInterface} from "contracts/RequestFactoryInterface.sol";
 import {PaymentLib} from "contracts/PaymentLib.sol";
 import {RequestScheduleLib} from "contracts/Library/RequestScheduleLib.sol";
-import {RequestLib} from "contracts/RequestLib.sol";
+import {RequestLib} from "contracts/Library/RequestLib.sol";
 import {SafeSendLib} from "contracts/_deprecate/SafeSendLib.sol";
 import {MathLib} from "contracts/Library/MathLib.sol";
 
