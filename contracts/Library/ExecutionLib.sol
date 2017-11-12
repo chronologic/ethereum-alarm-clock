@@ -1,5 +1,4 @@
-//pragma solidity 0.4.1;
-
+pragma solidity ^0.4.17;
 
 library ExecutionLib {
     struct ExecutionData {

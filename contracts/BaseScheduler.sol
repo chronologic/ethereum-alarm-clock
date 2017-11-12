@@ -1,8 +1,8 @@
 pragma solidity ^0.4.17;
 
-import {RequestScheduleLib} from "contracts/Library/RequestScheduleLib.sol";
-import {SchedulerInterface} from "contracts/SchedulerInterface.sol";
-import {SchedulerLib} from "contracts/SchedulerLib.sol";
+import "contracts/Interface/SchedulerInterface.sol";
+import "contracts/Library/RequestScheduleLib.sol";
+import "contracts/Library/SchedulerLib.sol";
 
 
 contract BaseScheduler is SchedulerInterface {

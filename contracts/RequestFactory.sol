@@ -1,11 +1,14 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
-import {RequestFactoryInterface} from "contracts/RequestFactoryInterface.sol";
-import {TransactionRequest} from "contracts/TransactionRequest.sol";
-import {RequestLib} from "contracts/Library/RequestLib.sol";
-import {SafeSendLib} from "contracts/_deprecate/SafeSendLib.sol";
-import {IterTools} from "contracts/IterTools.sol";
-import {RequestTrackerInterface} from "contracts/RequestTrackerInterface.sol";
+import "contracts/Interface/RequestFactoryInterface.sol";
+import "contracts/Interface/RequestTrackerInterface.sol";
+
+import "contracts/TransactionRequest.sol";
+
+import "contracts/Library/RequestLib.sol";
+
+import "contracts/_deprecate/SafeSendLib.sol";
+import "contracts/IterTools.sol";
 
 
 contract RequestFactory is RequestFactoryInterface {
@@ -15,7 +18,9 @@ contract RequestFactory is RequestFactoryInterface {
     RequestTrackerInterface public requestTracker;
 
     function RequestFactory(address _trackerAddress) {
-        if (_trackerAddress == 0x0) throw;
+        if (_trackerAddress == 0x0) {
+            revert();
+        }
         requestTracker = RequestTrackerInterface(_trackerAddress);
     }
 

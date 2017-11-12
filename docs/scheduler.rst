@@ -27,7 +27,7 @@ configured with.
 Interface
 ---------
 
-.. literalinclude:: ../contracts/SchedulerInterface.sol
+.. literalinclude:: ../contracts/Interface/SchedulerInterface.sol
     :language: solidity
 
 

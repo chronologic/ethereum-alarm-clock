@@ -1,8 +1,7 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
-
-import {RequestScheduleLib} from "contracts/Library/RequestScheduleLib.sol";
-import {SchedulerLib} from "contracts/SchedulerLib.sol";
+import "contracts/Library/RequestScheduleLib.sol";
+import "contracts/Library/SchedulerLib.sol";
 
 
 contract SchedulerInterface {

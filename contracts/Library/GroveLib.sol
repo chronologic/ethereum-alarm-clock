@@ -1,5 +1,4 @@
-//pragma solidity 0.4.1;
-
+pragma solidity ^0.4.17;
 
 /// @title GroveLib - Library for queriable indexed ordered data.
 /// @author PiperMerriam - <pipermerriam@gmail.com>

@@ -1,13 +1,12 @@
 pragma solidity ^0.4.17;
 
-import {ExecutionLib} from "contracts/ExecutionLib.sol";
-import {ClaimLib} from "contracts/ClaimLib.sol";
-import {RequestMetaLib} from "contracts/RequestMetaLib.sol";
-import {PaymentLib} from "contracts/PaymentLib.sol";
+import "contracts/_deprecate/SafeSendLib.sol";
 
-import {SafeSendLib} from "contracts/_deprecate/SafeSendLib.sol";
-
+import "contracts/Library/ClaimLib.sol";
+import "contracts/Library/ExecutionLib.sol";
 import "contracts/Library/MathLib.sol";
+import "contracts/Library/PaymentLib.sol";
+import "contracts/Library/RequestMetaLib.sol";
 import "contracts/Library/RequestScheduleLib.sol";
 
 

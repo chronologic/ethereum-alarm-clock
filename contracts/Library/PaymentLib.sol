@@ -1,8 +1,8 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
-import {ExecutionLib} from "contracts/ExecutionLib.sol";
-import {SafeSendLib} from "contracts/_deprecate/SafeSendLib.sol";
-import {MathLib} from "contracts/Library/MathLib.sol";
+import "contracts/Library/ExecutionLib.sol";
+import "contracts/Library/MathLib.sol";
+import "contracts/_deprecate/SafeSendLib.sol";
 
 
 library PaymentLib {
