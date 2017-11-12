@@ -29,7 +29,7 @@ contract TransactionRequest is TransactionRequestInterface {
      */
     function TransactionRequest(address[4] addressArgs,
                                 uint[11] uintArgs,
-                                bytes callData)
+                                bytes32 callData)
         payable
     {
         txnRequest.initialize(addressArgs, uintArgs, callData);
@@ -77,7 +77,7 @@ contract TransactionRequest is TransactionRequestInterface {
         }
     }
 
-    function callData() public constant returns (bytes) {
+    function callData() public constant returns (bytes32) {
         return txnRequest.txnData.callData;
     }
 

@@ -5,8 +5,8 @@ library ExecutionLib {
         // The address that the txn will be sent to.
         address toAddress;
 
-        // The bytes value that will be sent with the txn.
-        bytes callData;
+        // The bytes32 value that will be sent with the txn.
+        bytes32 callData;
 
         // The value in wei that will be sent with the txn.
         uint callValue;

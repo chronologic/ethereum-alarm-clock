@@ -25,7 +25,7 @@ contract BaseScheduler is SchedulerInterface {
      *  @param address toAddress;
      */
     function scheduleTransaction(address _toAddress,
-                                 bytes callData,
+                                 bytes32 callData,
                                  uint[4] uintArgs)
         doReset public returns (address)
     {
@@ -55,11 +55,11 @@ contract BaseScheduler is SchedulerInterface {
      *  uintArgs[4] requiredStackDepth
      *  uintArgs[5] windowSize
      *  uintArgs[6] windowStart
-     *  bytes callData;
+     *  bytes32 callData;
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
-                                 bytes callData,
+                                 bytes32 callData,
                                  uint[7] uintArgs)
         doReset public returns (address)
     {

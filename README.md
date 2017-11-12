@@ -15,4 +15,4 @@ Current test suite can be found in the test/ directory. Original Populus tests c
 
 To run the test suit make sure you have a testrpc running and truffle v4.0.0 installed.
 
-Run `truffle test` at the top of the directory.
+Run `truffle test` at the root of the directory.

@@ -42,11 +42,11 @@ contract SchedulerInterface {
      *  uintArgs[1] callValue
      *  uintArgs[2] windowSize
      *  uintArgs[3] windowStart
-     *  bytes callData;
+     *  bytes32 callData;
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
-                                 bytes callData,
+                                 bytes32 callData,
                                  uint[4] uintArgs) doReset public returns (address);
 
     /*
@@ -59,10 +59,10 @@ contract SchedulerInterface {
      *  uintArgs[4] requiredStackDepth
      *  uintArgs[5] windowSize
      *  uintArgs[6] windowStart
-     *  bytes callData;
+     *  bytes32 callData;
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
-                                 bytes callData,
+                                 bytes32 callData,
                                  uint[7] uintArgs) doReset public returns (address);
 }

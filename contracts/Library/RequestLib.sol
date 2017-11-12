@@ -64,7 +64,7 @@ library RequestLib {
      */
     function validate(address[4] addressArgs,
                       uint[11] uintArgs,
-                      bytes callData,
+                      bytes32 callData,
                       uint endowment) 
         public returns (bool[7] is_valid)
     {
@@ -136,7 +136,7 @@ library RequestLib {
     function initialize(Request storage self,
                         address[4] addressArgs,
                         uint[11] uintArgs,
-                        bytes callData) 
+                        bytes32 callData) 
         public returns (bool)
     {
         address[6] memory addressValues = [
@@ -238,7 +238,7 @@ library RequestLib {
                          bool[3] boolValues,
                          uint[15] uintValues,
                          uint8[1] uint8Values,
-                         bytes callData)
+                         bytes32 callData)
         internal returns (bool) // TODO public or internal?
     {
         // callData is special.

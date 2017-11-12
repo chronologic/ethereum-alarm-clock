@@ -90,6 +90,8 @@ module.exports = function(deployer) {
     deployer.link(SafeSendLib, TransactionRequest);
     deployer.deploy(TransactionRequest);
 
+    deployer.link(MathLib, RequestFactory);
+    deployer.link(RequestScheduleLib, RequestFactory);
     deployer.link(IterTools, RequestFactory);
     deployer.link(PaymentLib, RequestFactory);
     deployer.link(RequestLib, RequestFactory);

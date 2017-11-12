@@ -15,7 +15,7 @@ contract TransactionRequestInterface {
                                              bool[3],
                                              uint[15],
                                              uint8[1]);
-    function callData() constant returns (bytes);
+    function callData() constant returns (bytes32);
 
     /*
      *  Pull mechanisms for payments.
