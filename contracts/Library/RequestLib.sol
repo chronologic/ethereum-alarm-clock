@@ -352,7 +352,7 @@ library RequestLib {
                    self.schedule.inReservedWindow()) {
             Aborted(uint8(AbortReason.ReservedForClaimer));
             return false;
-        } else { continue; }
+        }
         //else if (msg.sender != tx.origin && !self.txnData.stackCanBeExtended()) {
         //    Aborted(uint8(AbortReason.StackTooDeep));
         //    return false;
