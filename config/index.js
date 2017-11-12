@@ -1,4 +1,4 @@
-let _        = require("lodash"),
+let _    = require("lodash"),
 contract = require("truffle-contract"),
 nconf    = require("nconf"),
 path     = require("path"),

@@ -10,7 +10,7 @@ let RequestTracker      = artifacts.require("./RequestTracker.sol"),
     TransactionRequest  = artifacts.require("./TransactionRequest.sol"),
     TransactionRecorder = artifacts.require("./TransactionRecorder.sol");
 
-let config = require("../../config");
+let config = require("../../../config");
 
 contract('Request Execution', (accounts) => {
 

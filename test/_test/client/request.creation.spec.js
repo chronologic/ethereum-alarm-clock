@@ -8,7 +8,7 @@ RequestLib         = artifacts.require("./RequestLib.sol"),
 PaymentLib         = artifacts.require("./PaymentLib.sol"),
 TransactionRequest = artifacts.require("./TransactionRequest.sol");
 
-let config = require("../../config");
+let config = require("../../../config");
 
 contract('Request Creation', (accounts) => {
 

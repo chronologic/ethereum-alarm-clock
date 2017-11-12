@@ -10,7 +10,7 @@ let RequestTracker      = artifacts.require("./RequestTracker.sol"),
     TransactionRequest  = artifacts.require("./TransactionRequest.sol"),
     TransactionRecorder = artifacts.require("./TransactionRecorder.sol");
 
-let config = require("../../config");
+let config = require("../../../config");
 
 contract('Block Claiming', (accounts) => {
 
@@ -53,7 +53,7 @@ contract('Block Claiming', (accounts) => {
         let blockNumber = await config.web3.eth.getBlockNumber();
         let firstClaimBlock = blockNumber - claimWindowSize;
 
-        assert(firstClaimBlock > await config.web3.eth.blockNumber());
+        assert(firstClaimBlock < blockNumber, "The first claim block should be before current block.");
 
     });
 });
