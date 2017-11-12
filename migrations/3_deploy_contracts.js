@@ -17,7 +17,7 @@ const BlockScheduler = artifacts.require('./BlockScheduler.sol')
 
 module.exports = function(deployer) {
     /// Now we can deploy the contract we want...
-    deployer.link(RequestScheduleLib, BlockScheduler).then(() => {
-        deployer.deploy(BlockScheduler)
-    })
+    // deployer.link(RequestScheduleLib, BlockScheduler).then(() => {
+    //     deployer.deploy(BlockScheduler)
+    // })
 }
