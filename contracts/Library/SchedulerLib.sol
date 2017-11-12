@@ -1,11 +1,12 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
-import {RequestFactoryInterface} from "contracts/RequestFactoryInterface.sol";
-import {PaymentLib} from "contracts/PaymentLib.sol";
-import {RequestScheduleLib} from "contracts/RequestScheduleLib.sol";
-import {RequestLib} from "contracts/RequestLib.sol";
-import {SafeSendLib} from "contracts/SafeSendLib.sol";
-import {MathLib} from "contracts/MathLib.sol";
+import "contracts/Interface/RequestFactoryInterface.sol";
+
+import "contracts/Library/MathLib.sol";
+import "contracts/Library/PaymentLib.sol";
+import "contracts/Library/RequestLib.sol";
+import "contracts/Library/RequestScheduleLib.sol";
+import "contracts/_deprecate/SafeSendLib.sol";
 
 
 library SchedulerLib {
@@ -24,7 +25,7 @@ library SchedulerLib {
 
         uint callGas;
         uint callValue;
-        bytes callData;
+        bytes32 callData;
         address toAddress;
         uint requiredStackDepth;
 

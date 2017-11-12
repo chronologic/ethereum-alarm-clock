@@ -1,8 +1,7 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
-
-import {RequestScheduleLib} from "contracts/RequestScheduleLib.sol";
-import {BaseScheduler} from "contracts/Scheduler.sol";
+import "contracts/Library/RequestScheduleLib.sol";
+import "contracts/BaseScheduler.sol";
 
 
 contract TimestampScheduler is BaseScheduler {

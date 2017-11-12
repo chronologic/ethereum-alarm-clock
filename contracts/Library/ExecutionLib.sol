@@ -1,13 +1,12 @@
-//pragma solidity 0.4.1;
-
+pragma solidity ^0.4.17;
 
 library ExecutionLib {
     struct ExecutionData {
         // The address that the txn will be sent to.
         address toAddress;
 
-        // The bytes value that will be sent with the txn.
-        bytes callData;
+        // The bytes32 value that will be sent with the txn.
+        bytes32 callData;
 
         // The value in wei that will be sent with the txn.
         uint callValue;
@@ -31,22 +30,6 @@ library ExecutionLib {
 
     function GAS_PER_DEPTH() returns (uint) {
         return _GAS_PER_DEPTH;
-    }
-
-    /*
-     *  Verifies that the stack can currently be extended by the
-     *  `requiredStackDepth`.  For this function to work, the contract calling
-     *  this library function must have implemented the interface found in the
-     *  `contracts/Digger.sol` contract.
-     */
-    function stackCanBeExtended(ExecutionData storage self) returns (bool) {
-        if (self.requiredStackDepth == 0) return true;
-        return address(this).callcode
-                            .gas(_GAS_PER_DEPTH * self.requiredStackDepth)
-                            (
-                                bytes4(sha3("__dig(uint256)")),
-                                self.requiredStackDepth - 1
-                            );
     }
 
     uint constant _MAX_STACK_DEPTH_REQUIREMENT = 1000;

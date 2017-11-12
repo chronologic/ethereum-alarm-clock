@@ -1,7 +1,7 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
-import {GroveLib} from "contracts/GroveLib.sol";
-import {MathLib} from "contracts/MathLib.sol";
+import "contracts/Library/GroveLib.sol";
+import "contracts/Library/MathLib.sol";
 
 
 contract RequestTracker {

@@ -18,7 +18,7 @@ This package is only tested against Python 3.5.  It may work on other versions
 but they are explicitely not supported.
 
 This package is only tested on unix based platforms (OSX and Linux).  It may
-work on other platforms but they are explicitely not supported.
+work on other platforms but they are explicitly not supported.
 
 
 Installation

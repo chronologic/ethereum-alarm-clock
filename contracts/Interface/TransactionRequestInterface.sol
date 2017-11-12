@@ -1,5 +1,4 @@
-//pragma solidity 0.4.1;
-
+pragma solidity ^0.4.17;
 
 contract TransactionRequestInterface {
     /*
@@ -16,7 +15,7 @@ contract TransactionRequestInterface {
                                              bool[3],
                                              uint[15],
                                              uint8[1]);
-    function callData() constant returns (bytes);
+    function callData() constant returns (bytes32);
 
     /*
      *  Pull mechanisms for payments.
