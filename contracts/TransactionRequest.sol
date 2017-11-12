@@ -1,12 +1,14 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
 import {RequestLib} from "contracts/RequestLib.sol";
-import {TransactionRequestInterface} from "contracts/TransactionRequestInterface.sol";
-import {Digger} from "contracts/Digger.sol";
+
+import "contracts/Interface/TransactionRequestInterface.sol";
 
 
-contract TransactionRequest is Digger, TransactionRequestInterface {
+contract TransactionRequest is TransactionRequestInterface {
     using RequestLib for RequestLib.Request;
+
+    RequestLib.Request private txnRequest; // TODO: Public? This is a data struct
 
     /*
      *  addressArgs[0] - meta.owner
@@ -27,7 +29,9 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
      */
     function TransactionRequest(address[4] addressArgs,
                                 uint[11] uintArgs,
-                                bytes callData) payable {
+                                bytes callData)
+        payable
+    {
         txnRequest.initialize(addressArgs, uintArgs, callData);
     }
 
@@ -35,10 +39,7 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
      *  Allow receiving ether.  This is needed if there is a large increase in
      *  network gas prices.
      */
-    function() {
-    }
-
-    RequestLib.Request txnRequest;
+    function() public payable {}
 
     /*
      *  Actions
@@ -60,11 +61,10 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
      */
     //
     //  TODO: figure out why returning RequestLib.serialize() isn't working.
-    //
-    function requestData() constant returns (address[6],
-                                             bool[3],
-                                             uint[15],
-                                             uint8[1]) {
+    // TODO: Figure out this todo
+    function requestData() 
+        public constant returns (address[6], bool[3], uint[15], uint8[1])
+    {
         if (txnRequest.serialize()) {
             return (
                 txnRequest.serializedValues.addressValues,
@@ -73,11 +73,11 @@ contract TransactionRequest is Digger, TransactionRequestInterface {
                 txnRequest.serializedValues.uint8Values
             );
         } else {
-            throw;
+            revert();
         }
     }
 
-    function callData() constant returns (bytes) {
+    function callData() public constant returns (bytes) {
         return txnRequest.txnData.callData;
     }
 

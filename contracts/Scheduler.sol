@@ -1,7 +1,6 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
-
-import {RequestScheduleLib} from "contracts/RequestScheduleLib.sol";
+import {RequestScheduleLib} from "contracts/Library/RequestScheduleLib.sol";
 import {SchedulerInterface} from "contracts/SchedulerInterface.sol";
 import {SchedulerLib} from "contracts/SchedulerLib.sol";
 
@@ -10,26 +9,27 @@ contract BaseScheduler is SchedulerInterface {
     using SchedulerLib for SchedulerLib.FutureTransaction;
 
     /*
-     * Fallback function to be able to receive ether.  This can occur
-     * legidimately when scheduling fails due to a validation error.
+     * Fallback function to be able to receive ether. This can occur
+     * legitimately when scheduling fails due to a validation error.
      */
-    function() {
-    }
+    function() payable public {}
 
     /*
-     *  Full scheduling API exposing all fields.
+     *  @dev Full scheduling API exposing all fields.
      * 
-     *  uintArgs[0] callGas
-     *  uintArgs[1] callValue
-     *  uintArgs[2] windowSize
-     *  uintArgs[3] windowStart
-     *  bytes callData;
-     *  address toAddress;
+     *  @param uintArgs[0] callGas
+     *  @param uintArgs[1] callValue
+     *  @param uintArgs[2] windowSize
+     *  @param uintArgs[3] windowStart
+     *  @param bytes callData;
+     *  @param address toAddress;
      */
-    function scheduleTransaction(address toAddress,
+    function scheduleTransaction(address _toAddress,
                                  bytes callData,
-                                 uint[4] uintArgs) doReset public returns (address) {
-        futureTransaction.toAddress = toAddress;
+                                 uint[4] uintArgs)
+        doReset public returns (address)
+    {
+        futureTransaction.toAddress = _toAddress;
         futureTransaction.callData = callData;
         futureTransaction.callGas = uintArgs[0];
         futureTransaction.callValue = uintArgs[1];
@@ -60,7 +60,9 @@ contract BaseScheduler is SchedulerInterface {
      */
     function scheduleTransaction(address toAddress,
                                  bytes callData,
-                                 uint[7] uintArgs) doReset public returns (address) {
+                                 uint[7] uintArgs)
+        doReset public returns (address)
+    {
         futureTransaction.toAddress = toAddress;
         futureTransaction.callData = callData;
         futureTransaction.callGas = uintArgs[0];

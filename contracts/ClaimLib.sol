@@ -1,7 +1,7 @@
-//pragma solidity 0.4.1;
+pragma solidity ^0.4.17;
 
-import {SafeSendLib} from "contracts/SafeSendLib.sol";
-import {MathLib} from "contracts/MathLib.sol";
+import {SafeSendLib} from "contracts/_deprecate/SafeSendLib.sol";
+import {MathLib} from "contracts/Library/MathLib.sol";
 
 
 library ClaimLib {

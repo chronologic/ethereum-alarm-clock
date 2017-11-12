@@ -2,10 +2,10 @@
 
 import {RequestFactoryInterface} from "contracts/RequestFactoryInterface.sol";
 import {PaymentLib} from "contracts/PaymentLib.sol";
-import {RequestScheduleLib} from "contracts/RequestScheduleLib.sol";
+import {RequestScheduleLib} from "contracts/Library/RequestScheduleLib.sol";
 import {RequestLib} from "contracts/RequestLib.sol";
-import {SafeSendLib} from "contracts/SafeSendLib.sol";
-import {MathLib} from "contracts/MathLib.sol";
+import {SafeSendLib} from "contracts/_deprecate/SafeSendLib.sol";
+import {MathLib} from "contracts/Library/MathLib.sol";
 
 
 library SchedulerLib {

@@ -1,6 +1,5 @@
 //pragma solidity 0.4.1;
 
-
 contract Digger {
     /*
      * Recursively call this contracts code, each time extending the stack

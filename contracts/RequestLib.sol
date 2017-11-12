@@ -1,12 +1,12 @@
 //pragma solidity 0.4.1;
 
 import {ExecutionLib} from "contracts/ExecutionLib.sol";
-import {RequestScheduleLib} from "contracts/RequestScheduleLib.sol";
+import {RequestScheduleLib} from "contracts/Library/RequestScheduleLib.sol";
 import {ClaimLib} from "contracts/ClaimLib.sol";
 import {RequestMetaLib} from "contracts/RequestMetaLib.sol";
 import {PaymentLib} from "contracts/PaymentLib.sol";
-import {SafeSendLib} from "contracts/SafeSendLib.sol";
-import {MathLib} from "contracts/MathLib.sol";
+import {SafeSendLib} from "contracts/_deprecate/SafeSendLib.sol";
+import {MathLib} from "contracts/Library/MathLib.sol";
 
 
 library RequestLib {

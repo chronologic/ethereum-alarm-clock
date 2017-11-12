@@ -16,7 +16,7 @@ parameters.
 Interface
 ---------
 
-.. literalinclude:: ../contracts/TransactionRequestInterface.sol
+.. literalinclude:: ../contracts/Interface/TransactionRequestInterface.sol
     :language: solidity
 
 

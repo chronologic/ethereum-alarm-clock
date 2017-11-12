@@ -8,6 +8,7 @@ Changelog
  - Upgraded pragma to ^0.4.18 [wip]
  - Integrate Truffle framework for compiling and tests. [wip]
  - Port test suite from Python to ES6. [wip]
+ - Digger.sol removed due to `EIP 150`_ making it obsolete.
 
 0.8.0 (unreleased)
 ------------------
@@ -94,5 +95,6 @@ Changelog
 - Initial release.
 
 
+.. _EIP150: https://ethereum.stackexchange.com/questions/9398/how-does-eip-150-change-the-call-depth-attack
 .. _Issue 42: https://github.com/pipermerriam/ethereum-alarm-clock/issues/42
 .. _Grove: https://github.com/pipermerriam/ethereum-grove

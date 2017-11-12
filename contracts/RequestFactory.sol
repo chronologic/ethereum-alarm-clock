@@ -3,7 +3,7 @@
 import {RequestFactoryInterface} from "contracts/RequestFactoryInterface.sol";
 import {TransactionRequest} from "contracts/TransactionRequest.sol";
 import {RequestLib} from "contracts/RequestLib.sol";
-import {SafeSendLib} from "contracts/SafeSendLib.sol";
+import {SafeSendLib} from "contracts/_deprecate/SafeSendLib.sol";
 import {IterTools} from "contracts/IterTools.sol";
 import {RequestTrackerInterface} from "contracts/RequestTrackerInterface.sol";
 

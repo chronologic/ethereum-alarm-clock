@@ -33,22 +33,6 @@ library ExecutionLib {
         return _GAS_PER_DEPTH;
     }
 
-    /*
-     *  Verifies that the stack can currently be extended by the
-     *  `requiredStackDepth`.  For this function to work, the contract calling
-     *  this library function must have implemented the interface found in the
-     *  `contracts/Digger.sol` contract.
-     */
-    function stackCanBeExtended(ExecutionData storage self) returns (bool) {
-        if (self.requiredStackDepth == 0) return true;
-        return address(this).callcode
-                            .gas(_GAS_PER_DEPTH * self.requiredStackDepth)
-                            (
-                                bytes4(sha3("__dig(uint256)")),
-                                self.requiredStackDepth - 1
-                            );
-    }
-
     uint constant _MAX_STACK_DEPTH_REQUIREMENT = 1000;
 
     function MAX_STACK_DEPTH_REQUIREMENT() returns (uint) {
