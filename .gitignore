@@ -2,10 +2,13 @@
 .env
 .password
 .genesis.json
+.vscode
 
 build/
 dist/
 chains/
+nContracts/
+origContracts/
 node_modules/
 
 **/_build
