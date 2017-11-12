@@ -13,6 +13,6 @@ _Tests are in the process of being ported over to ES6 JavaScript._
 
 Current test suite can be found in the test/ directory. Original Populus tests can be found in the tests/ directory.
 
-To run the test suit make sure you have a testrpc running and truffle v4.0.0 installed.
+To run the test suite make sure you have a testrpc running and truffle v4.0.0 installed.
 
 Run `truffle test` at the root of the directory.
