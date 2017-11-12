@@ -2,7 +2,6 @@ pragma solidity ^0.4.17;
 
 import "contracts/Library/MathLib.sol";
 
-
 library RequestScheduleLib {
     using MathLib for uint;
 
