@@ -1,6 +1,3 @@
-const BigNumber = require('bignumber.js')
-const assertFail = require('../_helpers/assertFail.js')
-
 /// Contracts
 const BlockScheduler = artifacts.require('./BlockScheduler.sol')
 const RequestFactory = artifacts.require('./RequestFactory.sol')
@@ -49,17 +46,16 @@ contract('BlockScheduler', function(accounts) {
         let windowStart = startBlockNum + 20
 
         let scheduleTx = await blockScheduler.scheduleTransaction(transactionRecorder.address,
-                                                                     "this-is-call-data",
-                                                                     [
-                                                                        4e15, //callGas
+                                                                    "this-is-call-data",
+                                                                    [
+                                                                        7676767, //callGas
                                                                         123454321, //callValue
                                                                         98765, //donation
                                                                         80008, //payment
-                                                                        123, //requiredStackDepth
                                                                         54321, //windowSize
                                                                         windowStart //windowStart
-                                                                     ],
-                                                                     {from: User2, value: config.web3.utils.toWei(10)}
+                                                                    ],
+                                                                    {from: User2, value: config.web3.utils.toWei(60), gas: 4000000}
         )
       
         assert(scheduleTx.tx)

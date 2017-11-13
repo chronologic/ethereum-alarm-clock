@@ -121,8 +121,8 @@ library SchedulerLib {
                       address factoryAddress) 
         public returns (address) 
     {
-        var factory = RequestFactoryInterface(factoryAddress);
-        var endowment = MathLib.min(PaymentLib.computeEndowment(
+        RequestFactoryInterface factory = RequestFactoryInterface(factoryAddress);
+        uint endowment = MathLib.min(PaymentLib.computeEndowment(
             self.payment,
             self.donation,
             self.callGas,
@@ -146,7 +146,7 @@ library SchedulerLib {
                 self.windowSize,          // scheduler.windowSize
                 self.windowStart,         // scheduler.windowStart
                 self.callGas,             // txnData.callGas
-                self.callValue           // txnData.callValue
+                self.callValue            // txnData.callValue
             ],
             self.callData
         );
