@@ -61,10 +61,10 @@ library RequestLib {
      *  Validate the initialization parameters for a transaction request.
      */
     function validate(address[4] addressArgs,
-                      uint[11] uintArgs,
+                      uint[10] uintArgs,
                       bytes32 callData,
                       uint endowment) 
-        public returns (bool[7] is_valid)
+        public returns (bool[6] is_valid)
     {
         Request memory request;
 
@@ -100,7 +100,6 @@ library RequestLib {
         request.schedule.windowStart = uintArgs[7];
         request.txnData.callGas = uintArgs[8];
         request.txnData.callValue = uintArgs[9];
-        request.txnData.requiredStackDepth = uintArgs[10];
 
         // Uint8 values
         request.claimData.paymentModifier = 0;
@@ -112,7 +111,6 @@ library RequestLib {
                                                    request.paymentData.donation,
                                                    request.txnData.callGas,
                                                    request.txnData.callValue,
-                                                   request.txnData.requiredStackDepth,
                                                    _EXECUTION_GAS_OVERHEAD);
         is_valid[1] = RequestScheduleLib.validateReservedWindowSize(request.schedule.reservedWindowSize,
                                                                     request.schedule.windowSize);
@@ -120,10 +118,9 @@ library RequestLib {
         is_valid[3] = RequestScheduleLib.validateWindowStart(request.schedule.temporalUnit,
                                                              request.schedule.freezePeriod,
                                                              request.schedule.windowStart);
-        is_valid[4] = ExecutionLib.validateRequiredStackDepth(request.txnData.requiredStackDepth);
-        is_valid[5] = ExecutionLib.validateCallGas(request.txnData.callGas,
+        is_valid[4] = ExecutionLib.validateCallGas(request.txnData.callGas,
                                                    _EXECUTION_GAS_OVERHEAD);
-        is_valid[6] = ExecutionLib.validateToAddress(request.txnData.toAddress);
+        is_valid[5] = ExecutionLib.validateToAddress(request.txnData.toAddress);
 
         return is_valid;
     }
@@ -133,7 +130,7 @@ library RequestLib {
      */
     function initialize(Request storage self,
                         address[4] addressArgs,
-                        uint[11] uintArgs,
+                        uint[10] uintArgs,
                         bytes32 callData) 
         public returns (bool)
     {
@@ -148,7 +145,7 @@ library RequestLib {
 
         bool[3] memory boolValues = [false, false, false];
 
-        uint[15] memory uintValues = [
+        uint[14] memory uintValues = [
             0,               // self.claimData.claimDeposit
             tx.gasprice,     // self.paymentData.anchorGasPrice
             uintArgs[0],     // self.paymentData.donation
@@ -162,8 +159,7 @@ library RequestLib {
             uintArgs[6],     // self.schedule.windowSize
             uintArgs[7],     // self.schedule.windowStart
             uintArgs[8],     // self.txnData.callGas
-            uintArgs[9],     // self.txnData.callValue
-            uintArgs[10]     // self.txnData.requiredStackDepth
+            uintArgs[9]     // self.txnData.callValue
         ];
 
         uint8[1] memory uint8Values = [
@@ -218,7 +214,6 @@ library RequestLib {
         self.serializedValues.uintValues[11] = self.schedule.windowStart;
         self.serializedValues.uintValues[12] = self.txnData.callGas;
         self.serializedValues.uintValues[13] = self.txnData.callValue;
-        self.serializedValues.uintValues[14] = self.txnData.requiredStackDepth;
 
         // Uint8 values
         self.serializedValues.uint8Values[0] = self.claimData.paymentModifier;
@@ -234,7 +229,7 @@ library RequestLib {
     function deserialize(Request storage self,
                          address[6] addressValues,
                          bool[3] boolValues,
-                         uint[15] uintValues,
+                         uint[14] uintValues,
                          uint8[1] uint8Values,
                          bytes32 callData)
         internal returns (bool) // TODO public or internal?
@@ -270,7 +265,6 @@ library RequestLib {
         self.schedule.windowStart = uintValues[11];
         self.txnData.callGas = uintValues[12];
         self.txnData.callValue = uintValues[13];
-        self.txnData.requiredStackDepth = uintValues[14];
 
         // Uint8 values
         self.claimData.paymentModifier = uint8Values[0];
@@ -449,11 +443,11 @@ library RequestLib {
     {
         var requiredGas = self.txnData.callGas.add(_EXECUTION_GAS_OVERHEAD);
 
-        if (msg.sender != tx.origin) {
-            var stackCheckGas = ExecutionLib.GAS_PER_DEPTH()
-                                            .mul(self.txnData.requiredStackDepth);
-            requiredGas = requiredGas.add(stackCheckGas);
-        }
+        // if (msg.sender != tx.origin) {
+        //     var stackCheckGas = ExecutionLib.GAS_PER_DEPTH()
+        //                                     .mul(self.txnData.requiredStackDepth);
+        //     requiredGas = requiredGas.add(stackCheckGas);
+        // }
 
         return requiredGas;
     }

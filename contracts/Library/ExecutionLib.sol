@@ -16,9 +16,6 @@ library ExecutionLib {
 
         // FIXME: Add callGasPrice
 
-        // The stack depth this txn requires.
-        // FIXME: Remove
-        uint requiredStackDepth;
     }
 
     function sendTransaction(ExecutionData storage self) returns (bool) {
@@ -27,27 +24,6 @@ library ExecutionLib {
                                   (self.callData);
     }
 
-    // This is the *average* amount of gas needed to drill down one level in
-    // the stack.
-    uint constant _GAS_PER_DEPTH = 700;
-
-    function GAS_PER_DEPTH() returns (uint) {
-        return _GAS_PER_DEPTH;
-    }
-
-    uint constant _MAX_STACK_DEPTH_REQUIREMENT = 1000;
-
-    function MAX_STACK_DEPTH_REQUIREMENT() returns (uint) {
-        return _MAX_STACK_DEPTH_REQUIREMENT;
-    }
-
-    /*
-     * Validation: ensure that the required stack depth is not above the
-     * MAX_STACK_DEPTH_REQUIREMENT
-     */
-    function validateRequiredStackDepth(uint requiredStackDepth) returns (bool) {
-        return requiredStackDepth <= _MAX_STACK_DEPTH_REQUIREMENT;
-    }
 
     /*
      * Returns the maximum possible gas consumption that a transaction request

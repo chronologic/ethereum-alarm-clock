@@ -56,13 +56,12 @@ contract SchedulerInterface {
      *  uintArgs[1] callValue
      *  uintArgs[2] donation
      *  uintArgs[3] payment
-     *  uintArgs[4] requiredStackDepth
-     *  uintArgs[5] windowSize
-     *  uintArgs[6] windowStart
+     *  uintArgs[4] windowSize
+     *  uintArgs[5] windowStart
      *  bytes32 callData;
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
                                  bytes32 callData,
-                                 uint[7] uintArgs) doReset public payable returns (address);
+                                 uint[6] uintArgs) doReset public payable returns (address);
 }

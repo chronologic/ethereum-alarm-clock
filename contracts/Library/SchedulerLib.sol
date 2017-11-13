@@ -26,7 +26,6 @@ library SchedulerLib {
         uint callValue;
         bytes32 callData;
         address toAddress;
-        uint requiredStackDepth;
 
         uint reservedWindowSize;
         uint freezePeriod;
@@ -57,9 +56,6 @@ library SchedulerLib {
         }
         if (self.callData.length != 0) {
             self.callData = "";
-        }
-        if (self.requiredStackDepth != 10) {
-            self.requiredStackDepth = 10;
         }
         return true;
     }
@@ -131,7 +127,6 @@ library SchedulerLib {
             self.donation,
             self.callGas,
             self.callValue,
-            self.requiredStackDepth,
             RequestLib.EXECUTION_GAS_OVERHEAD()
         ), this.balance);
 
@@ -151,8 +146,7 @@ library SchedulerLib {
                 self.windowSize,          // scheduler.windowSize
                 self.windowStart,         // scheduler.windowStart
                 self.callGas,             // txnData.callGas
-                self.callValue,           // txnData.callValue
-                self.requiredStackDepth   // txnData.requiredStackDepth
+                self.callValue           // txnData.callValue
             ],
             self.callData
         );

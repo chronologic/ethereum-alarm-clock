@@ -25,10 +25,9 @@ contract TransactionRequest is TransactionRequestInterface {
      *  uintArgs[6]  - schedule.windowStart
      *  uintArgs[8]  - txnData.callGas
      *  uintArgs[9]  - txnData.callValue
-     *  uintArgs[10] - txnData.requiredStackDepth
      */
     function TransactionRequest(address[4] addressArgs,
-                                uint[11] uintArgs,
+                                uint[10] uintArgs,
                                 bytes32 callData)
         payable
     {

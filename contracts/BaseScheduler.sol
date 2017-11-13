@@ -54,15 +54,14 @@ contract BaseScheduler is SchedulerInterface {
      *  uintArgs[1] callValue
      *  uintArgs[2] donation
      *  uintArgs[3] payment
-     *  uintArgs[4] requiredStackDepth
-     *  uintArgs[5] windowSize
-     *  uintArgs[6] windowStart
+     *  uintArgs[4] windowSize
+     *  uintArgs[5] windowStart
      *  bytes32 callData;
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
                                  bytes32 callData,
-                                 uint[7] uintArgs)
+                                 uint[6] uintArgs)
         doReset public payable returns (address)
     {
         futureTransaction.toAddress = toAddress;
@@ -71,9 +70,8 @@ contract BaseScheduler is SchedulerInterface {
         futureTransaction.callValue = uintArgs[1];
         futureTransaction.donation = uintArgs[2];
         futureTransaction.payment = uintArgs[3];
-        futureTransaction.requiredStackDepth = uintArgs[4];
-        futureTransaction.windowSize = uintArgs[5];
-        futureTransaction.windowStart = uintArgs[6];
+        futureTransaction.windowSize = uintArgs[4];
+        futureTransaction.windowStart = uintArgs[5];
 
         // This is here to make this explicit.  While it should remain the same
         // across multiple calls, this ensures that it is clear what this value

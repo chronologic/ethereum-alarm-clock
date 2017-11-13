@@ -129,17 +129,12 @@ library PaymentLib {
                               uint donation,
                               uint callGas,
                               uint callValue,
-                              uint requiredStackDepth,
                               uint gasOverhead) 
         constant returns (uint)
     {
-        var stackCheckCost = requiredStackDepth.mul(ExecutionLib.GAS_PER_DEPTH())
-                                               .mul(tx.gasprice)
-                                               .mul(2);
         return payment.add(donation)
                       .mul(2)
-                      .add(_computeHelper(callGas, callValue, gasOverhead))
-                      .add(stackCheckCost);
+                      .add(_computeHelper(callGas, callValue, gasOverhead));
     }
 
     /// Was getting a stack depth error after replacing old MathLib with Zeppelin's SafeMath.
@@ -165,7 +160,6 @@ library PaymentLib {
                                uint donation,
                                uint callGas,
                                uint callValue,
-                               uint requiredStackDepth,
                                uint gasOverhead)
         returns (bool)
     {
@@ -173,7 +167,6 @@ library PaymentLib {
                                              donation,
                                              callGas,
                                              callValue,
-                                             requiredStackDepth,
                                              gasOverhead);
     }
 }

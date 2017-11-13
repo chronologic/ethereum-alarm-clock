@@ -11,7 +11,7 @@ import "contracts/IterTools.sol";
 
 
 contract RequestFactory is RequestFactoryInterface {
-    using IterTools for bool[7];
+    using IterTools for bool[6];
 
     RequestTrackerInterface public requestTracker;
 
@@ -39,11 +39,12 @@ contract RequestFactory is RequestFactoryInterface {
      *  uintArgs[7]    -  schedule.windowStart
      *  uintArgs[8]    -  txnData.callGas
      *  uintArgs[9]    -  txnData.callValue
-     *  uintArgs[10]   -  txnData.requiredStackDepth
      */
     function createRequest(address[3] addressArgs,
-                           uint[11] uintArgs,
-                           bytes32 callData) returns (address) {
+                           uint[10] uintArgs,
+                           bytes32 callData)
+        returns (address)
+    {
         var request = (new TransactionRequest).value(msg.value)(
             [
                 msg.sender,
@@ -87,9 +88,11 @@ contract RequestFactory is RequestFactoryInterface {
      * `createValidatedRequest`
      */
     function validateRequestParams(address[3] addressArgs,
-                                   uint[11] uintArgs,
+                                   uint[10] uintArgs,
                                    bytes32 callData,
-                                   uint endowment) returns (bool[7]) {
+                                   uint endowment) 
+        returns (bool[6])
+    {
         return RequestLib.validate(
             [
                 msg.sender,      // meta.createdBy
@@ -110,7 +113,7 @@ contract RequestFactory is RequestFactoryInterface {
      *  Parameters are the same as `createRequest`
      */
     function createValidatedRequest(address[3] addressArgs,
-                                    uint[11] uintArgs,
+                                    uint[10] uintArgs,
                                     bytes32 callData) 
         payable public returns (address)
     {
@@ -133,12 +136,9 @@ contract RequestFactory is RequestFactoryInterface {
                 ValidationError(uint8(Errors.ExecutionWindowTooSoon));
             }
             if (!is_valid[4]) {
-                ValidationError(uint8(Errors.InvalidRequiredStackDepth));
-            }
-            if (!is_valid[5]) {
                 ValidationError(uint8(Errors.CallGasTooHigh));
             }
-            if (!is_valid[6]) {
+            if (!is_valid[5]) {
                 ValidationError(uint8(Errors.EmptyToAddress));
             }
 
