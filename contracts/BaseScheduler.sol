@@ -15,7 +15,8 @@ contract BaseScheduler is SchedulerInterface {
     function() payable public {}
 
     /*
-     *  @dev Full scheduling API exposing all fields.
+     *  @dev Smaller scheduling API.
+     *  FIXME: Use explicit calls.
      * 
      *  @param uintArgs[0] callGas
      *  @param uintArgs[1] callValue
@@ -46,8 +47,9 @@ contract BaseScheduler is SchedulerInterface {
     }
 
     /*
-     *  Full scheduling API exposing all fields.
-     * 
+     *  @dev Full scheduling API exposing all fields.
+     *  FIXME: ClaimWindow is fixed
+     *
      *  uintArgs[0] callGas
      *  uintArgs[1] callValue
      *  uintArgs[2] donation

@@ -10,6 +10,7 @@ library PaymentLib {
 
     struct PaymentData {
         // The gas price that was used during creation of this request.
+        // FIXME: Going away
         uint anchorGasPrice;
 
         // The amount in wei that will be payed to the address that executes
@@ -26,6 +27,7 @@ library PaymentLib {
         uint donation;
 
         // The address that the donation should be sent to.
+        // FIXME: Call it affiliate
         address donationBenefactor;
 
         // The amount that is owed to the donation benefactor.

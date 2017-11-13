@@ -14,7 +14,10 @@ library ExecutionLib {
         // The amount of gas that will be sent with the txn
         uint callGas;
 
+        // FIXME: Add callGasPrice
+
         // The stack depth this txn requires.
+        // FIXME: Remove
         uint requiredStackDepth;
     }
 
