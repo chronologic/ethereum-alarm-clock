@@ -1,10 +1,12 @@
 pragma solidity ^0.4.17;
 
 import "contracts/Library/ExecutionLib.sol";
-import "contracts/Library/MathLib.sol";
+import 'contracts/Library/MathLib.sol';
+
+import "contracts/zeppelin/SafeMath.sol";
 
 library PaymentLib {
-    using MathLib for uint;
+    using SafeMath for uint;
 
     struct PaymentData {
         // The gas price that was used during creation of this request.
@@ -54,11 +56,11 @@ library PaymentLib {
     */
     function getMultiplier(PaymentData storage self) returns (uint) {
         if (tx.gasprice > self.anchorGasPrice) {
-            return self.anchorGasPrice.safeMultiply(100) / tx.gasprice;
+            return self.anchorGasPrice.mul(100).div(tx.gasprice);
         } else {
-            return 200 - (self.anchorGasPrice.safeMultiply(100) /
-                self.anchorGasPrice.safeMultiply(2).flooredSub(tx.gasprice)
-            ).min(200);
+            return 200 - MathLib.min(
+                (self.anchorGasPrice.mul(100).div(self.anchorGasPrice.mul(2).sub(tx.gasprice))
+                ), 200);
         }
     }
 
@@ -67,14 +69,14 @@ library PaymentLib {
      */
     function getDonation(PaymentData storage self) returns (uint) {
         require(getMultiplier(self) != 0);
-        return self.donation.safeMultiply(getMultiplier(self)) / 100;
+        return self.donation.mul(getMultiplier(self)).div(100);
     }
 
     /*
      *  Computes the amount to send to the address that fulfilled the request
      */
     function getPayment(PaymentData storage self) returns (uint) {
-        return self.payment.safeMultiply(getMultiplier(self)) / 100;
+        return self.payment.mul(getMultiplier(self)).div(100);
     }
 
     /*
@@ -85,7 +87,7 @@ library PaymentLib {
                                     uint8 paymentModifier)
         returns (uint)
     {
-        return getPayment(self).safeMultiply(paymentModifier) / 100;
+        return getPayment(self).mul(paymentModifier).div(100);
     }
 
     /*
@@ -127,19 +129,27 @@ library PaymentLib {
                               uint callValue,
                               uint requiredStackDepth,
                               uint gasOverhead) 
-        returns (uint)
+        constant returns (uint)
     {
-        var stackCheckCost = requiredStackDepth.safeMultiply(ExecutionLib.GAS_PER_DEPTH())
-                                               .safeMultiply(tx.gasprice)
-                                               .safeMultiply(2);
-        return payment.safeAdd(donation)
-                      .safeMultiply(2)
-                      .safeAdd(callGas.safeMultiply(tx.gasprice).safeMultiply(2))
-                      .safeAdd(gasOverhead.safeMultiply(tx.gasprice).safeMultiply(2))
-                      .safeAdd(callValue)
-                      .safeAdd(stackCheckCost);
+        var stackCheckCost = requiredStackDepth.mul(ExecutionLib.GAS_PER_DEPTH())
+                                               .mul(tx.gasprice)
+                                               .mul(2);
+        return payment.add(donation)
+                      .mul(2)
+                      .add(_computeHelper(callGas, callValue, gasOverhead))
+                      .add(stackCheckCost);
     }
 
+    /// Was getting a stack depth error after replacing old MathLib with Zeppelin's SafeMath.
+    ///  Added this function to fix it.
+    ///  See for context: https://ethereum.stackexchange.com/questions/7325/stack-too-deep-try-removing-local-variables 
+    function _computeHelper(uint _callGas, uint _callValue, uint _gasOverhead)
+        constant returns (uint)
+    {
+        return _callGas.mul(tx.gasprice).mul(2)
+                      .add(_gasOverhead.mul(tx.gasprice).mul(2))
+                      .add(_callValue);
+    }
     /*
      * Validation: ensure that the request endowment is sufficient to cover.
      * - payment * maxMultiplier

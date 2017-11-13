@@ -58,22 +58,22 @@ library RequestScheduleLib {
             return block.number;
         } else {
             // Unsupported unit.
-            throw;
+            revert();
         }
     }
 
     /*
      * The modifier that will be applied to the payment value for a claimed call.
      */
-    function computePaymentModifier(ExecutionWindow storage self) returns (uint8) {
-        if (!inClaimWindow(self)) {
-            throw;
-        }
+    function computePaymentModifier(ExecutionWindow storage self) 
+        returns (uint8)
+    {
+        require(inClaimWindow(self));
+        
         uint paymentModifier = getNow(self).flooredSub(firstClaimBlock(self))
                                            .safeMultiply(100) / self.claimWindowSize;
-        if (paymentModifier > 100) {
-            throw;
-        }
+        assert(paymentModifier <= 100); 
+
         return uint8(paymentModifier);
     }
 

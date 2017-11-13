@@ -1,10 +1,9 @@
 pragma solidity ^0.4.17;
 
-import "contracts/Library/MathLib.sol";
-
+import 'contracts/zeppelin/SafeMath.sol';
 
 library ClaimLib {
-    using MathLib for uint;
+    using SafeMath for uint;
 
     struct ClaimData {
         // The address that has claimed this request
@@ -42,23 +41,21 @@ library ClaimLib {
      * maximum possible payment value that could be paid out by this request.
      */
     function minimumDeposit(uint payment) returns (uint) {
-        return payment.safeMultiply(2);
+        return payment.mul(2);
     }
 
     /*
-     * Refund the claimer deposit.
+     * @dev Refund the claimer deposit.
      */
     function refundDeposit(ClaimData storage self) returns (bool) {
         uint depositAmount;
 
         depositAmount = self.claimDeposit;
         if (depositAmount > 0) {
-            // re-entrance protection. TODO: Is this still necessary? - Logan
             self.claimDeposit = 0;
-            self.claimedBy.transfer(depositAmount);
-            // self.claimDeposit = depositAmount.flooredSub(self.claimedBy.transfer(depositAmount));
-        }
 
+            self.claimedBy.transfer(depositAmount);
+        }
         return true;
     }
 }
