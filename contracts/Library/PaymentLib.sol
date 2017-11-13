@@ -33,7 +33,7 @@ library PaymentLib {
     /*
      *
      */
-    function hasBenefactor(PaymentData storage self) pure returns (bool) {
+    function hasBenefactor(PaymentData storage self) view returns (bool) {
         return self.donationBenefactor != 0x0;
     }
 
@@ -92,10 +92,6 @@ library PaymentLib {
      * Send the donationOwed amount to the donationBenefactor
      */
     function sendDonation(PaymentData storage self) returns (bool) {
-        return sendDonation(self);
-    }
-
-    function sendDonation(PaymentData storage self) returns (bool) {
         uint donationAmount = self.donationOwed;
         if (donationAmount > 0) {
             // re-entrance protection.
@@ -109,10 +105,6 @@ library PaymentLib {
     /*
      * Send the paymentOwed amount to the paymentBenefactor
      */
-    function sendPayment(PaymentData storage self) returns (bool) {
-        return sendPayment(self);
-    }
-
     function sendPayment(PaymentData storage self) returns (bool) {
         uint paymentAmount = self.paymentOwed;
         if (paymentAmount > 0) {

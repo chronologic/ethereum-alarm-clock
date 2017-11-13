@@ -11,7 +11,7 @@ contract TransactionRequestInterface {
     /*
      *  Data accessors
      */
-    function requestData() constant returns (address[6],
+    function requestData() returns (address[6],
                                              bool[3],
                                              uint[15],
                                              uint8[1]);

@@ -33,7 +33,7 @@ library ClaimLib {
     /*
      * Helper: returns whether this request is claimed.
      */
-    function isClaimed(ClaimData storage self) pure returns (bool) {
+    function isClaimed(ClaimData storage self) returns (bool) {
         return self.claimedBy != 0x0;
     }
 
@@ -41,17 +41,13 @@ library ClaimLib {
      * Amount that must be supplied as a deposit to claim.  This is set to the
      * maximum possible payment value that could be paid out by this request.
      */
-    function minimumDeposit(uint payment) pure returns (uint) {
+    function minimumDeposit(uint payment) returns (uint) {
         return payment.safeMultiply(2);
     }
 
     /*
      * Refund the claimer deposit.
      */
-    function refundDeposit(ClaimData storage self) returns (bool) {
-        return refundDeposit(self);
-    }
-
     function refundDeposit(ClaimData storage self) returns (bool) {
         uint depositAmount;
 

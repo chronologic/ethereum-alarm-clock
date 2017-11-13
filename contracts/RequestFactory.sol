@@ -12,7 +12,6 @@ import "contracts/IterTools.sol";
 
 contract RequestFactory is RequestFactoryInterface {
     using IterTools for bool[7];
-    using SafeSendLib for address;
 
     RequestTrackerInterface public requestTracker;
 

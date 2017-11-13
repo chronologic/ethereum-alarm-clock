@@ -596,10 +596,7 @@ library RequestLib {
         public returns (bool)
     {
         if (!isClaimable(self)) {
-            if (msg.sender.sendOrThrow(msg.value)) {    // TODO: change this to transfer
-                return false;
-            }
-            revert();
+            msg.sender.transfer(msg.value);
         }
         self.claimData.claim(self.schedule.computePaymentModifier());
         Claimed();
@@ -613,7 +610,7 @@ library RequestLib {
         public returns (bool)
     {
         if (self.meta.isCancelled || self.schedule.isAfterWindow()) {
-            return self.claimData.refundDeposit(0);
+            return self.claimData.refundDeposit();
         }
         return false;
     }
@@ -625,7 +622,7 @@ library RequestLib {
         public returns (bool)
     {
         if (self.schedule.isAfterWindow()) {
-            return self.paymentData.sendDonation(0);
+            return self.paymentData.sendDonation();
         }
         return false;
     }
@@ -637,18 +634,9 @@ library RequestLib {
         public returns (bool)
     {
         if (self.schedule.isAfterWindow()) {
-            return self.paymentData.sendPayment(0);
+            return self.paymentData.sendPayment();
         }
         return false;
-    }
-
-    /*
-     * Send all extra ether in the request contract back to the owner.
-     */
-    function sendOwnerEther(Request storage self) 
-        public returns (bool)
-    {
-        return sendOwnerEther(self);
     }
 
     function sendOwnerEther(Request storage self) 
@@ -658,8 +646,9 @@ library RequestLib {
             var ownerRefund = this.balance.flooredSub(self.claimData.claimDeposit)
                                           .flooredSub(self.paymentData.paymentOwed)
                                           .flooredSub(self.paymentData.donationOwed);
-            var amountSent = self.meta.owner.transfer(ownerRefund);
-            return (ownerRefund == 0 || amountSent > 0);
+            self.meta.owner.transfer(ownerRefund);
+            return true;
+            // return (ownerRefund == 0 || amountSent > 0);
         }
         return false;
     }

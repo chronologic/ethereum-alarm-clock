@@ -63,7 +63,7 @@ contract TransactionRequest is TransactionRequestInterface {
     //  TODO: figure out why returning RequestLib.serialize() isn't working.
     // TODO: Figure out this todo
     function requestData() 
-        public constant returns (address[6], bool[3], uint[15], uint8[1])
+        public returns (address[6], bool[3], uint[15], uint8[1])
     {
         if (txnRequest.serialize()) {
             return (
@@ -97,6 +97,6 @@ contract TransactionRequest is TransactionRequestInterface {
     }
 
     function sendOwnerEther() public returns (bool) {
-        return txnRequest.sendOwnerEther(0);
+        return txnRequest.sendOwnerEther();
     }
 }
