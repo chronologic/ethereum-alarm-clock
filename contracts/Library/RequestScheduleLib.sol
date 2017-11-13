@@ -1,9 +1,9 @@
 pragma solidity ^0.4.17;
 
-import "contracts/Library/MathLib.sol";
+import "contracts/zeppelin/SafeMath.sol";
 
 library RequestScheduleLib {
-    using MathLib for uint;
+    using SafeMath for uint;
 
     /*
      *  The manner in which this schedule specifies time.
@@ -70,8 +70,8 @@ library RequestScheduleLib {
     {
         require(inClaimWindow(self));
         
-        uint paymentModifier = getNow(self).flooredSub(firstClaimBlock(self))
-                                           .safeMultiply(100) / self.claimWindowSize;
+        uint paymentModifier = getNow(self).sub(firstClaimBlock(self))
+                                           .mul(100).div(self.claimWindowSize);
         assert(paymentModifier <= 100); 
 
         return uint8(paymentModifier);
@@ -81,7 +81,7 @@ library RequestScheduleLib {
      *  Helper: computes the end of the execution window.
      */
     function windowEnd(ExecutionWindow storage self) returns (uint) {
-        return self.windowStart.safeAdd(self.windowSize);
+        return self.windowStart.add(self.windowSize);
     }
 
     /*
@@ -89,21 +89,21 @@ library RequestScheduleLib {
      *  window.
      */
     function reservedWindowEnd(ExecutionWindow storage self) returns (uint) {
-        return self.windowStart.safeAdd(self.reservedWindowSize);
+        return self.windowStart.add(self.reservedWindowSize);
     }
 
     /*
      *  Helper: computes the time when the request will be frozen until execution.
      */
     function freezeStart(ExecutionWindow storage self) returns (uint) {
-        return self.windowStart.flooredSub(self.freezePeriod);
+        return self.windowStart.sub(self.freezePeriod);
     }
 
     /*
      *  Helper: computes the time when the request will be frozen until execution.
      */
     function firstClaimBlock(ExecutionWindow storage self) returns (uint) {
-        return freezeStart(self).flooredSub(self.claimWindowSize);
+        return freezeStart(self).sub(self.claimWindowSize);
     }
 
     /*
@@ -160,8 +160,10 @@ library RequestScheduleLib {
      *  Validation: ensure that the reservedWindowSize <= windowSize
      */
     function validateReservedWindowSize(uint reservedWindowSize,
-                                        uint windowSize) returns (bool) {
-        return reservedWindowSize <= windowSize.safeAdd(1);
+                                        uint windowSize)
+        view returns (bool)
+    {
+        return reservedWindowSize <= windowSize.add(1);
     }
 
     /*
@@ -169,8 +171,10 @@ library RequestScheduleLib {
      */
     function validateWindowStart(TemporalUnit temporalUnit,
                                  uint freezePeriod,
-                                 uint windowStart) returns (bool) {
-        return getNow(temporalUnit).safeAdd(freezePeriod) <= windowStart;
+                                 uint windowStart) 
+        view returns (bool)
+    {
+        return getNow(temporalUnit).add(freezePeriod) <= windowStart;
     }
 
     /*

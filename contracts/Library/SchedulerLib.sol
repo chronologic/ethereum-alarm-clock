@@ -2,13 +2,15 @@ pragma solidity ^0.4.17;
 
 import "contracts/Interface/RequestFactoryInterface.sol";
 
-import "contracts/Library/MathLib.sol";
 import "contracts/Library/PaymentLib.sol";
 import "contracts/Library/RequestLib.sol";
 import "contracts/Library/RequestScheduleLib.sol";
 
+import "contracts/Library/MathLib.sol";
+import "contracts/zeppelin/SafeMath.sol";
+
 library SchedulerLib {
-    using MathLib for uint;
+    using SafeMath for uint;
 
     address constant DONATION_BENEFACTOR = 0x246eB2e1E59b857678Bf0d0B7f25cC25b6106044;
 
@@ -32,17 +34,21 @@ library SchedulerLib {
     }
 
     /*
-     * Set common default values.
+     * @dev Set common default values.
      */
     function resetCommon(FutureTransaction storage self) 
         public returns (bool)
     {
-        if (self.payment != 1000000 * tx.gasprice) {
-            self.payment = 1000000 * tx.gasprice;
+        uint defaultPayment = tx.gasprice.mul(1000000);
+        if (self.payment != defaultPayment) {
+            self.payment = defaultPayment;
         }
-        if (self.donation != self.payment / 100 ) {
-            self.donation = self.payment / 100;
+
+        uint defaultDonation = self.payment.div(100);
+        if (self.donation != defaultDonation ) {
+            self.donation = defaultDonation;
         }
+
         if (self.toAddress != msg.sender) {
             self.toAddress = msg.sender;
         }
@@ -59,7 +65,7 @@ library SchedulerLib {
     }
 
     /*
-     * Set default values for block based scheduling.
+     * @dev Set default values for block based scheduling.
      */
     function resetAsBlock(FutureTransaction storage self)
         public returns (bool)
@@ -120,14 +126,14 @@ library SchedulerLib {
         public returns (address) 
     {
         var factory = RequestFactoryInterface(factoryAddress);
-        var endowment = PaymentLib.computeEndowment(
+        var endowment = MathLib.min(PaymentLib.computeEndowment(
             self.payment,
             self.donation,
             self.callGas,
             self.callValue,
             self.requiredStackDepth,
             RequestLib.EXECUTION_GAS_OVERHEAD()
-        ).min(this.balance);
+        ), this.balance);
 
         address newRequestAddress = factory.createValidatedRequest.value(endowment)(
             [

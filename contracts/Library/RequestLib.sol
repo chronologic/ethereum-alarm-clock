@@ -2,10 +2,12 @@ pragma solidity ^0.4.17;
 
 import "contracts/Library/ClaimLib.sol";
 import "contracts/Library/ExecutionLib.sol";
-import "contracts/Library/MathLib.sol";
 import "contracts/Library/PaymentLib.sol";
 import "contracts/Library/RequestMetaLib.sol";
 import "contracts/Library/RequestScheduleLib.sol";
+
+import "contracts/Library/MathLib.sol";
+import "contracts/zeppelin/SafeMath.sol";
 
 
 library RequestLib {
@@ -14,8 +16,7 @@ library RequestLib {
     using ClaimLib for ClaimLib.ClaimData;
     using RequestMetaLib for RequestMetaLib.RequestMeta;
     using PaymentLib for PaymentLib.PaymentData;
-    using MathLib for uint;
-
+    using SafeMath for uint;
     /*
      *  This struct exists to circumvent an issue with returning multiple
      *  values from a library function.  I found through experimentation that I
@@ -94,7 +95,7 @@ library RequestLib {
         request.schedule.freezePeriod = uintArgs[3];
         request.schedule.reservedWindowSize = uintArgs[4];
         // This must be capped at 1 or it throws an exception.
-        request.schedule.temporalUnit = RequestScheduleLib.TemporalUnit(uintArgs[5].min(2));
+        request.schedule.temporalUnit = RequestScheduleLib.TemporalUnit(MathLib.min(uintArgs[5], 2));
         request.schedule.windowSize = uintArgs[6];
         request.schedule.windowStart = uintArgs[7];
         request.txnData.callGas = uintArgs[8];
@@ -328,7 +329,7 @@ library RequestLib {
         // | Begin: Authorization |
         // +----------------------+
 
-        if (msg.gas < requiredExecutionGas(self).flooredSub(_PRE_EXECUTION_GAS)) {
+        if (msg.gas < requiredExecutionGas(self).sub(_PRE_EXECUTION_GAS)) {
             Aborted(uint8(AbortReason.InsufficientGas));
             return false;
         } else if (self.meta.wasCalled) {
@@ -378,7 +379,7 @@ library RequestLib {
         // Compute the donation amount
         if (self.paymentData.hasBenefactor()) {
             self.paymentData.donationOwed = self.paymentData.getDonation()
-                                                            .safeAdd(self.paymentData.donationOwed);
+                                                            .add(self.paymentData.donationOwed);
         }
 
         // record this so that we can log it later.
@@ -390,27 +391,27 @@ library RequestLib {
         // Compute the payment amount and who it should be sent do.
         self.paymentData.paymentBenefactor = msg.sender;
         if (self.claimData.isClaimed()) {
-            self.paymentData.paymentOwed = self.claimData.claimDeposit.safeAdd(self.paymentData.paymentOwed);
+            self.paymentData.paymentOwed = self.claimData.claimDeposit.add(self.paymentData.paymentOwed);
             // need to zero out the claim deposit since it is now accounted for
             // in the paymentOwed value.
             self.claimData.claimDeposit = 0;
             self.paymentData.paymentOwed = self.paymentData.getPaymentWithModifier(self.claimData.paymentModifier)
-                                                           .safeAdd(self.paymentData.paymentOwed);
+                                                           .add(self.paymentData.paymentOwed);
         } else {
             self.paymentData.paymentOwed = self.paymentData.getPayment()
-                                                           .safeAdd(self.paymentData.paymentOwed);
+                                                           .add(self.paymentData.paymentOwed);
         }
 
         // Record the amount of gas used by execution.
-        uint measuredGasConsumption = startGas.flooredSub(msg.gas).safeAdd(_EXECUTE_EXTRA_GAS);
+        uint measuredGasConsumption = startGas.sub(msg.gas).add(_EXECUTE_EXTRA_GAS);
 
         // +----------------------------------------------------------------------+
         // | NOTE: All code after this must be accounted for by EXECUTE_EXTRA_GAS |
         // +----------------------------------------------------------------------+
 
         // Add the gas reimbursment amount to the payment.
-        self.paymentData.paymentOwed = measuredGasConsumption.safeMultiply(tx.gasprice)
-                                                             .safeAdd(self.paymentData.paymentOwed);
+        self.paymentData.paymentOwed = measuredGasConsumption.mul(tx.gasprice)
+                                                             .add(self.paymentData.paymentOwed);
 
         // Log the two payment amounts.  Otherwise it is non-trivial to figure
         // out how much was payed.
@@ -445,12 +446,12 @@ library RequestLib {
     function requiredExecutionGas(Request storage self) 
         public returns (uint)
     {
-        var requiredGas = self.txnData.callGas.safeAdd(_EXECUTION_GAS_OVERHEAD);
+        var requiredGas = self.txnData.callGas.add(_EXECUTION_GAS_OVERHEAD);
 
         if (msg.sender != tx.origin) {
             var stackCheckGas = ExecutionLib.GAS_PER_DEPTH()
-                                            .safeMultiply(self.txnData.requiredStackDepth);
-            requiredGas = requiredGas.safeAdd(stackCheckGas);
+                                            .mul(self.txnData.requiredStackDepth);
+            requiredGas = requiredGas.add(stackCheckGas);
         }
 
         return requiredGas;
@@ -529,10 +530,11 @@ library RequestLib {
         uint rewardPayment;
         uint measuredGasConsumption;
 
-        if (!isCancellable(self)) {
-            // revert(); ?
-            return false;
-        }
+        require(isCancellable(self));
+        // if (!isCancellable(self)) {
+        //     // revert(); ?
+        //     return false;
+        // }
 
         // set this here to prevent re-entrance attacks.
         self.meta.isCancelled = true;
@@ -549,13 +551,13 @@ library RequestLib {
             // should really be done with `rewardBenefactor` and `rewardOwed`
             // fields.
             self.paymentData.paymentBenefactor = msg.sender;
-            self.paymentData.paymentOwed = self.paymentData.paymentOwed.safeAdd(
-                self.paymentData.payment.safeMultiply(self.paymentData.getMultiplier()) / 100 / 100
+            self.paymentData.paymentOwed = self.paymentData.paymentOwed.add(
+                self.paymentData.payment.mul(self.paymentData.getMultiplier()) / 100 / 100
             );
-            measuredGasConsumption = startGas.flooredSub(msg.gas)
-                                             .safeAdd(_CANCEL_EXTRA_GAS);
-            self.paymentData.paymentOwed = measuredGasConsumption.safeMultiply(tx.gasprice)
-                                                                 .safeAdd(self.paymentData.paymentOwed);
+            measuredGasConsumption = startGas.sub(msg.gas)
+                                             .add(_CANCEL_EXTRA_GAS);
+            self.paymentData.paymentOwed = measuredGasConsumption.mul(tx.gasprice)
+                                                                 .add(self.paymentData.paymentOwed);
             // take note of the reward payment so we can log it.
             rewardPayment = self.paymentData.paymentOwed;
 
@@ -643,9 +645,9 @@ library RequestLib {
         internal returns (bool)
     {
         if (self.meta.isCancelled || self.schedule.isAfterWindow()) {
-            var ownerRefund = this.balance.flooredSub(self.claimData.claimDeposit)
-                                          .flooredSub(self.paymentData.paymentOwed)
-                                          .flooredSub(self.paymentData.donationOwed);
+            var ownerRefund = this.balance.sub(self.claimData.claimDeposit)
+                                          .sub(self.paymentData.paymentOwed)
+                                          .sub(self.paymentData.donationOwed);
             self.meta.owner.transfer(ownerRefund);
             return true;
             // return (ownerRefund == 0 || amountSent > 0);

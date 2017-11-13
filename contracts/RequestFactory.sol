@@ -19,6 +19,7 @@ contract RequestFactory is RequestFactoryInterface {
         // if (_trackerAddress == 0x0) {
         //     revert();
         // }
+        require(_trackerAddress != 0x0);
         requestTracker = RequestTrackerInterface(_trackerAddress);
     }
 

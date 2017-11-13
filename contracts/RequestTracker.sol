@@ -3,14 +3,12 @@ pragma solidity ^0.4.17;
 import "contracts/Library/GroveLib.sol";
 import "contracts/Library/MathLib.sol";
 
-
 contract RequestTracker {
     /*
-     * testnet: 0x8e67d439713b2022cac2ff4ebca21e173ccba4a0
-     * mainnet: n/a
+     * testnet: 
+     * mainnet: 
      */
     using GroveLib for GroveLib.Index;
-    using MathLib for uint;
 
     mapping (address => GroveLib.Index) requestsByAddress;
 
@@ -39,7 +37,7 @@ contract RequestTracker {
      * Add the given request.
      */
     function addRequest(address request, uint startWindow) returns (bool) {
-        requestsByAddress[msg.sender].insert(bytes32(request), startWindow.safeCastSigned());
+        requestsByAddress[msg.sender].insert(bytes32(request), MathLib.safeCastSigned(startWindow));
         return true;
     }
 
@@ -63,6 +61,6 @@ contract RequestTracker {
      * Query the index for the given factory.
      */
     function query(address factory, bytes2 operator, uint value) constant returns (address) {
-        return address(requestsByAddress[factory].query(operator, value.safeCastSigned()));
+        return address(requestsByAddress[factory].query(operator, MathLib.safeCastSigned(value)));
     }
 }
