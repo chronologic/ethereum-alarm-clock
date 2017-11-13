@@ -407,6 +407,7 @@ library RequestLib {
                  measuredGasConsumption);
 
         // Send the payment.
+        // FIXME: no more pushes for payments. client needs to call
         self.paymentData.sendPayment();
 
         // Send all extra ether back to the owner.

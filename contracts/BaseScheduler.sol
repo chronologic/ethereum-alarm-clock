@@ -18,6 +18,7 @@ contract BaseScheduler is SchedulerInterface {
 
     /*
      *  Full scheduling API exposing all fields.
+     * FIXME: remove this. Use explicits calls
      * 
      *  uintArgs[0] callGas
      *  uintArgs[1] callValue
@@ -47,6 +48,7 @@ contract BaseScheduler is SchedulerInterface {
 
     /*
      *  Full scheduling API exposing all fields.
+     * ClaimWindow is fixed
      * 
      *  uintArgs[0] callGas
      *  uintArgs[1] callValue
