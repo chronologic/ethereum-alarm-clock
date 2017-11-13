@@ -21,6 +21,8 @@ contract RequestFactory is RequestFactoryInterface {
         // if (_trackerAddress == 0x0) {
         //     revert();
         // }
+        // FIXME: Deployment to testrpc fails here. Use assertion and uncomment.
+        // if (_trackerAddress == 0x0) throw;
         requestTracker = RequestTrackerInterface(_trackerAddress);
     }
 

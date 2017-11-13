@@ -47,6 +47,7 @@ contract BaseScheduler is SchedulerInterface {
 
     /*
      *  Full scheduling API exposing all fields.
+     *  TODO: ClaimWindow is fixed
      * 
      *  uintArgs[0] callGas
      *  uintArgs[1] callValue

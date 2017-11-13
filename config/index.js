@@ -1,9 +1,9 @@
-let _    = require("lodash"),
-contract = require("truffle-contract"),
-nconf    = require("nconf"),
-path     = require("path"),
-Web3     = require("web3"),
-defaults = require("./defaults.json");
+let _        = require("lodash"),
+    contract = require("truffle-contract"),
+    nconf    = require("nconf"),
+    path     = require("path"),
+    Web3     = require("web3"),
+    defaults = require("./defaults.json");
 
 let configPath = path.join(__dirname, '../config');
 nconf.env().argv();
@@ -15,9 +15,9 @@ let web3     = new Web3(provider);
 
 let properties       = ["contract_name", "abi", "unlinked_binary"];
 let contractDefaults = {
-from: web3.eth.accounts[0],
-gas: 4712388,
-gasPrice: 100000000000
+    from: web3.eth.accounts[0],
+    gas: 4712388,
+    gasPrice: 100000000000
 };
 
 let MathLib = contract(_.pick(require("../build/contracts/MathLib.json"), properties));
@@ -96,21 +96,21 @@ module.exports      = nconf;
 module.exports.web3 = web3;
 
 module.exports.contracts = {
-MathLib: MathLib,
-GroveLib: GroveLib,
-IterTools: IterTools,
-ExecutionLib: ExecutionLib,
-RequestMetaLib: RequestMetaLib,
-SafeSendLib: SafeSendLib,
-ClaimLib: ClaimLib,
-PaymentLib: PaymentLib,
-RequestScheduleLib: RequestScheduleLib,
-RequestLib: RequestLib,
-SchedulerLib: SchedulerLib,
-BaseScheduler: BaseScheduler,
-BlockScheduler: BlockScheduler,
-TimestampScheduler: TimestampScheduler,
-RequestTracker: RequestTracker,
-TransactionRequest: TransactionRequest,
-RequestFactory: RequestFactory
+    MathLib: MathLib,
+    GroveLib: GroveLib,
+    IterTools: IterTools,
+    ExecutionLib: ExecutionLib,
+    RequestMetaLib: RequestMetaLib,
+    SafeSendLib: SafeSendLib,
+    ClaimLib: ClaimLib,
+    PaymentLib: PaymentLib,
+    RequestScheduleLib: RequestScheduleLib,
+    RequestLib: RequestLib,
+    SchedulerLib: SchedulerLib,
+    BaseScheduler: BaseScheduler,
+    BlockScheduler: BlockScheduler,
+    TimestampScheduler: TimestampScheduler,
+    RequestTracker: RequestTracker,
+    TransactionRequest: TransactionRequest,
+    RequestFactory: RequestFactory
 };

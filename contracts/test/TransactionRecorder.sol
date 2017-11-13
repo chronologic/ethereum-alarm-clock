@@ -1,22 +1,26 @@
-import {Proxy} from "tests/Proxy.sol";
+pragma solidity ^0.4.15;
 
 
-contract TransactionRecorder is Proxy {
+contract TransactionRecorder {
     address owner;
+
     bool public wasCalled;
 
     uint public lastCallValue;
+
     address public lastCaller;
-    bytes public lastCallData;
+
+    bytes32 public lastCallData;
+
     uint public lastCallGas;
 
     function TransactionRecorder() {
         owner = msg.sender;
     }
 
-    function () {
+    function() {
         lastCallGas = msg.gas;
-        lastCallData = msg.data;
+//        lastCallData = msg.data;
         lastCaller = msg.sender;
         lastCallValue = msg.value;
         wasCalled = true;
