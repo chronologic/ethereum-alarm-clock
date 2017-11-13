@@ -59,9 +59,8 @@ contract TransactionRequest is TransactionRequestInterface {
     /*
      *  Data accessor functions.
      */
-    //
-    //  TODO: figure out why returning RequestLib.serialize() isn't working.
-    // TODO: Figure out this todo
+     
+    // TODO: figure out why returning RequestLib.serialize() isn't working.
     function requestData() 
         public returns (address[6], bool[3], uint[15], uint8[1])
     {

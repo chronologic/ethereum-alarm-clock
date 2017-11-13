@@ -63,7 +63,8 @@ contract('BlockScheduler', function(accounts) {
         )
       
         assert(scheduleTx.tx)
-        // console.log(receipt)
+
+        // let txRequest = 
     })
 
     it('should do block scheduling with simplified args', async function() {
