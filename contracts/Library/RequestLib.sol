@@ -9,7 +9,6 @@ import "contracts/Library/RequestScheduleLib.sol";
 import "contracts/Library/MathLib.sol";
 import "contracts/zeppelin/SafeMath.sol";
 
-
 library RequestLib {
     using ExecutionLib for ExecutionLib.ExecutionData;
     using RequestScheduleLib for RequestScheduleLib.ExecutionWindow;
@@ -17,6 +16,7 @@ library RequestLib {
     using RequestMetaLib for RequestMetaLib.RequestMeta;
     using PaymentLib for PaymentLib.PaymentData;
     using SafeMath for uint;
+
     /*
      *  This struct exists to circumvent an issue with returning multiple
      *  values from a library function.  I found through experimentation that I
@@ -26,7 +26,7 @@ library RequestLib {
     struct SerializedRequest {
         address[6] addressValues;
         bool[3] boolValues;
-        uint[15] uintValues;
+        uint[14] uintValues;
         uint8[1] uint8Values;
     }
 

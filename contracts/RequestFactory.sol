@@ -42,7 +42,7 @@ contract RequestFactory is RequestFactoryInterface {
     function createRequest(address[3] addressArgs,
                            uint[10] uintArgs,
                            bytes32 callData)
-        returns (address)
+        public payable returns (address)
     {
         var request = (new TransactionRequest).value(msg.value)(
             [
@@ -62,20 +62,20 @@ contract RequestFactory is RequestFactoryInterface {
         RequestCreated(address(request));
 
         // Add the request to the RequestTracker
-        requestTracker.addRequest(address(request), uintArgs[7]);
+        requestTracker.addRequest(address(request), uintArgs[7]); // windowStart
 
         return request;
     }
 
     /*
-     *  ValidationError
+     *  @dev The enum for launching `ValidationError` events and mapping them to an error.
      */
     enum Errors {
         InsufficientEndowment,
         ReservedWindowBiggerThanExecutionWindow,
         InvalidTemporalUnit,
         ExecutionWindowTooSoon,
-        InvalidRequiredStackDepth,
+        // InvalidRequiredStackDepth,
         CallGasTooHigh,
         EmptyToAddress
     }
@@ -90,7 +90,7 @@ contract RequestFactory is RequestFactoryInterface {
                                    uint[10] uintArgs,
                                    bytes32 callData,
                                    uint endowment) 
-        returns (bool[6])
+        internal returns (bool[6])
     {
         return [
             true,
@@ -157,10 +157,12 @@ contract RequestFactory is RequestFactoryInterface {
         return createRequest(addressArgs, uintArgs, callData);
     }
 
+    // TODO: decide whether this should be a local mapping or from tracker.
     mapping (address => bool) requests;
 
-    function isKnownRequest(address _address) returns (bool) {
-        // TODO: decide whether this should be a local mapping or from tracker.
+    function isKnownRequest(address _address) 
+        view returns (bool)
+    {
         return requests[_address];
     }
 }

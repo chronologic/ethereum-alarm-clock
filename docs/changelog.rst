@@ -4,12 +4,13 @@ Changelog
 0.9.0 (WIP)
 -----------
 
- - Full rewrite of all contracts to modern solidity syntax. [wip]
- - Upgraded pragma to ^0.4.18 [wip]
- - Integrate Truffle framework for compiling and tests. [wip]
- - Port test suite from Python to ES6. [wip]
- - Digger.sol removed due to `EIP 150`_ making it obsolete.
- - SafeSendLib.sol removed due to Solidity keyword `transfer` or ``send` making it obsolete.
+ - Full rewrite of all contracts to modern solidity syntax. [60%]
+ - Upgraded pragma to ^0.4.17 [done]
+ - Integrate Truffle framework. [75%]
+ - Port test suite from Python to ES6. [0/21]
+ - Digger.sol removed due to `EIP 150`_ making it obsolete. [done]
+ - All stack depth checking also obsolete due to `EIP150` removed. [done]
+ - SafeSendLib.sol removed due to Solidity keyword `transfer` and ``send` making it obsolete. [done]
 
 0.8.0 (unreleased)
 ------------------

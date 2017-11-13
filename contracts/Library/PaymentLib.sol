@@ -35,16 +35,18 @@ library PaymentLib {
     }
 
     /*
-     *
+     * @dev Getter function that returns true if a request has a benefactor.
      */
-    function hasBenefactor(PaymentData storage self) view returns (bool) {
+    function hasBenefactor(PaymentData storage self)
+        public view returns (bool)
+    {
         return self.donationBenefactor != 0x0;
     }
 
     /*
     *  Return a number between 0 - 200 to scale the donation based on the
     *  gas price set for the calling transaction as compared to the gas
-    *  price of the scheduling transaction.
+ {   *  price of the scheduling transaction.
     *
     *  - number approaches zero as the transaction gas price goes
     *  above the gas price recorded when the call was scheduled.
@@ -56,34 +58,43 @@ library PaymentLib {
     *  for the executing transaction, the higher the payout to the
     *  caller.
     */
-    function getMultiplier(PaymentData storage self) returns (uint) {
+    function getMultiplier(PaymentData storage self) 
+        returns (uint)
+    {
         if (tx.gasprice > self.anchorGasPrice) {
             return self.anchorGasPrice.mul(100).div(tx.gasprice);
         } else {
             return 200 - MathLib.min(
-                (self.anchorGasPrice.mul(100).div(self.anchorGasPrice.mul(2).sub(tx.gasprice))
+                (self.anchorGasPrice.mul(100).div(self.anchorGasPrice.mul(2)) ///.sub(tx.gasprice))
                 ), 200);
         }
     }
 
     /*
-     *  Computes the amount to send to the donationBenefactor
+     * @dev Computes the amount to send to the donationBenefactor. 
      */
-    function getDonation(PaymentData storage self) returns (uint) {
-        require(getMultiplier(self) != 0);
-        return self.donation.mul(getMultiplier(self)).div(100);
+    function getDonation(PaymentData storage self) 
+        internal returns (uint)
+    {
+        if (getMultiplier(self) == 0) {
+            return 0;
+        } else {
+            return self.donation.mul(getMultiplier(self)).div(100);
+        }
     }
 
     /*
-     *  Computes the amount to send to the address that fulfilled the request
+     * @dev Computes the amount to send to the address that fulfilled the request.
      */
-    function getPayment(PaymentData storage self) returns (uint) {
+    function getPayment(PaymentData storage self)
+        returns (uint)
+    {
         return self.payment.mul(getMultiplier(self)).div(100);
     }
-
+ 
     /*
-     *  Computes the amount to send to the address that fulfilled the request
-     *  with an additional modifier.  This is used when the call was claimed.
+     * @dev Computes the amount to send to the address that fulfilled the request
+     *       with an additional modifier. This is used when the call was claimed.
      */
     function getPaymentWithModifier(PaymentData storage self,
                                     uint8 paymentModifier)
@@ -93,9 +104,11 @@ library PaymentLib {
     }
 
     /*
-     * Send the donationOwed amount to the donationBenefactor
+     * @dev Send the donationOwed amount to the donationBenefactor.
      */
-    function sendDonation(PaymentData storage self) returns (bool) {
+    function sendDonation(PaymentData storage self) 
+        returns (bool)
+    {
         uint donationAmount = self.donationOwed;
         if (donationAmount > 0) {
             // re-entrance protection.
@@ -107,9 +120,11 @@ library PaymentLib {
     }
 
     /*
-     * Send the paymentOwed amount to the paymentBenefactor
+     * @dev Send the paymentOwed amount to the paymentBenefactor.
      */
-    function sendPayment(PaymentData storage self) returns (bool) {
+    function sendPayment(PaymentData storage self)
+        returns (bool)
+    {
         uint paymentAmount = self.paymentOwed;
         if (paymentAmount > 0) {
             // re-entrance protection.
@@ -130,7 +145,7 @@ library PaymentLib {
                               uint callGas,
                               uint callValue,
                               uint gasOverhead) 
-        constant returns (uint)
+        internal view returns (uint)
     {
         return payment.add(donation)
                       .mul(2)
@@ -141,7 +156,7 @@ library PaymentLib {
     ///  Added this function to fix it.
     ///  See for context: https://ethereum.stackexchange.com/questions/7325/stack-too-deep-try-removing-local-variables 
     function _computeHelper(uint _callGas, uint _callValue, uint _gasOverhead)
-        constant returns (uint)
+        internal view returns (uint)
     {
         return _callGas.mul(tx.gasprice).mul(2)
                       .add(_gasOverhead.mul(tx.gasprice).mul(2))
@@ -161,7 +176,7 @@ library PaymentLib {
                                uint callGas,
                                uint callValue,
                                uint gasOverhead)
-        returns (bool)
+        view returns (bool)
     {
         return true;
         // return endowment >= computeEndowment(payment,

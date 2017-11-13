@@ -1,7 +1,6 @@
 let BaseScheduler               = artifacts.require("./BaseScheduler.sol"),
     BlockScheduler              = artifacts.require("./BlockScheduler.sol"),
     ClaimLib                    = artifacts.require("./ClaimLib.sol"),
-    Digger                      = artifacts.require("./Digger.sol"),
     ExecutionLib                = artifacts.require("./ExecutionLib.sol"),
     GroveLib                    = artifacts.require("./GroveLib.sol"),
     IterTools                   = artifacts.require("./IterTools.sol"),
@@ -14,7 +13,7 @@ let BaseScheduler               = artifacts.require("./BaseScheduler.sol"),
     RequestScheduleLib          = artifacts.require("./RequestScheduleLib.sol"),
     RequestTracker              = artifacts.require("./RequestTracker.sol"),
     RequestTrackerInterface     = artifacts.require("./RequestTrackerInterface.sol"),
-    SafeSendLib                 = artifacts.require("./SafeSendLib.sol"),
+    SafeMath                    = artifacts.require("./SafeMath.sol"),
     SchedulerInterface          = artifacts.require("./SchedulerInterface.sol"),
     SchedulerLib                = artifacts.require("./SchedulerLib.sol"),
     TimestampScheduler          = artifacts.require("./TimestampScheduler.sol"),
@@ -29,22 +28,18 @@ module.exports = function(deployer) {
     deployer.deploy(GroveLib);
     deployer.deploy(IterTools);
     deployer.deploy(ExecutionLib);
-    deployer.deploy(Digger);
     deployer.deploy(RequestMetaLib);
+    deployer.deploy(SafeMath);    
 
-    deployer.link(MathLib, SafeSendLib);
-    deployer.deploy(SafeSendLib);
-
-    deployer.link(MathLib, ClaimLib);
-    deployer.link(SafeSendLib, ClaimLib);
+    deployer.link(SafeMath, ClaimLib);
     deployer.deploy(ClaimLib);
 
     deployer.link(ExecutionLib, PaymentLib);
     deployer.link(MathLib, PaymentLib);
-    deployer.link(SafeSendLib, PaymentLib);
+    deployer.link(SafeMath, PaymentLib);
     deployer.deploy(PaymentLib);
 
-    deployer.link(MathLib, RequestScheduleLib);
+    deployer.link(SafeMath, RequestScheduleLib);
     deployer.deploy(RequestScheduleLib);
 
     deployer.link(ClaimLib, RequestLib);
@@ -53,13 +48,13 @@ module.exports = function(deployer) {
     deployer.link(PaymentLib, RequestLib);
     deployer.link(RequestMetaLib, RequestLib);
     deployer.link(RequestScheduleLib, RequestLib);
-    deployer.link(SafeSendLib, RequestLib);
+    deployer.link(SafeMath, RequestLib);
     deployer.deploy(RequestLib);
 
     deployer.link(MathLib, SchedulerLib);
     deployer.link(PaymentLib, SchedulerLib);
     deployer.link(RequestLib, SchedulerLib);
-    deployer.link(SafeSendLib, SchedulerLib);
+    deployer.link(SafeMath, SchedulerLib);
     deployer.deploy(SchedulerLib);
 
     deployer.link(RequestScheduleLib, BaseScheduler);
@@ -79,7 +74,6 @@ module.exports = function(deployer) {
     deployer.link(MathLib, RequestTracker);
     deployer.deploy(RequestTracker);
 
-    deployer.link(Digger, TransactionRequest);
     deployer.link(ClaimLib, TransactionRequest);
     deployer.link(ExecutionLib, TransactionRequest);
     deployer.link(MathLib, TransactionRequest);
@@ -87,7 +81,7 @@ module.exports = function(deployer) {
     deployer.link(RequestMetaLib, TransactionRequest);
     deployer.link(RequestLib, TransactionRequest);
     deployer.link(RequestScheduleLib, TransactionRequest);
-    deployer.link(SafeSendLib, TransactionRequest);
+    deployer.link(SafeMath, TransactionRequest);
     deployer.deploy(TransactionRequest);
 
     deployer.link(MathLib, RequestFactory);
@@ -95,9 +89,9 @@ module.exports = function(deployer) {
     deployer.link(IterTools, RequestFactory);
     deployer.link(PaymentLib, RequestFactory);
     deployer.link(RequestLib, RequestFactory);
-    deployer.link(SafeSendLib, RequestFactory);
     deployer.link(RequestTracker, RequestFactory);
     deployer.link(TransactionRequest, RequestFactory);
+    deployer.link(SafeMath, RequestFactory);
     deployer.deploy(RequestFactory);
 
     deployer.deploy(TransactionRecorder);

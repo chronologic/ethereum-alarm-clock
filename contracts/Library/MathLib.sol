@@ -6,38 +6,38 @@ library MathLib {
      * Subtracts b from a in a manner such that zero is returned when an
      * underflow condition is met.
      */
-    function flooredSub(uint a, uint b) returns (uint) {
-        if (b >= a) {
-            return 0;
-        } else {
-            return a - b;
-        }
-    }
+    // function flooredSub(uint a, uint b) returns (uint) {
+    //     if (b >= a) {
+    //         return 0;
+    //     } else {
+    //         return a - b;
+    //     }
+    // }
 
-    /*
-     * Adds b to a in a manner that throws an exception when overflow
-     * conditions are met.
-     */
-    function safeAdd(uint a, uint b) returns (uint) {
-        if (a + b >= a) {
-            return a + b;
-        } else {
-            throw;
-        }
-    }
+    // /*
+    //  * Adds b to a in a manner that throws an exception when overflow
+    //  * conditions are met.
+    //  */
+    // function safeAdd(uint a, uint b) returns (uint) {
+    //     if (a + b >= a) {
+    //         return a + b;
+    //     } else {
+    //         throw;
+    //     }
+    // }
 
-    /*
-     * Multiplies a by b in a manner that throws an exception when overflow
-     * conditions are met.
-     */
-    function safeMultiply(uint a, uint b) returns (uint) {
-        var result = a * b;
-        if (b == 0 || result / b == a) {
-            return a * b;
-        } else {
-            throw;
-        }
-    }
+    // /*
+    //  * Multiplies a by b in a manner that throws an exception when overflow
+    //  * conditions are met.
+    //  */
+    // function safeMultiply(uint a, uint b) returns (uint) {
+    //     var result = a * b;
+    //     if (b == 0 || result / b == a) {
+    //         return a * b;
+    //     } else {
+    //         throw;
+    //     }
+    // }
 
     /*
      * Return the larger of a or b.  Returns a if a == b.
@@ -67,9 +67,7 @@ library MathLib {
      * number.
      */
     function safeCastSigned(uint a) returns (int) {
-        if (a > INT_MAX) {
-            throw;
-        }
+        assert(a <= INT_MAX);
         return int(a);
     }
 }
