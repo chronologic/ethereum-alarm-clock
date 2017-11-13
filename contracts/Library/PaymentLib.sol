@@ -137,8 +137,8 @@ library PaymentLib {
 
 
     /*
-     * Compute the required endowment value for the given TransactionRequest
-     * parameters.
+     * @dev Compute the required endowment value for the given TransactionRequest
+     *       parameters.
      */
     function computeEndowment(uint payment,
                               uint donation,

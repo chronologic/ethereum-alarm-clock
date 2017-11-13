@@ -44,7 +44,7 @@ contract('BlockScheduler', function(accounts) {
     it('should do block scheduling with full args', async function() {
         let startBlockNum = await config.web3.eth.getBlockNumber()
         let windowStart = startBlockNum + 20
-        // console.log(`This far! ${transactionRecorder.address}`)
+
         let scheduleTx = await blockScheduler.scheduleTransaction(transactionRecorder.address,
                                                                     "this-is-the-call-data",
                                                                     [
@@ -58,8 +58,8 @@ contract('BlockScheduler', function(accounts) {
                                                                     {from: Owner, value: config.web3.utils.toWei(10)}
         )
       
-        // assert(scheduleTx.tx)
-
+        assert(scheduleTx.tx, "The transaction fired off and returned.")
+        console.log(scheduleTx)
         // let txRequest = 
     })
 

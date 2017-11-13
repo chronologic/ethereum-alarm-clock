@@ -66,7 +66,8 @@ library SchedulerLib {
     function resetAsBlock(FutureTransaction storage self)
         public returns (bool)
     {
-        assert(resetCommon(self));
+        // assert(resetCommon(self));
+        resetCommon(self);
 
         if (self.windowSize != 255) {
             self.windowSize = 255;
@@ -115,7 +116,7 @@ library SchedulerLib {
     }
 
     /*
-     *  The low level interface for creating a transaction request.
+     * @dev The low level interface for creating a transaction request.
      */
     function schedule(FutureTransaction storage self,
                       address factoryAddress) 
@@ -127,7 +128,7 @@ library SchedulerLib {
             self.donation,
             self.callGas,
             self.callValue,
-            RequestLib.EXECUTION_GAS_OVERHEAD()
+            RequestLib.EXECUTION_GAS_OVERHEAD() //180000, line 459 RequestLib
         ), this.balance);
 
         address newRequestAddress = factory.createValidatedRequest.value(endowment)(

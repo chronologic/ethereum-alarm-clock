@@ -48,9 +48,7 @@ contract SchedulerInterface {
     function scheduleTransaction(address toAddress,
                                  bytes32 callData,
                                  uint[4] uintArgs) 
-                                //  doReset 
-                                 public payable returns (bool);
-                                //  (address);
+                                 doReset public payable returns (address);
 
     /*
      *  Full scheduling API exposing all fields.
@@ -67,7 +65,5 @@ contract SchedulerInterface {
     function scheduleTransaction(address toAddress,
                                  bytes32 callData,
                                  uint[6] uintArgs) 
-                                //  doReset 
-                                public payable returns (bool);
-                                // (address);
+                                 doReset public payable returns (address);
 }
