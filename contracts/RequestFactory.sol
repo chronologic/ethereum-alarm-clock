@@ -7,7 +7,6 @@ import "contracts/TransactionRequest.sol";
 
 import "contracts/Library/RequestLib.sol";
 
-import "contracts/_deprecate/SafeSendLib.sol";
 import "contracts/IterTools.sol";
 
 
@@ -112,27 +111,40 @@ contract RequestFactory is RequestFactoryInterface {
      */
     function createValidatedRequest(address[3] addressArgs,
                                     uint[11] uintArgs,
-                                    bytes32 callData) payable returns (address) {
+                                    bytes32 callData) 
+        payable public returns (address)
+    {
         var is_valid = validateRequestParams(addressArgs,
                                              uintArgs,
                                              callData,
                                              msg.value);
 
         if (!is_valid.all()) {
-            if (!is_valid[0]) ValidationError(uint8(Errors.InsufficientEndowment));
-            if (!is_valid[1]) ValidationError(uint8(Errors.ReservedWindowBiggerThanExecutionWindow));
-            if (!is_valid[2]) ValidationError(uint8(Errors.InvalidTemporalUnit));
-            if (!is_valid[3]) ValidationError(uint8(Errors.ExecutionWindowTooSoon));
-            if (!is_valid[4]) ValidationError(uint8(Errors.InvalidRequiredStackDepth));
-            if (!is_valid[5]) ValidationError(uint8(Errors.CallGasTooHigh));
-            if (!is_valid[6]) ValidationError(uint8(Errors.EmptyToAddress));
+            if (!is_valid[0]) {
+                ValidationError(uint8(Errors.InsufficientEndowment));
+            }
+            if (!is_valid[1]) {
+                ValidationError(uint8(Errors.ReservedWindowBiggerThanExecutionWindow));
+            }
+            if (!is_valid[2]) {
+                ValidationError(uint8(Errors.InvalidTemporalUnit));
+            }
+            if (!is_valid[3]) {
+                ValidationError(uint8(Errors.ExecutionWindowTooSoon));
+            }
+            if (!is_valid[4]) {
+                ValidationError(uint8(Errors.InvalidRequiredStackDepth));
+            }
+            if (!is_valid[5]) {
+                ValidationError(uint8(Errors.CallGasTooHigh));
+            }
+            if (!is_valid[6]) {
+                ValidationError(uint8(Errors.EmptyToAddress));
+            }
 
             // Try to return the ether sent with the message.  If this failed
             // then throw to force it to be returned.
-            if (msg.sender.sendOrThrow(msg.value)) {
-                return 0x0;
-            }
-            throw;
+            msg.sender.transfer(msg.value);
         }
 
         return createRequest(addressArgs, uintArgs, callData);
@@ -147,5 +159,5 @@ contract RequestFactory is RequestFactoryInterface {
 }
 
 
-contract TestnetRequestFactory is RequestFactory(0x8e67d439713b2022cac2ff4ebca21e173ccba4a0) {
-}
+// contract TestnetRequestFactory is RequestFactory(0x8e67d439713b2022cac2ff4ebca21e173ccba4a0) {
+// }

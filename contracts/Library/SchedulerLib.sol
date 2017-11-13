@@ -6,14 +6,11 @@ import "contracts/Library/MathLib.sol";
 import "contracts/Library/PaymentLib.sol";
 import "contracts/Library/RequestLib.sol";
 import "contracts/Library/RequestScheduleLib.sol";
-import "contracts/_deprecate/SafeSendLib.sol";
-
 
 library SchedulerLib {
-    using SafeSendLib for address;
     using MathLib for uint;
 
-    address constant DONATION_BENEFACTOR = 0xd3cda913deb6f67967b99d67acdfa1712c293601;
+    address constant DONATION_BENEFACTOR = 0x246eB2e1E59b857678Bf0d0B7f25cC25b6106044;
 
     struct FutureTransaction {
         uint donation;
@@ -37,7 +34,9 @@ library SchedulerLib {
     /*
      * Set common default values.
      */
-    function resetCommon(FutureTransaction storage self) public returns (bool) {
+    function resetCommon(FutureTransaction storage self) 
+        public returns (bool)
+    {
         if (self.payment != 1000000 * tx.gasprice) {
             self.payment = 1000000 * tx.gasprice;
         }
@@ -62,7 +61,9 @@ library SchedulerLib {
     /*
      * Set default values for block based scheduling.
      */
-    function resetAsBlock(FutureTransaction storage self) public returns (bool) {
+    function resetAsBlock(FutureTransaction storage self)
+        public returns (bool)
+    {
         assert(resetCommon(self));
 
         if (self.windowSize != 255) {
@@ -87,7 +88,9 @@ library SchedulerLib {
     /*
      * Set default values for timestamp based scheduling.
      */
-    function resetAsTimestamp(FutureTransaction storage self) public returns (bool) {
+    function resetAsTimestamp(FutureTransaction storage self)
+        public returns (bool)
+    {
         assert(resetCommon(self));
 
         if (self.windowSize != 60 minutes) {
@@ -152,10 +155,8 @@ library SchedulerLib {
             // Something went wrong during creation (likely a ValidationError).
             // Try to return the ether that was sent.  If this fails then
             // resort to throwing an exception to force reversion.
-            if (msg.sender.sendOrThrow(msg.value)) {
-                return 0x0;
-            }
-            throw;
+            msg.sender.transfer(msg.value);
+            return 0x0;
         }
 
         return newRequestAddress;

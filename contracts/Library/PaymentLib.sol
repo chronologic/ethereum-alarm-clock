@@ -2,11 +2,8 @@ pragma solidity ^0.4.17;
 
 import "contracts/Library/ExecutionLib.sol";
 import "contracts/Library/MathLib.sol";
-import "contracts/_deprecate/SafeSendLib.sol";
-
 
 library PaymentLib {
-    using SafeSendLib for address;
     using MathLib for uint;
 
     struct PaymentData {
@@ -36,7 +33,7 @@ library PaymentLib {
     /*
      *
      */
-    function hasBenefactor(PaymentData storage self) returns (bool) {
+    function hasBenefactor(PaymentData storage self) pure returns (bool) {
         return self.donationBenefactor != 0x0;
     }
 
@@ -58,8 +55,7 @@ library PaymentLib {
     function getMultiplier(PaymentData storage self) returns (uint) {
         if (tx.gasprice > self.anchorGasPrice) {
             return self.anchorGasPrice.safeMultiply(100) / tx.gasprice;
-        }
-        else {
+        } else {
             return 200 - (self.anchorGasPrice.safeMultiply(100) /
                 self.anchorGasPrice.safeMultiply(2).flooredSub(tx.gasprice)
             ).min(200);
@@ -70,7 +66,7 @@ library PaymentLib {
      *  Computes the amount to send to the donationBenefactor
      */
     function getDonation(PaymentData storage self) returns (uint) {
-        if (getMultiplier(self) == 0) throw;
+        require(getMultiplier(self) != 0);
         return self.donation.safeMultiply(getMultiplier(self)) / 100;
     }
 
@@ -86,7 +82,9 @@ library PaymentLib {
      *  with an additional modifier.  This is used when the call was claimed.
      */
     function getPaymentWithModifier(PaymentData storage self,
-                                    uint8 paymentModifier) returns (uint) {
+                                    uint8 paymentModifier)
+        returns (uint)
+    {
         return getPayment(self).safeMultiply(paymentModifier) / 100;
     }
 
@@ -94,16 +92,16 @@ library PaymentLib {
      * Send the donationOwed amount to the donationBenefactor
      */
     function sendDonation(PaymentData storage self) returns (bool) {
-        return sendDonation(self, SafeSendLib.DEFAULT_SEND_GAS());
+        return sendDonation(self);
     }
 
-    function sendDonation(PaymentData storage self, uint sendGas) returns (bool) {
+    function sendDonation(PaymentData storage self) returns (bool) {
         uint donationAmount = self.donationOwed;
         if (donationAmount > 0) {
             // re-entrance protection.
             self.donationOwed = 0;
-            self.donationOwed = donationAmount.flooredSub(self.donationBenefactor.safeSend(donationAmount,
-                                                                                           sendGas));
+            self.donationBenefactor.transfer(donationAmount);
+            // self.donationOwed = donationAmount.flooredSub(self.donationBenefactor.transfer(donationAmount));
         }
         return true;
     }
@@ -112,16 +110,16 @@ library PaymentLib {
      * Send the paymentOwed amount to the paymentBenefactor
      */
     function sendPayment(PaymentData storage self) returns (bool) {
-        return sendPayment(self, SafeSendLib.DEFAULT_SEND_GAS());
+        return sendPayment(self);
     }
 
-    function sendPayment(PaymentData storage self, uint sendGas) returns (bool) {
+    function sendPayment(PaymentData storage self) returns (bool) {
         uint paymentAmount = self.paymentOwed;
         if (paymentAmount > 0) {
             // re-entrance protection.
             self.paymentOwed = 0;
-            self.paymentOwed = paymentAmount.flooredSub(self.paymentBenefactor.safeSend(paymentAmount,
-                                                                                        sendGas));
+            self.paymentBenefactor.transfer(paymentAmount);
+            // self.paymentOwed = paymentAmount.flooredSub(self.paymentBenefactor.transfer(paymentAmount));
         }
         return true;
     }
@@ -136,7 +134,9 @@ library PaymentLib {
                               uint callGas,
                               uint callValue,
                               uint requiredStackDepth,
-                              uint gasOverhead) returns (uint) {
+                              uint gasOverhead) 
+        returns (uint)
+    {
         var stackCheckCost = requiredStackDepth.safeMultiply(ExecutionLib.GAS_PER_DEPTH())
                                                .safeMultiply(tx.gasprice)
                                                .safeMultiply(2);
@@ -162,7 +162,9 @@ library PaymentLib {
                                uint callGas,
                                uint callValue,
                                uint requiredStackDepth,
-                               uint gasOverhead) returns (bool) {
+                               uint gasOverhead)
+        returns (bool)
+    {
         return endowment >= computeEndowment(payment,
                                              donation,
                                              callGas,

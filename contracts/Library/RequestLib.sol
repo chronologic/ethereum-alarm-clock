@@ -1,7 +1,5 @@
 pragma solidity ^0.4.17;
 
-import "contracts/_deprecate/SafeSendLib.sol";
-
 import "contracts/Library/ClaimLib.sol";
 import "contracts/Library/ExecutionLib.sol";
 import "contracts/Library/MathLib.sol";
@@ -16,7 +14,6 @@ library RequestLib {
     using ClaimLib for ClaimLib.ClaimData;
     using RequestMetaLib for RequestMetaLib.RequestMeta;
     using PaymentLib for PaymentLib.PaymentData;
-    using SafeSendLib for address;
     using MathLib for uint;
 
     /*
@@ -651,17 +648,17 @@ library RequestLib {
     function sendOwnerEther(Request storage self) 
         public returns (bool)
     {
-        return sendOwnerEther(self, SafeSendLib.DEFAULT_SEND_GAS());
+        return sendOwnerEther(self);
     }
 
-    function sendOwnerEther(Request storage self, uint sendGas) 
+    function sendOwnerEther(Request storage self) 
         internal returns (bool)
     {
         if (self.meta.isCancelled || self.schedule.isAfterWindow()) {
             var ownerRefund = this.balance.flooredSub(self.claimData.claimDeposit)
                                           .flooredSub(self.paymentData.paymentOwed)
                                           .flooredSub(self.paymentData.donationOwed);
-            var amountSent = self.meta.owner.safeSend(ownerRefund, sendGas);
+            var amountSent = self.meta.owner.transfer(ownerRefund);
             return (ownerRefund == 0 || amountSent > 0);
         }
         return false;

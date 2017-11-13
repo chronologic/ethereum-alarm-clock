@@ -9,6 +9,7 @@ Changelog
  - Integrate Truffle framework for compiling and tests. [wip]
  - Port test suite from Python to ES6. [wip]
  - Digger.sol removed due to `EIP 150`_ making it obsolete.
+ - SafeSendLib.sol removed due to Solidity keyword `transfer` or ``send` making it obsolete.
 
 0.8.0 (unreleased)
 ------------------

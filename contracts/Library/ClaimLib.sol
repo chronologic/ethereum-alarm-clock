@@ -1,11 +1,9 @@
 pragma solidity ^0.4.17;
 
-import "contracts/_deprecate/SafeSendLib.sol";
 import "contracts/Library/MathLib.sol";
 
 
 library ClaimLib {
-    using SafeSendLib for address;
     using MathLib for uint;
 
     struct ClaimData {
@@ -35,7 +33,7 @@ library ClaimLib {
     /*
      * Helper: returns whether this request is claimed.
      */
-    function isClaimed(ClaimData storage self) returns (bool) {
+    function isClaimed(ClaimData storage self) pure returns (bool) {
         return self.claimedBy != 0x0;
     }
 
@@ -43,7 +41,7 @@ library ClaimLib {
      * Amount that must be supplied as a deposit to claim.  This is set to the
      * maximum possible payment value that could be paid out by this request.
      */
-    function minimumDeposit(uint payment) returns (uint) {
+    function minimumDeposit(uint payment) pure returns (uint) {
         return payment.safeMultiply(2);
     }
 
@@ -51,18 +49,18 @@ library ClaimLib {
      * Refund the claimer deposit.
      */
     function refundDeposit(ClaimData storage self) returns (bool) {
-        return refundDeposit(self, SafeSendLib.DEFAULT_SEND_GAS());
+        return refundDeposit(self);
     }
 
-    function refundDeposit(ClaimData storage self, uint sendGas) returns (bool) {
+    function refundDeposit(ClaimData storage self) returns (bool) {
         uint depositAmount;
 
         depositAmount = self.claimDeposit;
         if (depositAmount > 0) {
-            // re-entrance protection.
+            // re-entrance protection. TODO: Is this still necessary? - Logan
             self.claimDeposit = 0;
-            self.claimDeposit = depositAmount.flooredSub(self.claimedBy.safeSend(depositAmount,
-                                                                                 sendGas));
+            self.claimedBy.transfer(depositAmount);
+            // self.claimDeposit = depositAmount.flooredSub(self.claimedBy.transfer(depositAmount));
         }
 
         return true;
