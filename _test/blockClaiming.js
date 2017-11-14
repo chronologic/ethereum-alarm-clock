@@ -1,9 +1,6 @@
-const BigNumber = require('bignumber.js')
-const assertFail = require('../_helpers/assertFail.js')
+const assertFail = require('./_helpers/assertFail.js')
 
 /// Contracts
-// const BlockScheduler = artifacts.require('./BlockScheduler.sol')
-// const RequestFactory = artifacts.require('./RequestFactory.sol')
 const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
@@ -11,14 +8,14 @@ const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 const SchedulerLib = artifacts.require('./SchedulerLib.sol')
 
 /// Brings in config.web3...
-let config = require("../../config");
+let config = require("../config");
 
 contract('Block claiming', function(accounts) {
     const Owner = accounts[0]
     const Benefactor = accounts[1]
     const ToAddress = accounts[2]
 
-    let transactuinRequest
+    let transactoinRequest
     let transactionRecorder
 
     const mine = async () => await web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_mine", params: [], id: 0 })
@@ -53,8 +50,7 @@ contract('Block claiming', function(accounts) {
                 0, //window size
                 curBlock + 1000, //windowStart
                 300000, //callGas
-                12345, //callValue
-                0 //stack depth bleg
+                12345 //callValue
             ],
             'this-is-the-call-data'
         )

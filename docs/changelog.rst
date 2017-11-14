@@ -5,9 +5,10 @@ Changelog
 -----------
 
  - Full rewrite of all contracts to modern solidity syntax. [60%]
- - Upgraded pragma to ^0.4.17 [done]
  - Integrate Truffle framework. [75%]
  - Port test suite from Python to ES6. [0/21]
+ - New API for Schedulers [0%]
+ - (Add String Pool) [Needs discussion]
  - Digger.sol removed due to `EIP 150`_ making it obsolete. [done]
  - All stack depth checking also obsolete due to `EIP150` removed. [done]
  - SafeSendLib.sol removed due to Solidity keyword `transfer` and ``send` making it obsolete. [done]

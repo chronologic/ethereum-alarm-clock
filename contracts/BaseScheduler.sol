@@ -10,7 +10,7 @@ contract BaseScheduler is SchedulerInterface {
 
     /*
      * Fallback function to be able to receive ether. This can occur
-     * legitimately when scheduling fails due to a validation error.
+     *  legitimately when scheduling fails due to a validation error.
      */
     function() payable public {}
 
@@ -45,6 +45,32 @@ contract BaseScheduler is SchedulerInterface {
         // return 0x0;
         return futureTransaction.schedule(factoryAddress);
     }
+
+    //------------------------
+    // New API [WIP]
+    //------------------------
+    function scheduleTxSimple(address _toAddress,
+                              bytes32 _callData,
+                              uint[4] _uintArgs)
+        doReset public payable returns (address)
+    {
+        TX("Received");
+        futureTransaction.toAddress = _toAddress;
+        futureTransaction.callData = _callData;
+        futureTransaction.callGas = _uintArgs[0];
+        futureTransaction.callValue = _uintArgs[1];
+        futureTransaction.windowSize = _uintArgs[2];
+        futureTransaction.windowStart = _uintArgs[3];
+
+        futureTransaction.temporalUnit = temporalUnit;
+
+        // address rtn = 0x0;
+        address rtn = futureTransaction.schedule(factoryAddress);
+        return rtn;
+    }
+
+    event TX(string _msg);
+
 
     /*
      *  @dev Full scheduling API exposing all fields.

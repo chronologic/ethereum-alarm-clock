@@ -66,8 +66,7 @@ library SchedulerLib {
     function resetAsBlock(FutureTransaction storage self)
         public returns (bool)
     {
-        // assert(resetCommon(self));
-        resetCommon(self);
+        assert(resetCommon(self));
 
         if (self.windowSize != 255) {
             self.windowSize = 255;
@@ -123,43 +122,47 @@ library SchedulerLib {
         public returns (address) 
     {
         RequestFactoryInterface factory = RequestFactoryInterface(factoryAddress);
-        uint endowment = MathLib.min(PaymentLib.computeEndowment(
-            self.payment,
-            self.donation,
-            self.callGas,
-            self.callValue,
-            RequestLib.EXECUTION_GAS_OVERHEAD() //180000, line 459 RequestLib
+        uint endowment = MathLib.min(
+            PaymentLib.computeEndowment(
+                self.payment,
+                self.donation,
+                self.callGas,
+                self.callValue,
+                RequestLib.EXECUTION_GAS_OVERHEAD() //180000, line 459 RequestLib
         ), this.balance);
 
-        address newRequestAddress = factory.createValidatedRequest.value(endowment)(
-            [
-                msg.sender,           // meta.owner
-                DONATION_BENEFACTOR,  // paymentData.donationBenefactor
-                self.toAddress        // txnData.toAddress
-            ],
-            [
-                self.donation,            // paymentData.donation
-                self.payment,             // paymentData.payment
-                self.claimWindowSize,     // scheduler.claimWindowSize
-                self.freezePeriod,        // scheduler.freezePeriod
-                self.reservedWindowSize,  // scheduler.reservedWindowSize
-                uint(self.temporalUnit),  // scheduler.temporalUnit (1: block, 2: timestamp)
-                self.windowSize,          // scheduler.windowSize
-                self.windowStart,         // scheduler.windowStart
-                self.callGas,             // txnData.callGas
-                self.callValue            // txnData.callValue
-            ],
-            self.callData
-        );
 
-        if (newRequestAddress == 0x0) {
-            // Something went wrong during creation (likely a ValidationError).
-            // Try to return the ether that was sent.  If this fails then
-            // resort to throwing an exception to force reversion.
-            msg.sender.transfer(msg.value);
-            return 0x0;
-        }
+        return address(factory);
 
-        return newRequestAddress;
+        // address newRequestAddress = factory.createValidatedRequest.value(endowment)(
+        //     [
+        //         msg.sender,           // meta.owner
+        //         DONATION_BENEFACTOR,  // paymentData.donationBenefactor
+        //         self.toAddress        // txnData.toAddress
+        //     ],
+        //     [
+        //         self.donation,            // paymentData.donation
+        //         self.payment,             // paymentData.payment
+        //         self.claimWindowSize,     // scheduler.claimWindowSize
+        //         self.freezePeriod,        // scheduler.freezePeriod
+        //         self.reservedWindowSize,  // scheduler.reservedWindowSize
+        //         uint(self.temporalUnit),  // scheduler.temporalUnit (1: block, 2: timestamp)
+        //         self.windowSize,          // scheduler.windowSize
+        //         self.windowStart,         // scheduler.windowStart
+        //         self.callGas,             // txnData.callGas
+        //         self.callValue            // txnData.callValue
+        //     ],
+        //     self.callData
+        // );
+
+        // if (newRequestAddress == 0x0) {
+        //     // Something went wrong during creation (likely a ValidationError).
+        //     // Try to return the ether that was sent.  If this fails then
+        //     // resort to throwing an exception to force reversion.
+        //     msg.sender.transfer(msg.value);
+        //     return 0x0;
+        // }
+
+        // return newRequestAddress;
     }
 }

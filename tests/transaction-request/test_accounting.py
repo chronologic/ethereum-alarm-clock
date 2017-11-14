@@ -12,7 +12,7 @@ def test_txn_request_payments(chain,
 
     before_donation_balance = web3.eth.getBalance(request_data.paymentData.donationBenefactor)
     before_payment_balance = web3.eth.getBalance(web3.eth.accounts[1])
-
+ 
     chain.wait.for_block(request_data.schedule.windowStart)
 
     execute_txn_hash = txn_request.transact({

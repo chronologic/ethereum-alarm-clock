@@ -92,25 +92,17 @@ contract RequestFactory is RequestFactoryInterface {
                                    uint endowment) 
         internal returns (bool[6])
     {
-        return [
-            true,
-            true,
-            true,
-            true,
-            true,
-            true
-        ];
-        // return RequestLib.validate(
-        //     [
-        //         msg.sender,      // meta.createdBy
-        //         addressArgs[0],  // meta.owner
-        //         addressArgs[1],  // paymentData.donationBenefactor
-        //         addressArgs[2]   // txnData.toAddress
-        //     ],
-        //     uintArgs,
-        //     callData,
-        //     endowment
-        // );
+        return RequestLib.validate(
+            [
+                msg.sender,      // meta.createdBy
+                addressArgs[0],  // meta.owner
+                addressArgs[1],  // paymentData.donationBenefactor
+                addressArgs[2]   // txnData.toAddress
+            ],
+            uintArgs,
+            callData,
+            endowment
+        );
     }
 
     /*
