@@ -44,7 +44,7 @@ contract RequestFactory is RequestFactoryInterface {
                            bytes32 callData)
         public payable returns (address)
     {
-        var request = (new TransactionRequest).value(msg.value)(
+        TransactionRequest request = (new TransactionRequest).value(msg.value)(
             [
                 msg.sender,
                 addressArgs[0],  // meta.owner
@@ -62,6 +62,7 @@ contract RequestFactory is RequestFactoryInterface {
         RequestCreated(address(request));
 
         // Add the request to the RequestTracker
+        ///FIXED - IMPORTANT BUG LIVES IN THIS FUNCTION BELOW
         requestTracker.addRequest(address(request), uintArgs[7]); // windowStart
 
         return request;
@@ -143,7 +144,7 @@ contract RequestFactory is RequestFactoryInterface {
 
             // Try to return the ether sent with the message.  If this failed
             // then throw to force it to be returned.
-            // msg.sender.transfer(msg.value);
+            msg.sender.transfer(msg.value);
         }
 
         return createRequest(addressArgs, uintArgs, callData);

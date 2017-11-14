@@ -131,29 +131,28 @@ library SchedulerLib {
                 RequestLib.EXECUTION_GAS_OVERHEAD() //180000, line 459 RequestLib
         ), this.balance);
 
-
-        return address(factory);
-
-        // address newRequestAddress = factory.createValidatedRequest.value(endowment)(
-        //     [
-        //         msg.sender,           // meta.owner
-        //         DONATION_BENEFACTOR,  // paymentData.donationBenefactor
-        //         self.toAddress        // txnData.toAddress
-        //     ],
-        //     [
-        //         self.donation,            // paymentData.donation
-        //         self.payment,             // paymentData.payment
-        //         self.claimWindowSize,     // scheduler.claimWindowSize
-        //         self.freezePeriod,        // scheduler.freezePeriod
-        //         self.reservedWindowSize,  // scheduler.reservedWindowSize
-        //         uint(self.temporalUnit),  // scheduler.temporalUnit (1: block, 2: timestamp)
-        //         self.windowSize,          // scheduler.windowSize
-        //         self.windowStart,         // scheduler.windowStart
-        //         self.callGas,             // txnData.callGas
-        //         self.callValue            // txnData.callValue
-        //     ],
-        //     self.callData
-        // );
+        address newRequestAddress = factory.createValidatedRequest.value(endowment)(
+            [
+                msg.sender,           // meta.owner
+                DONATION_BENEFACTOR,  // paymentData.donationBenefactor
+                self.toAddress        // txnData.toAddress
+            ],
+            [
+                self.donation,            // paymentData.donation
+                self.payment,             // paymentData.payment
+                self.claimWindowSize,     // scheduler.claimWindowSize
+                self.freezePeriod,        // scheduler.freezePeriod
+                self.reservedWindowSize,  // scheduler.reservedWindowSize
+                uint(self.temporalUnit),  // scheduler.temporalUnit (1: block, 2: timestamp)
+                self.windowSize,          // scheduler.windowSize
+                self.windowStart,         // scheduler.windowStart
+                self.callGas,             // txnData.callGas
+                self.callValue            // txnData.callValue
+            ],
+            self.callData
+        );
+        
+        return address(newRequestAddress);
 
         // if (newRequestAddress == 0x0) {
         //     // Something went wrong during creation (likely a ValidationError).

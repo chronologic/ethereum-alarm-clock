@@ -1,6 +1,7 @@
 /// Contracts
 const BlockScheduler = artifacts.require('./BlockScheduler.sol')
 const RequestFactory = artifacts.require('./RequestFactory.sol')
+const RequestTracker = artifacts.require('./RequestTracker.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
 /// Libraries
@@ -16,6 +17,7 @@ contract('BlockScheduler', function(accounts) {
 
     let blockScheduler
     let requestFactory
+    let requestTracker
     let transactionRecorder
 
     const checkIsNotEmptyAddress = (address) => {
@@ -33,7 +35,14 @@ contract('BlockScheduler', function(accounts) {
         transactionRecorder = await TransactionRecorder.deployed()
         assert(checkIsNotEmptyAddress(transactionRecorder.address), "Transaction Recorder was deployed.")
 
-        requestFactory = await RequestFactory.deployed()
+        requestTracker = await RequestTracker.deployed()
+        assert(checkIsNotEmptyAddress(requestTracker.address), "Request Tracker was deployed.")
+        
+        /// I was running into an annoying bug that I had to dig through the contracts for,
+        ///  eventually I solved it by making sure I deployed a new instance of RequestFactory
+        ///  and passing in the requestTracker address. - Logan
+
+        requestFactory = await RequestFactory.new(requestTracker.address)
         blockScheduler = await BlockScheduler.new(requestFactory.address)        
 
         /// Get the factory address
@@ -64,47 +73,35 @@ contract('BlockScheduler', function(accounts) {
                                                             ])
 
         console.log(scheduleTx)
-        // let scheduleTx = await blockScheduler.scheduleTransaction(transactionRecorder.address,
-        //                                                             testData32,
-        //                                                             [
-        //                                                                 4e15, //callGas
-        //                                                                 123454321, //callValue
-        //                                                                 98765, //donation
-        //                                                                 80008, //payment
-        //                                                                 54321, //windowSize
-        //                                                                 windowStart //windowStart
-        //                                                             ]
-        //                                                             // {from: Owner, value: config.web3.utils.toWei(10)}
-        // )
-      
+
         // assert(scheduleTx.tx, "The transaction fired off and returned.")
         // console.log(scheduleTx)
         // // let txRequest = 
     })
 
-    // it('should do block scheduling with simplified args', async function() {
-    //     let startBlockNum = await config.web3.eth.getBlockNumber()
-    //     let windowStart = startBlockNum + 20
+    it('should do block scheduling with simplified args', async function() {
+        let startBlockNum = await config.web3.eth.getBlockNumber()
+        let windowStart = startBlockNum + 20
 
-    //     let scheduleTx = await blockScheduler.scheduleTransaction(transactionRecorder.address,
-    //                                                                   'this-is-call-data',
-    //                                                                   [
-    //                                                                       4e15, //callGas
-    //                                                                       123454321, //callValue
-    //                                                                       255, //windowSize
-    //                                                                       windowStart
-    //                                                                   ],
-    //                                                                   {from: User1, value: config.web3.utils.toWei(10)}
-    //     )
+        let scheduleTx = await blockScheduler.scheduleTransaction(transactionRecorder.address,
+                                                                      'this-is-call-data',
+                                                                      [
+                                                                          4e15, //callGas
+                                                                          123454321, //callValue
+                                                                          255, //windowSize
+                                                                          windowStart
+                                                                      ],
+                                                                      {from: User1, value: config.web3.utils.toWei(10)}
+        )
 
-    //     // assert(scheduleTx.tx)
+        assert(scheduleTx.tx)
 
     //     // let receipt = scheduleTx.receipt
     //     // assert(receipt.gasUsed < 1300000) //226061
 
     //     // let txRequest = 
 
-    // })
+    })
 
     // it('should return ether on invalid transaction', async function() {
     //     let lastBlock = await config.web3.eth.getBlockNumber()

@@ -8,7 +8,7 @@ import "contracts/Interface/TransactionRequestInterface.sol";
 contract TransactionRequest is TransactionRequestInterface {
     using RequestLib for RequestLib.Request;
 
-    RequestLib.Request private txnRequest; // TODO: Public? This is a data struct
+    RequestLib.Request txnRequest; // TODO: Public? This is a data struct
 
     /*
      *  addressArgs[0] - meta.owner
@@ -29,7 +29,7 @@ contract TransactionRequest is TransactionRequestInterface {
     function TransactionRequest(address[4] addressArgs,
                                 uint[10] uintArgs,
                                 bytes32 callData)
-        payable
+        public payable
     {
         txnRequest.initialize(addressArgs, uintArgs, callData);
     }
@@ -75,7 +75,7 @@ contract TransactionRequest is TransactionRequestInterface {
         }
     }
 
-    function callData() public constant returns (bytes32) {
+    function callData() public view returns (bytes32) {
         return txnRequest.txnData.callData;
     }
 
