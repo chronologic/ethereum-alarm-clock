@@ -1,11 +1,14 @@
+require('chai')
+    .use(require('chai-as-promised'))
+    .should()   
+
+const expect = require('chai').expect
+    
 /// Contracts
 const BlockScheduler = artifacts.require('./BlockScheduler.sol')
 const RequestFactory = artifacts.require('./RequestFactory.sol')
 const RequestTracker = artifacts.require('./RequestTracker.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
-
-/// Libraries
-const SchedulerLib = artifacts.require('./SchedulerLib.sol')
 
 /// Brings in config.web3...
 let config = require("../config");
@@ -62,15 +65,6 @@ contract('BlockScheduler', function(accounts) {
         let balAfter = await config.web3.eth.getBalance(blockScheduler.address)
         assert(balBefore < balAfter, "It sent 1000 wei correctly.")
 
-        /// Let's start watching events from our scheduler so that we can get the new transaction
-        ///  request address.
-        const events = await blockScheduler.allEvents()
-        events.watch((err, event) => {
-            if (!err) {
-                console.log(event);
-            }
-        })
-
         /// Now let's send it an actual transaction ;-)
         let scheduleTx = await blockScheduler.scheduleTxSimple(transactionRecorder.address,
                                                             testData32,
@@ -81,14 +75,39 @@ contract('BlockScheduler', function(accounts) {
                                                                 windowStart
                                                             ])
 
-        // console.log(scheduleTx)
-
         assert(scheduleTx.tx, "The transaction fired off and returned.")
-        // console.log(scheduleTx)
-        // // let txRequest = 
+
+        // Let's get the logs so we can find the transaction request address.
+        let event = scheduleTx.logs.find(e => e.event === "NewRequest")
+        expect(event.args.request).to.exist
     })
 
-    it('should do block scheduling with simplified args', async function() {
+    it('should do block scheduling with `scheduleTxFull`', async function() {
+        let startBlockNum = await config.web3.eth.getBlockNumber()
+        let windowStart = startBlockNum + 20
+
+        let testData32 ="2323".padEnd(32, "FF")
+
+        /// Now let's send it an actual transaction ;-)
+        let scheduleTx = await blockScheduler.scheduleTxFull(transactionRecorder.address,
+                                                            testData32,
+                                                            [
+                                                                4e15, //callGas
+                                                                123123, //callValue
+                                                                808080, // donation
+                                                                100200300, // payment
+                                                                300, //windowSize
+                                                                windowStart
+                                                            ])
+
+        assert(scheduleTx.tx, "The transaction fired off and returned.")
+
+        // Let's get the logs so we can find the transaction request address.
+        let event = scheduleTx.logs.find(e => e.event === "NewRequest")
+        expect(event.args.request).to.exist
+    })
+
+    it('should do block scheduling with simplified args: legacy `scheduleTransaction`', async function() {
         let startBlockNum = await config.web3.eth.getBlockNumber()
         let windowStart = startBlockNum + 20
 
@@ -104,42 +123,41 @@ contract('BlockScheduler', function(accounts) {
         )
 
         assert(scheduleTx.tx)
-
-    //     // let receipt = scheduleTx.receipt
-    //     // assert(receipt.gasUsed < 1300000) //226061
-
-    //     // let txRequest = 
-
     })
 
-    // it('should return ether on invalid transaction', async function() {
-    //     let lastBlock = await config.web3.eth.getBlockNumber()
-    //     let windowStart = lastBlock + 20
+    it('should do block scheduling with full args: legacy `scheduleTransaction`', async function() {
+        let startBlockNum = await config.web3.eth.getBlockNumber()
+        let windowStart = startBlockNum + 20
 
-    //     let balBefore = await config.web3.eth.getBalance(User1)
-    //     let gasPrice = await config.web3.eth.getGasPrice()        
+        let scheduleTx = await blockScheduler.scheduleTransaction(transactionRecorder.address,
+                                                                      'this-is-call-data',
+                                                                      [
+                                                                          4e15, //callGas
+                                                                          123454321, //callValue
+                                                                          808080, // donation
+                                                                          100200300, // payment
+                                                                          255, //windowSize
+                                                                          windowStart
+                                                                      ],
+                                                                      {from: User1, value: config.web3.utils.toWei(10)}
+        )
 
-    //     let scheduleTx = await blockScheduler.scheduleTransaction(transactionRecorder.address,
-    //                                                                   'this-is-the-call-data',
-    //                                                                   [
-    //                                                                       4e15, //callGas set crazy high
-    //                                                                       123454321, //callValue
-    //                                                                       0, //windowSize
-    //                                                                       windowStart
-    //                                                                   ],
-    //                                                                   {from: User2, value: config.web3.utils.toWei(10), gasPrice: gasPrice}
-    //     )
+        assert(scheduleTx.tx)
+    })
 
-        // assert(scheduleTx.tx, "Should have a transaction hash.")
-        // let gasUsed = scheduleTx.receipt.gasUsed
+    it('should revert on invalid transaction', async function() {
+        let lastBlock = await config.web3.eth.getBlockNumber()
+        let windowStart = lastBlock + 20
 
-        // let balAfter = await config.web3.eth.getBalance(User1)
- 
-        // assert((balBefore - balAfter <= config.web3.utils.toWei(10)), "Should have sent back the 10 ether.")
-        
-        // /// These numbers aren't exactly equal but are close, need a way to fuzz them
-        // console.log(balBefore - balAfter)
-        // console.log(gasUsed * gasPrice)
-        // assert((balBefore - balAfter <= gasUsed * gasPrice), "Should have only subtracted the amount of gas for failed instantiation")
-    // })
+        await blockScheduler.scheduleTransaction(transactionRecorder.address,
+                                                                      'this-is-the-call-data',
+                                                                      [
+                                                                          4e15, //callGas set crazy high
+                                                                          123454321, //callValue
+                                                                          0, //windowSize
+                                                                          windowStart
+                                                                      ],
+                                                                      {from: User2, value: config.web3.utils.toWei(10)}
+        ).should.be.rejectedWith('VM Exception while processing transaction: revert')
+    })
 })

@@ -71,8 +71,33 @@ contract BaseScheduler is SchedulerInterface {
     }
 
     event TX(string _msg);
-    event NewRequest(address _newAddress);
+    event NewRequest(address request);
 
+    function scheduleTxFull(address _toAddress,
+                            bytes32 _callData,
+                            uint[6] _uintArgs)
+        doReset public payable returns (address)
+    {
+        futureTransaction.toAddress = _toAddress;
+        futureTransaction.callData = _callData;
+        futureTransaction.callGas = _uintArgs[0];
+        futureTransaction.callValue = _uintArgs[1];
+        futureTransaction.donation = _uintArgs[2];
+        futureTransaction.payment = _uintArgs[3];
+        futureTransaction.windowSize = _uintArgs[4];
+        futureTransaction.windowStart = _uintArgs[5];
+
+        // This is here to make this explicit.  While it should remain the same
+        // across multiple calls, this ensures that it is clear what this value
+        // is set to as well as keeping the setting close to where the other
+        // transaction details are set.
+        futureTransaction.temporalUnit = temporalUnit;
+
+        address newRequest = futureTransaction.schedule(factoryAddress);
+        assert( newRequest != 0x0 );
+        NewRequest(newRequest);
+        return newRequest;
+    }
 
     /*
      *  @dev Full scheduling API exposing all fields.
@@ -106,7 +131,7 @@ contract BaseScheduler is SchedulerInterface {
         // is set to as well as keeping the setting close to where the other
         // transaction details are set.
         futureTransaction.temporalUnit = temporalUnit;
-        return 0x0;
-        // return futureTransaction.schedule(factoryAddress);
+
+        return futureTransaction.schedule(factoryAddress);
     }
 }
