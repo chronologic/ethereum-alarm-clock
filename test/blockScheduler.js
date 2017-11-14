@@ -50,7 +50,7 @@ contract('BlockScheduler', function(accounts) {
         assert(checkIsNotEmptyAddress(factoryAddress), "BlockScheduler is instantiated and linked to requestFactory.")
     })
 
-    it('should do block scheduling with simplified args', async function() {
+    it('should do block scheduling with `scheduleTxSimple`', async function() {
         let startBlockNum = await config.web3.eth.getBlockNumber()
         let windowStart = startBlockNum + 20
 
@@ -62,6 +62,15 @@ contract('BlockScheduler', function(accounts) {
         let balAfter = await config.web3.eth.getBalance(blockScheduler.address)
         assert(balBefore < balAfter, "It sent 1000 wei correctly.")
 
+        /// Let's start watching events from our scheduler so that we can get the new transaction
+        ///  request address.
+        const events = await blockScheduler.allEvents()
+        events.watch((err, event) => {
+            if (!err) {
+                console.log(event);
+            }
+        })
+
         /// Now let's send it an actual transaction ;-)
         let scheduleTx = await blockScheduler.scheduleTxSimple(transactionRecorder.address,
                                                             testData32,
@@ -72,9 +81,9 @@ contract('BlockScheduler', function(accounts) {
                                                                 windowStart
                                                             ])
 
-        console.log(scheduleTx)
+        // console.log(scheduleTx)
 
-        // assert(scheduleTx.tx, "The transaction fired off and returned.")
+        assert(scheduleTx.tx, "The transaction fired off and returned.")
         // console.log(scheduleTx)
         // // let txRequest = 
     })

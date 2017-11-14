@@ -64,12 +64,14 @@ contract BaseScheduler is SchedulerInterface {
 
         futureTransaction.temporalUnit = temporalUnit;
 
-        // address rtn = 0x0;
-        address rtn = futureTransaction.schedule(factoryAddress);
-        return rtn;
+        address newRequest = futureTransaction.schedule(factoryAddress);
+        assert( newRequest != 0x0 );
+        NewRequest(newRequest);
+        return newRequest;
     }
 
     event TX(string _msg);
+    event NewRequest(address _newAddress);
 
 
     /*

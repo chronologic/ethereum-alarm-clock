@@ -152,16 +152,18 @@ library SchedulerLib {
             self.callData
         );
         
-        return address(newRequestAddress);
+        if (newRequestAddress == 0x0) {
+            // Something went wrong during creation (likely a ValidationError).
+            // Try to return the ether that was sent.  If this fails then
+            // resort to throwing an exception to force reversion.
+            ERROR();
+            msg.sender.transfer(msg.value);
+            return 0x0;
+        }
 
-        // if (newRequestAddress == 0x0) {
-        //     // Something went wrong during creation (likely a ValidationError).
-        //     // Try to return the ether that was sent.  If this fails then
-        //     // resort to throwing an exception to force reversion.
-        //     msg.sender.transfer(msg.value);
-        //     return 0x0;
-        // }
-
-        // return newRequestAddress;
+        return newRequestAddress;
     }
+    
+    /// Debugging purposes
+    event ERROR();
 }
