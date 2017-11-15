@@ -12,7 +12,7 @@ let RequestTracker      = artifacts.require("./RequestTracker.sol"),
 
 let config = require("../../config");
 
-contract('Test Execution', function(accounts) {
+contract('Test TransactionRecorder', function(accounts) {
 
     it("should send a transaction as specified", async () => {
         let txRecorder = await TransactionRecorder.new();
