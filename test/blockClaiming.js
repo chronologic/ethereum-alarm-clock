@@ -1,14 +1,17 @@
-const assertFail = require('./_helpers/assertFail.js')
+require('chai')
+.use(require('chai-as-promised'))
+.should()   
+
+const expect = require('chai').expect
 
 /// Contracts
 const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
-/// Libraries
-const SchedulerLib = artifacts.require('./SchedulerLib.sol')
-
 /// Brings in config.web3...
-let config = require("../config");
+const config = require("../config");
+
+const { wait, waitUntilBlock } = require('@digix/tempo')(web3);
 
 contract('Block claiming', function(accounts) {
     const Owner = accounts[0]
@@ -18,14 +21,7 @@ contract('Block claiming', function(accounts) {
     let transactoinRequest
     let transactionRecorder
 
-    const mine = async () => await web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_mine", params: [], id: 0 })
-
-    const checkIsNotEmptyAddress = (address) => {
-        if (address == "0x0000000000000000000000000000000000000000") {
-            return false;
-        }
-        return true;
-    }
+    let firstClaimBlock
 
     /////////////
     /// Tests ///
@@ -48,20 +44,28 @@ contract('Block claiming', function(accounts) {
                 0, //reserved window size
                 0, // temporal unit
                 0, //window size
-                curBlock + 1000, //windowStart
+                curBlock + 355, //windowStart
                 300000, //callGas
                 12345 //callValue
             ],
             'this-is-the-call-data'
         )
 
-        let firstClaimBlock  = (curBlock + 1000) - 10 - 255
+        /// The first claim block is the current block + the number of blocks
+        ///  until the window starts, minus the freeze period minus claim window size.
+        firstClaimBlock  = (curBlock + 355) - 10 - 255
+
         curBlock = await config.web3.eth.getBlockNumber()
-        assert(firstClaimBlock > curBlock, "Sanity check")
+        assert(firstClaimBlock > curBlock, "the first claim block should be in the future.")
         
-        // assert(curBlock == firstClaimBlock - 1, "Another sanity check")
+        // No claiming before the window starts!
+        await transactionRequest.claim().should.be.rejectedWith('VM Exception while processing transaction: revert')
+    })
 
-        assertFail(await transactionRequest.claim(), "Should revert.")        
+    it('should allow claiming at the first claim block', async function() {
+        await waitUntilBlock(0, firstClaimBlock + 20);
 
+        let res = await transactionRequest.claim({value: config.web3.utils.toWei(1)})
+        console.log(res)
     })
 })

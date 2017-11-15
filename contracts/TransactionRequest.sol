@@ -51,7 +51,7 @@ contract TransactionRequest is TransactionRequestInterface {
         return txnRequest.cancel();
     }
 
-    function claim() public returns (bool) {
+    function claim() public payable returns (bool) {
         return txnRequest.claim();
     }
 

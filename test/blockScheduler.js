@@ -149,6 +149,7 @@ contract('BlockScheduler', function(accounts) {
         let lastBlock = await config.web3.eth.getBlockNumber()
         let windowStart = lastBlock + 20
 
+        /// The below reverts because we change the windowSize to 0.
         await blockScheduler.scheduleTransaction(transactionRecorder.address,
                                                                       'this-is-the-call-data',
                                                                       [

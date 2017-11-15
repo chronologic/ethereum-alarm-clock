@@ -40,7 +40,7 @@ library ClaimLib {
      * Amount that must be supplied as a deposit to claim.  This is set to the
      * maximum possible payment value that could be paid out by this request.
      */
-    function minimumDeposit(uint payment) returns (uint) {
+    function minimumDeposit(uint payment) pure returns (uint) {
         return payment.mul(2);
     }
 

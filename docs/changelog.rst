@@ -4,10 +4,10 @@ Changelog
 0.9.0 (WIP)
 -----------
 
- - Full rewrite of all contracts to modern solidity syntax. [60%]
+ - Full rewrite of all contracts to modern solidity syntax. [65%]
  - Integrate Truffle framework. [75%]
- - Port test suite from Python to ES6. [0/21]
- - New API for Schedulers [0%]
+ - Port test suite from Python to ES6. [1/21]
+ - New API for Schedulers [50%]
  - (Add String Pool) [Needs discussion]
  - Digger.sol removed due to `EIP 150`_ making it obsolete. [done]
  - All stack depth checking also obsolete due to `EIP150` removed. [done]
