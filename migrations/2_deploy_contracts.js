@@ -14,7 +14,6 @@ let BaseScheduler               = artifacts.require("./BaseScheduler.sol"),
     RequestScheduleLib          = artifacts.require("./RequestScheduleLib.sol"),
     RequestTracker              = artifacts.require("./RequestTracker.sol"),
     RequestTrackerInterface     = artifacts.require("./RequestTrackerInterface.sol"),
-    SafeSendLib                 = artifacts.require("./SafeSendLib.sol"),
     SchedulerInterface          = artifacts.require("./SchedulerInterface.sol"),
     SchedulerLib                = artifacts.require("./SchedulerLib.sol"),
     TimestampScheduler          = artifacts.require("./TimestampScheduler.sol"),
@@ -32,16 +31,11 @@ module.exports = function(deployer) {
     deployer.deploy(Digger);
     deployer.deploy(RequestMetaLib);
 
-    deployer.link(MathLib, SafeSendLib);
-    deployer.deploy(SafeSendLib);
-
     deployer.link(MathLib, ClaimLib);
-    deployer.link(SafeSendLib, ClaimLib);
     deployer.deploy(ClaimLib);
 
     deployer.link(ExecutionLib, PaymentLib);
     deployer.link(MathLib, PaymentLib);
-    deployer.link(SafeSendLib, PaymentLib);
     deployer.deploy(PaymentLib);
 
     deployer.link(MathLib, RequestScheduleLib);
@@ -53,13 +47,11 @@ module.exports = function(deployer) {
     deployer.link(PaymentLib, RequestLib);
     deployer.link(RequestMetaLib, RequestLib);
     deployer.link(RequestScheduleLib, RequestLib);
-    deployer.link(SafeSendLib, RequestLib);
     deployer.deploy(RequestLib);
 
     deployer.link(MathLib, SchedulerLib);
     deployer.link(PaymentLib, SchedulerLib);
     deployer.link(RequestLib, SchedulerLib);
-    deployer.link(SafeSendLib, SchedulerLib);
     deployer.deploy(SchedulerLib);
 
     deployer.link(RequestScheduleLib, BaseScheduler);
@@ -87,14 +79,13 @@ module.exports = function(deployer) {
     deployer.link(RequestMetaLib, TransactionRequest);
     deployer.link(RequestLib, TransactionRequest);
     deployer.link(RequestScheduleLib, TransactionRequest);
-    deployer.link(SafeSendLib, TransactionRequest);
     deployer.deploy(TransactionRequest);
 
     deployer.link(IterTools, RequestFactory);
     deployer.link(PaymentLib, RequestFactory);
     deployer.link(RequestLib, RequestFactory);
-    deployer.link(SafeSendLib, RequestFactory);
     deployer.link(RequestTracker, RequestFactory);
+    deployer.link(RequestScheduleLib, RequestFactory)
     deployer.link(TransactionRequest, RequestFactory);
     deployer.deploy(RequestFactory);
 

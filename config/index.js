@@ -88,25 +88,6 @@ module.exports      = nconf;
 module.exports.web3 = web3;
 
 module.exports.contracts = {
-<<<<<<< HEAD
-    MathLib: MathLib,
-    GroveLib: GroveLib,
-    IterTools: IterTools,
-    ExecutionLib: ExecutionLib,
-    RequestMetaLib: RequestMetaLib,
-    SafeSendLib: SafeSendLib,
-    ClaimLib: ClaimLib,
-    PaymentLib: PaymentLib,
-    RequestScheduleLib: RequestScheduleLib,
-    RequestLib: RequestLib,
-    SchedulerLib: SchedulerLib,
-    BaseScheduler: BaseScheduler,
-    BlockScheduler: BlockScheduler,
-    TimestampScheduler: TimestampScheduler,
-    RequestTracker: RequestTracker,
-    TransactionRequest: TransactionRequest,
-    RequestFactory: RequestFactory
-=======
 MathLib: MathLib,
 GroveLib: GroveLib,
 IterTools: IterTools,
@@ -123,5 +104,4 @@ TimestampScheduler: TimestampScheduler,
 RequestTracker: RequestTracker,
 TransactionRequest: TransactionRequest,
 RequestFactory: RequestFactory
->>>>>>> dev
 };

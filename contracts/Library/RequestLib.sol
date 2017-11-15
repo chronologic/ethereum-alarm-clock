@@ -417,15 +417,10 @@ library RequestLib {
                  measuredGasConsumption);
 
         // Send the payment.
-<<<<<<< HEAD
-        // FIXME: no more pushes for payments. client needs to call
-        self.paymentData.sendPayment();
-=======
         //FIXME: NO MORE PUSHES FOR PAYMENTS, CLIENTS MUST CALL
         // self.paymentData.sendPayment();
 
         DEBUG("Here");
->>>>>>> dev
 
         // Send all extra ether back to the owner.
         sendOwnerEther(self);

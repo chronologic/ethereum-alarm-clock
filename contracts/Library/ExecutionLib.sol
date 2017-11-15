@@ -16,14 +16,8 @@ library ExecutionLib {
 
         uint callGas;
 
-<<<<<<< HEAD
-        // The stack depth this txn requires.
-        // FIXME: remove
-        uint requiredStackDepth;
-=======
         // FIXME: Add callGasPrice
         // uint callGasPrice;
->>>>>>> dev
     }
 
     function sendTransaction(ExecutionData storage self)

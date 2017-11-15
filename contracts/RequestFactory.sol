@@ -16,17 +16,9 @@ contract RequestFactory is RequestFactoryInterface {
     RequestTrackerInterface public requestTracker;
 
     function RequestFactory(address _trackerAddress) {
-<<<<<<< HEAD
-        // if (_trackerAddress == 0x0) {
-        //     revert();
-        // }
-        // FIXME: Deployment to testrpc fails here. Use assertion and uncomment.
-        // if (_trackerAddress == 0x0) throw;
-=======
         // Below is commented out so that truffle migrates correctly... Probably should be
         //  uncommented again when this gets pushed to production. - Logan
         // require(_trackerAddress != 0x0);
->>>>>>> dev
         requestTracker = RequestTrackerInterface(_trackerAddress);
     }
 

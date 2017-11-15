@@ -10,11 +10,7 @@ library PaymentLib {
 
     struct PaymentData {
         // The gas price that was used during creation of this request.
-<<<<<<< HEAD
-        // FIXME: going away
-=======
         // FIXME: Going away
->>>>>>> dev
         uint anchorGasPrice;
 
         // The amount in wei that will be payed to the address that executes
