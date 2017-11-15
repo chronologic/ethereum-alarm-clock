@@ -45,7 +45,7 @@ contract('Block claiming', function(accounts) {
                 0, //payment
                 25, //claim window size
                 5, //freeze period
-                0, //reserved window size
+                10, //reserved window size
                 0, // temporal unit
                 10, //window size
                 curBlock + 38, //windowStart
@@ -61,7 +61,6 @@ contract('Block claiming', function(accounts) {
         /// The last claim block is the currenct block + the number of blocks
         ///  until the window starts, minus the freeze period minus 1
         lastClaimBlock = (curBlock + 38) - 5 - 1
-        
     })
 
     it('should not claim before first claim block', async function() {
@@ -107,6 +106,63 @@ contract('Block claiming', function(accounts) {
 
         await transactionRequest.claim({value: config.web3.utils.toWei(1)})
             .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        
+    })
+
+    it('should execute a claimed block request', async function() {
+        await waitUntilBlock(0, firstClaimBlock)
+        
+        let res = await transactionRequest.claim({value: config.web3.utils.toWei(2)})
+
+        /// Search for the claimed function and expect it to exist.
+        let claimed = res.logs.find(e => e.event === "Claimed")
+        expect(claimed).to.exist
+
+        await waitUntilBlock(0, await config.web3.eth.getBlockNumber() + 30)
+
+
+        let res2 = await transactionRequest.execute({gas: 3000000})
+        // console.log(res2)
+
+        // console.log(await config.web3.eth.getBalance(transactionRequest.address))
+        
+        let executed = res2.logs.find(e => e.event === "Executed")
+        expect(executed).to.exist
+        // console.log(executed.args)
+
+        // console.log(await config.web3.eth.getBalance(transactionRequest.address))
+    })
+
+    it('should execute a claimed call after block reserve window', async function() {
+        await waitUntilBlock(0, firstClaimBlock)
+        
+        let res = await transactionRequest.claim({value: config.web3.utils.toWei(2)})
+
+        /// Search for the claimed function and expect it to exist.
+        let claimed = res.logs.find(e => e.event === "Claimed")
+        expect(claimed).to.exist
+
+        await waitUntilBlock(0, lastClaimBlock+15)
+
+        let res2 = await transactionRequest.execute({gas: 3000000})
+
+        let executed = res2.logs.find(e => e.event === "Executed")
+        expect(executed).to.exist
+    })
+
+    it('should determine payment amount', async function() {
+        let claimBlock = Math.floor(firstClaimBlock + 25 * 2/3)
+        let expectedPaymentModifier = Math.floor(100 * 2/3)
+
+        await waitUntilBlock(0, claimBlock)
+
+        let res = await transactionRequest.claim({value: config.web3.utils.toWei(2)})
+        
+        /// Search for the claimed function and expect it to exist.
+        let claimed = res.logs.find(e => e.event === "Claimed")
+        expect(claimed).to.exist
+
+        //TODO: validate the payment modifier
         
     })
 })

@@ -129,7 +129,7 @@ library PaymentLib {
         if (paymentAmount > 0) {
             // re-entrance protection.
             self.paymentOwed = 0;
-            self.paymentBenefactor.transfer(paymentAmount);
+            // self.paymentBenefactor.transfer(paymentAmount);
             // self.paymentOwed = paymentAmount.flooredSub(self.paymentBenefactor.transfer(paymentAmount));
         }
         return true;

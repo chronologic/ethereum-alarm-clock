@@ -40,13 +40,13 @@ library RequestLib {
     }
 
     enum AbortReason {
-        WasCancelled,
-        AlreadyCalled,
-        BeforeCallWindow,
-        AfterCallWindow,
-        ReservedForClaimer,
-        StackTooDeep,
-        InsufficientGas
+        WasCancelled, //0
+        AlreadyCalled, //1
+        BeforeCallWindow, //2
+        AfterCallWindow, //3
+        ReservedForClaimer, //4
+        StackTooDeep, //5 - DEPRECATED
+        InsufficientGas //6
     }
 
     event Cancelled(uint rewardPayment, uint measuredGasConsumption);
@@ -317,7 +317,7 @@ library RequestLib {
          *  3. Send remaining ether back to owner.
          *
          */
-        var startGas = msg.gas;
+        uint startGas = msg.gas;
 
         // +----------------------+
         // | Begin: Authorization |
@@ -344,12 +344,8 @@ library RequestLib {
             Aborted(uint8(AbortReason.ReservedForClaimer));
             return false;
         }
-        //else if (msg.sender != tx.origin && !self.txnData.stackCanBeExtended()) {
-        //    Aborted(uint8(AbortReason.StackTooDeep));
-        //    return false;
-        //}
-        // ABOVE NO LONGER NEEDED
 
+        DEBUG("After auth");
         // +--------------------+
         // | End: Authorization |
         // +--------------------+
@@ -363,6 +359,7 @@ library RequestLib {
         // Send the transaction
         self.meta.wasSuccessful = self.txnData.sendTransaction();
 
+        DEBUG("Made it up to here");
         // +----------------+
         // | End: Execution |
         // +----------------+
@@ -376,11 +373,15 @@ library RequestLib {
                                                             .add(self.paymentData.donationOwed);
         }
 
+        DEBUG("The above function is untested");
+
         // record this so that we can log it later.
-        var totalDonationPayment = self.paymentData.donationOwed;
+        uint totalDonationPayment = self.paymentData.donationOwed;
 
         // Send the donation.
         self.paymentData.sendDonation();
+
+        DEBUG("Up to here works");
 
         // Compute the payment amount and who it should be sent do.
         self.paymentData.paymentBenefactor = msg.sender;
@@ -395,18 +396,20 @@ library RequestLib {
             self.paymentData.paymentOwed = self.paymentData.getPayment()
                                                            .add(self.paymentData.paymentOwed);
         }
+        DEBUG("Up to here works");
 
         // Record the amount of gas used by execution.
         uint measuredGasConsumption = startGas.sub(msg.gas).add(_EXECUTE_EXTRA_GAS);
 
-        // +----------------------------------------------------------------------+
-        // | NOTE: All code after this must be accounted for by EXECUTE_EXTRA_GAS |
-        // +----------------------------------------------------------------------+
+        // // +----------------------------------------------------------------------+
+        // // | NOTE: All code after this must be accounted for by EXECUTE_EXTRA_GAS |
+        // // +----------------------------------------------------------------------+
 
         // Add the gas reimbursment amount to the payment.
         self.paymentData.paymentOwed = measuredGasConsumption.mul(tx.gasprice)
                                                              .add(self.paymentData.paymentOwed);
 
+        DEBUG("Up to here works");
         // Log the two payment amounts.  Otherwise it is non-trivial to figure
         // out how much was payed.
         Executed(self.paymentData.paymentOwed,
@@ -415,7 +418,9 @@ library RequestLib {
 
         // Send the payment.
         //FIXME: NO MORE PUSHES FOR PAYMENTS, CLIENTS MUST CALL
-        self.paymentData.sendPayment();
+        // self.paymentData.sendPayment();
+
+        DEBUG("Here");
 
         // Send all extra ether back to the owner.
         sendOwnerEther(self);
@@ -426,6 +431,8 @@ library RequestLib {
 
         return true;
     }
+
+    event DEBUG(string _msg);
 
     // This is the amount of gas that it takes to enter from the
     // `TransactionRequest.execute()` contract into the `RequestLib.execute()`
@@ -469,7 +476,7 @@ library RequestLib {
      *  The amount of gas used by the portion of the `execute` function
      *  that cannot be accounted for via gas tracking.
      */
-    uint private constant  _EXECUTE_EXTRA_GAS = 90000; // Check accuracy
+    uint private constant  _EXECUTE_EXTRA_GAS = 90000; // Same... Doubled this from Piper's original - Logan
 
     function EXECUTE_EXTRA_GAS() 
         public constant returns (uint)
