@@ -1,6 +1,6 @@
 require('chai')
-.use(require('chai-as-promised'))
-.should()   
+    .use(require('chai-as-promised'))
+    .should()   
 
 const expect = require('chai').expect
 
@@ -30,6 +30,7 @@ contract('Block claiming', function(accounts) {
     it('should not claim before first claim block', async function() {
         let curBlock = await config.web3.eth.getBlockNumber()
 
+        /// When you instantiate a TransactionRequest like this it does not have a `temporalUnit`
         transactionRequest = await TransactionRequest.new(
             [
                 Owner, // created by
@@ -39,12 +40,12 @@ contract('Block claiming', function(accounts) {
             ], [
                 0, //donation
                 0, //payment
-                255, //claim window size
-                10, //freeze period
+                25, //claim window size
+                5, //freeze period
                 0, //reserved window size
                 0, // temporal unit
-                0, //window size
-                curBlock + 355, //windowStart
+                10, //window size
+                curBlock + 38, //windowStart
                 300000, //callGas
                 12345 //callValue
             ],
@@ -53,7 +54,7 @@ contract('Block claiming', function(accounts) {
 
         /// The first claim block is the current block + the number of blocks
         ///  until the window starts, minus the freeze period minus claim window size.
-        firstClaimBlock  = (curBlock + 355) - 10 - 255
+        firstClaimBlock  = (curBlock + 38) - 5 - 25
 
         curBlock = await config.web3.eth.getBlockNumber()
         assert(firstClaimBlock > curBlock, "the first claim block should be in the future.")
@@ -63,7 +64,7 @@ contract('Block claiming', function(accounts) {
     })
 
     it('should allow claiming at the first claim block', async function() {
-        await waitUntilBlock(0, firstClaimBlock + 20);
+        await waitUntilBlock(0, firstClaimBlock);
 
         let res = await transactionRequest.claim({value: config.web3.utils.toWei(1)})
         console.log(res)

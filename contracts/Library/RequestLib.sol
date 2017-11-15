@@ -573,17 +573,14 @@ library RequestLib {
     function isClaimable(Request storage self) 
         public returns (bool)
     {
-        if (self.claimData.isClaimed()) {
-            return false;
-        } else if (self.meta.isCancelled) {
-            return false;
-        } else if (!self.schedule.inClaimWindow()) {
-            return false;
-        } else if (msg.value < ClaimLib.minimumDeposit(self.paymentData.payment)) {
-            return false;
-        } else {
-            return true;
-        }
+        /// Require not claimed and not cancelled.
+        // require(!self.claimData.isClaimed());
+        // require(!self.meta.isCancelled);
+
+        // Require that it's in the claim window and the value sent is over the min deposit.
+        require(self.schedule.inClaimWindow());
+        // require(msg.value > ClaimLib.minimumDeposit(self.paymentData.payment));
+        return true;
     }
 
     /*
@@ -592,9 +589,7 @@ library RequestLib {
     function claim(Request storage self) 
         public returns (bool)
     {
-        if (!isClaimable(self)) {
-            msg.sender.transfer(msg.value);
-        }
+        require(isClaimable(self));
         self.claimData.claim(self.schedule.computePaymentModifier());
         Claimed();
         return true;

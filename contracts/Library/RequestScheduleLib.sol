@@ -47,31 +47,37 @@ library RequestScheduleLib {
      *  Currently supports block based times, and timestamp (seconds) based
      *  times.
      */
-    function getNow(ExecutionWindow storage self) returns (uint) {
+    function getNow(ExecutionWindow storage self) 
+        internal view returns (uint)
+    {
         return getNow(self.temporalUnit);
     }
 
-    function getNow(TemporalUnit temporalUnit) internal returns (uint) {
+    function getNow(TemporalUnit temporalUnit) 
+        internal view  returns (uint)
+    {
+        /// It should just default to blocks.
         if (temporalUnit == TemporalUnit.Timestamp) {
-            return now;
+            return block.timestamp;
         } else if (temporalUnit == TemporalUnit.Blocks) {
             return block.number;
         } else {
+            /// THIS is a hack
+            return block.number;
             // Unsupported unit.
             revert();
         }
     }
 
     /*
-     * The modifier that will be applied to the payment value for a claimed call.
+     * @dev The modifier that will be applied to the payment value for a claimed call.
      */
     function computePaymentModifier(ExecutionWindow storage self) 
         returns (uint8)
     {
-        require(inClaimWindow(self));
+        //require(inClaimWindow(self)); // This is not needed since it is already checked before sending this function.
         
-        uint paymentModifier = getNow(self).sub(firstClaimBlock(self))
-                                           .mul(100).div(self.claimWindowSize);
+        uint paymentModifier = (getNow(self).sub(firstClaimBlock(self))).mul(100).div(self.claimWindowSize); 
         assert(paymentModifier <= 100); 
 
         return uint8(paymentModifier);
@@ -95,14 +101,18 @@ library RequestScheduleLib {
     /*
      *  Helper: computes the time when the request will be frozen until execution.
      */
-    function freezeStart(ExecutionWindow storage self) returns (uint) {
+    function freezeStart(ExecutionWindow storage self) 
+        view returns (uint)
+    {
         return self.windowStart.sub(self.freezePeriod);
     }
 
     /*
      *  Helper: computes the time when the request will be frozen until execution.
      */
-    function firstClaimBlock(ExecutionWindow storage self) returns (uint) {
+    function firstClaimBlock(ExecutionWindow storage self) 
+        view returns (uint)
+    {
         return freezeStart(self).sub(self.claimWindowSize);
     }
 
@@ -136,12 +146,19 @@ library RequestScheduleLib {
     }
 
     /*
-     *  Helper: Returns boolean if we are inside the claim window.
+     * @dev Helper: Returns boolean if we are inside the claim window.
      */
-    function inClaimWindow(ExecutionWindow storage self) returns (bool) {
-        return firstClaimBlock(self) <= getNow(self) && getNow(self) < freezeStart(self);
+    function inClaimWindow(ExecutionWindow storage self) 
+        view returns (bool)
+    {
+        // DEBUG(firstClaimBlock(self));
+        // DEBUG(getNow(self));
+        assert(firstClaimBlock(self) <= getNow(self));
+        assert(getNow(self) < freezeStart(self));
+        return true;
     }
 
+    event DEBUG(uint num);
     /*
      *  Helper: Returns boolean if we are before the freeze period.
      */
