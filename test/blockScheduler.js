@@ -13,7 +13,7 @@ const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 /// Brings in config.web3...
 let config = require("../config");
 
-contract('BlockScheduler', function(accounts) {
+contract('Block scheduling', function(accounts) {
     const Owner = accounts[0]
     const User1 = accounts[1]
     const User2 = accounts[2]
