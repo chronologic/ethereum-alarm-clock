@@ -53,7 +53,7 @@ contract('Block Claiming', (accounts) => {
         let blockNumber = await config.web3.eth.getBlockNumber();
         let firstClaimBlock = blockNumber - claimWindowSize;
 
-        assert(firstClaimBlock < blockNumber, "The first claim block should be before current block.");
+        assert(firstClaimBlock > blockNumber, "The first claim block should be after current block.");
 
     });
 });

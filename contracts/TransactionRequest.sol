@@ -8,7 +8,7 @@ import "contracts/Interface/TransactionRequestInterface.sol";
 contract TransactionRequest is TransactionRequestInterface {
     using RequestLib for RequestLib.Request;
 
-    RequestLib.Request private txnRequest; // TODO: Public? This is a data struct
+    RequestLib.Request txnRequest; // TODO: Public? This is a data struct
 
     /*
      *  addressArgs[0] - meta.owner
@@ -25,12 +25,11 @@ contract TransactionRequest is TransactionRequestInterface {
      *  uintArgs[6]  - schedule.windowStart
      *  uintArgs[8]  - txnData.callGas
      *  uintArgs[9]  - txnData.callValue
-     *  uintArgs[10] - txnData.requiredStackDepth
      */
     function TransactionRequest(address[4] addressArgs,
-                                uint[11] uintArgs,
+                                uint[10] uintArgs,
                                 bytes32 callData)
-        payable
+        public payable
     {
         txnRequest.initialize(addressArgs, uintArgs, callData);
     }
@@ -45,25 +44,27 @@ contract TransactionRequest is TransactionRequestInterface {
      *  Actions
      */
     function execute() public returns (bool) {
-        return txnRequest.execute();
+        require(txnRequest.execute());
+        return true;
+        // return txnRequest.execute();
     }
 
     function cancel() public returns (bool) {
         return txnRequest.cancel();
     }
 
-    function claim() public returns (bool) {
+    function claim() public payable returns (bool) {
         return txnRequest.claim();
     }
 
     /*
      *  Data accessor functions.
      */
-    //
-    //  TODO: figure out why returning RequestLib.serialize() isn't working.
-    // TODO: Figure out this todo
+     
+    // TODO: figure out why returning RequestLib.serialize() isn't working.
+    // FIXME: This needs to bubble up an event with all this data instead.
     function requestData() 
-        public constant returns (address[6], bool[3], uint[15], uint8[1])
+        public returns (address[6], bool[3], uint[14], uint8[1])
     {
         if (txnRequest.serialize()) {
             return (
@@ -77,7 +78,7 @@ contract TransactionRequest is TransactionRequestInterface {
         }
     }
 
-    function callData() public constant returns (bytes32) {
+    function callData() public view returns (bytes32) {
         return txnRequest.txnData.callData;
     }
 
@@ -97,6 +98,6 @@ contract TransactionRequest is TransactionRequestInterface {
     }
 
     function sendOwnerEther() public returns (bool) {
-        return txnRequest.sendOwnerEther(0);
+        return txnRequest.sendOwnerEther();
     }
 }

@@ -66,7 +66,7 @@ possible that your transaction will not be executed at all.
 
 In an ideal situation, there is a sufficient volume of scheduled transactions
 that operating a server to execute these transactions is a profitable endeavor.
-The reality is that I operate between 3-5 execution servers dedicated filling
+The reality is that I operate between 3-5 execution servers dedicated to filling
 this role until there is sufficient volume that I am confident I can turn those
 servers off or until it is no longer feasible for me to continue paying their
 costs.

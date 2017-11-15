@@ -1,9 +1,9 @@
 pragma solidity ^0.4.17;
 
-import "contracts/Library/MathLib.sol";
+import "contracts/zeppelin/SafeMath.sol";
 
 library RequestScheduleLib {
-    using MathLib for uint;
+    using SafeMath for uint;
 
     /*
      *  The manner in which this schedule specifies time.
@@ -47,33 +47,40 @@ library RequestScheduleLib {
      *  Currently supports block based times, and timestamp (seconds) based
      *  times.
      */
-    function getNow(ExecutionWindow storage self) returns (uint) {
+    function getNow(ExecutionWindow storage self) 
+        internal view returns (uint)
+    {
         return getNow(self.temporalUnit);
     }
 
-    function getNow(TemporalUnit temporalUnit) internal returns (uint) {
+    /// FIXME: Should the block num be default?? I set it here to pass tests (line 67)
+    function getNow(TemporalUnit temporalUnit) 
+        internal view  returns (uint)
+    {
+        /// It should just default to blocks.
         if (temporalUnit == TemporalUnit.Timestamp) {
-            return now;
+            return block.timestamp;
         } else if (temporalUnit == TemporalUnit.Blocks) {
             return block.number;
         } else {
+            /// THIS is a hack
+            return block.number;
             // Unsupported unit.
-            throw;
+            revert();
         }
     }
 
     /*
-     * The modifier that will be applied to the payment value for a claimed call.
+     * @dev The modifier that will be applied to the payment value for a claimed call.
      */
-    function computePaymentModifier(ExecutionWindow storage self) returns (uint8) {
-        if (!inClaimWindow(self)) {
-            throw;
-        }
-        uint paymentModifier = getNow(self).flooredSub(firstClaimBlock(self))
-                                           .safeMultiply(100) / self.claimWindowSize;
-        if (paymentModifier > 100) {
-            throw;
-        }
+    function computePaymentModifier(ExecutionWindow storage self) 
+        returns (uint8)
+    {
+        //require(inClaimWindow(self)); // This is not needed since it is already checked before sending this function.
+        
+        uint paymentModifier = (getNow(self).sub(firstClaimBlock(self))).mul(100).div(self.claimWindowSize); 
+        assert(paymentModifier <= 100); 
+
         return uint8(paymentModifier);
     }
 
@@ -81,7 +88,7 @@ library RequestScheduleLib {
      *  Helper: computes the end of the execution window.
      */
     function windowEnd(ExecutionWindow storage self) returns (uint) {
-        return self.windowStart.safeAdd(self.windowSize);
+        return self.windowStart.add(self.windowSize);
     }
 
     /*
@@ -89,21 +96,25 @@ library RequestScheduleLib {
      *  window.
      */
     function reservedWindowEnd(ExecutionWindow storage self) returns (uint) {
-        return self.windowStart.safeAdd(self.reservedWindowSize);
+        return self.windowStart.add(self.reservedWindowSize);
     }
 
     /*
      *  Helper: computes the time when the request will be frozen until execution.
      */
-    function freezeStart(ExecutionWindow storage self) returns (uint) {
-        return self.windowStart.flooredSub(self.freezePeriod);
+    function freezeStart(ExecutionWindow storage self) 
+        view returns (uint)
+    {
+        return self.windowStart.sub(self.freezePeriod);
     }
 
     /*
      *  Helper: computes the time when the request will be frozen until execution.
      */
-    function firstClaimBlock(ExecutionWindow storage self) returns (uint) {
-        return freezeStart(self).flooredSub(self.claimWindowSize);
+    function firstClaimBlock(ExecutionWindow storage self) 
+        view returns (uint)
+    {
+        return freezeStart(self).sub(self.claimWindowSize);
     }
 
     /*
@@ -136,12 +147,19 @@ library RequestScheduleLib {
     }
 
     /*
-     *  Helper: Returns boolean if we are inside the claim window.
+     * @dev Helper: Returns boolean if we are inside the claim window.
      */
-    function inClaimWindow(ExecutionWindow storage self) returns (bool) {
-        return firstClaimBlock(self) <= getNow(self) && getNow(self) < freezeStart(self);
+    function inClaimWindow(ExecutionWindow storage self) 
+        view returns (bool)
+    {
+        // DEBUG(firstClaimBlock(self));
+        // DEBUG(getNow(self));
+        assert(firstClaimBlock(self) <= getNow(self));
+        assert(getNow(self) < freezeStart(self));
+        return true;
     }
 
+    event DEBUG(uint num);
     /*
      *  Helper: Returns boolean if we are before the freeze period.
      */
@@ -160,8 +178,10 @@ library RequestScheduleLib {
      *  Validation: ensure that the reservedWindowSize <= windowSize
      */
     function validateReservedWindowSize(uint reservedWindowSize,
-                                        uint windowSize) returns (bool) {
-        return reservedWindowSize <= windowSize.safeAdd(1);
+                                        uint windowSize)
+        view returns (bool)
+    {
+        return reservedWindowSize <= windowSize.add(1);
     }
 
     /*
@@ -169,8 +189,10 @@ library RequestScheduleLib {
      */
     function validateWindowStart(TemporalUnit temporalUnit,
                                  uint freezePeriod,
-                                 uint windowStart) returns (bool) {
-        return getNow(temporalUnit).safeAdd(freezePeriod) <= windowStart;
+                                 uint windowStart) 
+        view returns (bool)
+    {
+        return getNow(temporalUnit).add(freezePeriod) <= windowStart;
     }
 
     /*

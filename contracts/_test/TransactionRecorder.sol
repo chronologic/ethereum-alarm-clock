@@ -1,26 +1,24 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.17;
 
-
+//// @dev This contract is okay to use bytes and not bytes32
+////       because, we can read bytes from javascript, but not
+////       from Solidity.
 contract TransactionRecorder {
     address owner;
 
     bool public wasCalled;
-
     uint public lastCallValue;
-
     address public lastCaller;
-
-    bytes32 public lastCallData;
-
+    bytes public lastCallData = "";
     uint public lastCallGas;
 
     function TransactionRecorder() {
         owner = msg.sender;
     }
 
-    function() {
+    function() payable {
         lastCallGas = msg.gas;
-//        lastCallData = msg.data;
+        lastCallData = msg.data;
         lastCaller = msg.sender;
         lastCallValue = msg.value;
         wasCalled = true;
@@ -28,14 +26,14 @@ contract TransactionRecorder {
 
     function __reset__() public {
         lastCallGas = 0;
-        lastCallData = '';
+        lastCallData = "";
         lastCaller = 0x0;
         lastCallValue = 0;
         wasCalled = false;
     }
 
     function kill() public {
-        if (msg.sender != owner) throw;
+        require(msg.sender == owner);
         selfdestruct(owner);
     }
 }

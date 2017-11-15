@@ -1,12 +1,9 @@
 pragma solidity ^0.4.17;
 
-import "contracts/_deprecate/SafeSendLib.sol";
-import "contracts/Library/MathLib.sol";
-
+import 'contracts/zeppelin/SafeMath.sol';
 
 library ClaimLib {
-    using SafeSendLib for address;
-    using MathLib for uint;
+    using SafeMath for uint;
 
     struct ClaimData {
         // The address that has claimed this request
@@ -43,28 +40,22 @@ library ClaimLib {
      * Amount that must be supplied as a deposit to claim.  This is set to the
      * maximum possible payment value that could be paid out by this request.
      */
-    function minimumDeposit(uint payment) returns (uint) {
-        return payment.safeMultiply(2);
+    function minimumDeposit(uint payment) pure returns (uint) {
+        return payment.mul(2);
     }
 
     /*
-     * Refund the claimer deposit.
+     * @dev Refund the claimer deposit.
      */
     function refundDeposit(ClaimData storage self) returns (bool) {
-        return refundDeposit(self, SafeSendLib.DEFAULT_SEND_GAS());
-    }
-
-    function refundDeposit(ClaimData storage self, uint sendGas) returns (bool) {
         uint depositAmount;
 
         depositAmount = self.claimDeposit;
         if (depositAmount > 0) {
-            // re-entrance protection.
             self.claimDeposit = 0;
-            self.claimDeposit = depositAmount.flooredSub(self.claimedBy.safeSend(depositAmount,
-                                                                                 sendGas));
-        }
 
+            self.claimedBy.transfer(depositAmount);
+        }
         return true;
     }
 }

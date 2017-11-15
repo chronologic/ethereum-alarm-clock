@@ -36,17 +36,9 @@ let ExecutionLib = contract(_.pick(require("../build/contracts/ExecutionLib.json
 ExecutionLib.setProvider(provider);
 ExecutionLib.defaults(contractDefaults);
 
-let Digger = contract(_.pick(require("../build/contracts/Digger.json"), properties));
-Digger.setProvider(provider);
-Digger.defaults(contractDefaults);
-
 let RequestMetaLib = contract(_.pick(require("../build/contracts/RequestMetaLib.json"), properties));
 RequestMetaLib.setProvider(provider);
 RequestMetaLib.defaults(contractDefaults);
-
-let SafeSendLib = contract(_.pick(require("../build/contracts/SafeSendLib.json"), properties));
-SafeSendLib.setProvider(provider);
-SafeSendLib.defaults(contractDefaults);
 
 let ClaimLib = contract(_.pick(require("../build/contracts/ClaimLib.json"), properties));
 ClaimLib.setProvider(provider);
@@ -96,6 +88,7 @@ module.exports      = nconf;
 module.exports.web3 = web3;
 
 module.exports.contracts = {
+<<<<<<< HEAD
     MathLib: MathLib,
     GroveLib: GroveLib,
     IterTools: IterTools,
@@ -113,4 +106,22 @@ module.exports.contracts = {
     RequestTracker: RequestTracker,
     TransactionRequest: TransactionRequest,
     RequestFactory: RequestFactory
+=======
+MathLib: MathLib,
+GroveLib: GroveLib,
+IterTools: IterTools,
+ExecutionLib: ExecutionLib,
+RequestMetaLib: RequestMetaLib,
+ClaimLib: ClaimLib,
+PaymentLib: PaymentLib,
+RequestScheduleLib: RequestScheduleLib,
+RequestLib: RequestLib,
+SchedulerLib: SchedulerLib,
+BaseScheduler: BaseScheduler,
+BlockScheduler: BlockScheduler,
+TimestampScheduler: TimestampScheduler,
+RequestTracker: RequestTracker,
+TransactionRequest: TransactionRequest,
+RequestFactory: RequestFactory
+>>>>>>> dev
 };

@@ -1,14 +1,13 @@
 pragma solidity ^0.4.17;
 
-import "contracts/_deprecate/SafeSendLib.sol";
-
 import "contracts/Library/ClaimLib.sol";
 import "contracts/Library/ExecutionLib.sol";
-import "contracts/Library/MathLib.sol";
 import "contracts/Library/PaymentLib.sol";
 import "contracts/Library/RequestMetaLib.sol";
 import "contracts/Library/RequestScheduleLib.sol";
 
+import "contracts/Library/MathLib.sol";
+import "contracts/zeppelin/SafeMath.sol";
 
 library RequestLib {
     using ExecutionLib for ExecutionLib.ExecutionData;
@@ -16,8 +15,7 @@ library RequestLib {
     using ClaimLib for ClaimLib.ClaimData;
     using RequestMetaLib for RequestMetaLib.RequestMeta;
     using PaymentLib for PaymentLib.PaymentData;
-    using SafeSendLib for address;
-    using MathLib for uint;
+    using SafeMath for uint;
 
     /*
      *  This struct exists to circumvent an issue with returning multiple
@@ -28,7 +26,7 @@ library RequestLib {
     struct SerializedRequest {
         address[6] addressValues;
         bool[3] boolValues;
-        uint[15] uintValues;
+        uint[14] uintValues;
         uint8[1] uint8Values;
     }
 
@@ -42,13 +40,13 @@ library RequestLib {
     }
 
     enum AbortReason {
-        WasCancelled,
-        AlreadyCalled,
-        BeforeCallWindow,
-        AfterCallWindow,
-        ReservedForClaimer,
-        StackTooDeep,
-        InsufficientGas
+        WasCancelled, //0
+        AlreadyCalled, //1
+        BeforeCallWindow, //2
+        AfterCallWindow, //3
+        ReservedForClaimer, //4
+        StackTooDeep, //5 - DEPRECATED
+        InsufficientGas //6
     }
 
     event Cancelled(uint rewardPayment, uint measuredGasConsumption);
@@ -63,10 +61,10 @@ library RequestLib {
      *  Validate the initialization parameters for a transaction request.
      */
     function validate(address[4] addressArgs,
-                      uint[11] uintArgs,
+                      uint[10] uintArgs,
                       bytes32 callData,
                       uint endowment) 
-        public returns (bool[7] is_valid)
+        public returns (bool[6] is_valid)
     {
         Request memory request;
 
@@ -97,12 +95,11 @@ library RequestLib {
         request.schedule.freezePeriod = uintArgs[3];
         request.schedule.reservedWindowSize = uintArgs[4];
         // This must be capped at 1 or it throws an exception.
-        request.schedule.temporalUnit = RequestScheduleLib.TemporalUnit(uintArgs[5].min(2));
+        request.schedule.temporalUnit = RequestScheduleLib.TemporalUnit(MathLib.min(uintArgs[5], 2));
         request.schedule.windowSize = uintArgs[6];
         request.schedule.windowStart = uintArgs[7];
         request.txnData.callGas = uintArgs[8];
         request.txnData.callValue = uintArgs[9];
-        request.txnData.requiredStackDepth = uintArgs[10];
 
         // Uint8 values
         request.claimData.paymentModifier = 0;
@@ -114,7 +111,6 @@ library RequestLib {
                                                    request.paymentData.donation,
                                                    request.txnData.callGas,
                                                    request.txnData.callValue,
-                                                   request.txnData.requiredStackDepth,
                                                    _EXECUTION_GAS_OVERHEAD);
         is_valid[1] = RequestScheduleLib.validateReservedWindowSize(request.schedule.reservedWindowSize,
                                                                     request.schedule.windowSize);
@@ -122,10 +118,9 @@ library RequestLib {
         is_valid[3] = RequestScheduleLib.validateWindowStart(request.schedule.temporalUnit,
                                                              request.schedule.freezePeriod,
                                                              request.schedule.windowStart);
-        is_valid[4] = ExecutionLib.validateRequiredStackDepth(request.txnData.requiredStackDepth);
-        is_valid[5] = ExecutionLib.validateCallGas(request.txnData.callGas,
+        is_valid[4] = ExecutionLib.validateCallGas(request.txnData.callGas,
                                                    _EXECUTION_GAS_OVERHEAD);
-        is_valid[6] = ExecutionLib.validateToAddress(request.txnData.toAddress);
+        is_valid[5] = ExecutionLib.validateToAddress(request.txnData.toAddress);
 
         return is_valid;
     }
@@ -135,7 +130,7 @@ library RequestLib {
      */
     function initialize(Request storage self,
                         address[4] addressArgs,
-                        uint[11] uintArgs,
+                        uint[10] uintArgs,
                         bytes32 callData) 
         public returns (bool)
     {
@@ -150,7 +145,7 @@ library RequestLib {
 
         bool[3] memory boolValues = [false, false, false];
 
-        uint[15] memory uintValues = [
+        uint[14] memory uintValues = [
             0,               // self.claimData.claimDeposit
             tx.gasprice,     // self.paymentData.anchorGasPrice
             uintArgs[0],     // self.paymentData.donation
@@ -164,8 +159,7 @@ library RequestLib {
             uintArgs[6],     // self.schedule.windowSize
             uintArgs[7],     // self.schedule.windowStart
             uintArgs[8],     // self.txnData.callGas
-            uintArgs[9],     // self.txnData.callValue
-            uintArgs[10]     // self.txnData.requiredStackDepth
+            uintArgs[9]     // self.txnData.callValue
         ];
 
         uint8[1] memory uint8Values = [
@@ -220,7 +214,6 @@ library RequestLib {
         self.serializedValues.uintValues[11] = self.schedule.windowStart;
         self.serializedValues.uintValues[12] = self.txnData.callGas;
         self.serializedValues.uintValues[13] = self.txnData.callValue;
-        self.serializedValues.uintValues[14] = self.txnData.requiredStackDepth;
 
         // Uint8 values
         self.serializedValues.uint8Values[0] = self.claimData.paymentModifier;
@@ -236,7 +229,7 @@ library RequestLib {
     function deserialize(Request storage self,
                          address[6] addressValues,
                          bool[3] boolValues,
-                         uint[15] uintValues,
+                         uint[14] uintValues,
                          uint8[1] uint8Values,
                          bytes32 callData)
         internal returns (bool) // TODO public or internal?
@@ -272,7 +265,6 @@ library RequestLib {
         self.schedule.windowStart = uintValues[11];
         self.txnData.callGas = uintValues[12];
         self.txnData.callValue = uintValues[13];
-        self.txnData.requiredStackDepth = uintValues[14];
 
         // Uint8 values
         self.claimData.paymentModifier = uint8Values[0];
@@ -325,13 +317,13 @@ library RequestLib {
          *  3. Send remaining ether back to owner.
          *
          */
-        var startGas = msg.gas;
+        uint startGas = msg.gas;
 
         // +----------------------+
         // | Begin: Authorization |
         // +----------------------+
 
-        if (msg.gas < requiredExecutionGas(self).flooredSub(_PRE_EXECUTION_GAS)) {
+        if (msg.gas < requiredExecutionGas(self).sub(_PRE_EXECUTION_GAS)) {
             Aborted(uint8(AbortReason.InsufficientGas));
             return false;
         } else if (self.meta.wasCalled) {
@@ -352,12 +344,8 @@ library RequestLib {
             Aborted(uint8(AbortReason.ReservedForClaimer));
             return false;
         }
-        //else if (msg.sender != tx.origin && !self.txnData.stackCanBeExtended()) {
-        //    Aborted(uint8(AbortReason.StackTooDeep));
-        //    return false;
-        //}
-        // ABOVE NO LONGER NEEDED
 
+        DEBUG("After auth");
         // +--------------------+
         // | End: Authorization |
         // +--------------------+
@@ -371,6 +359,7 @@ library RequestLib {
         // Send the transaction
         self.meta.wasSuccessful = self.txnData.sendTransaction();
 
+        DEBUG("Made it up to here");
         // +----------------+
         // | End: Execution |
         // +----------------+
@@ -381,40 +370,46 @@ library RequestLib {
         // Compute the donation amount
         if (self.paymentData.hasBenefactor()) {
             self.paymentData.donationOwed = self.paymentData.getDonation()
-                                                            .safeAdd(self.paymentData.donationOwed);
+                                                            .add(self.paymentData.donationOwed);
         }
 
+        DEBUG("The above function is untested");
+
         // record this so that we can log it later.
-        var totalDonationPayment = self.paymentData.donationOwed;
+        uint totalDonationPayment = self.paymentData.donationOwed;
 
         // Send the donation.
         self.paymentData.sendDonation();
 
+        DEBUG("Up to here works");
+
         // Compute the payment amount and who it should be sent do.
         self.paymentData.paymentBenefactor = msg.sender;
         if (self.claimData.isClaimed()) {
-            self.paymentData.paymentOwed = self.claimData.claimDeposit.safeAdd(self.paymentData.paymentOwed);
+            self.paymentData.paymentOwed = self.claimData.claimDeposit.add(self.paymentData.paymentOwed);
             // need to zero out the claim deposit since it is now accounted for
             // in the paymentOwed value.
             self.claimData.claimDeposit = 0;
             self.paymentData.paymentOwed = self.paymentData.getPaymentWithModifier(self.claimData.paymentModifier)
-                                                           .safeAdd(self.paymentData.paymentOwed);
+                                                           .add(self.paymentData.paymentOwed);
         } else {
             self.paymentData.paymentOwed = self.paymentData.getPayment()
-                                                           .safeAdd(self.paymentData.paymentOwed);
+                                                           .add(self.paymentData.paymentOwed);
         }
+        DEBUG("Up to here works");
 
         // Record the amount of gas used by execution.
-        uint measuredGasConsumption = startGas.flooredSub(msg.gas).safeAdd(_EXECUTE_EXTRA_GAS);
+        uint measuredGasConsumption = startGas.sub(msg.gas).add(_EXECUTE_EXTRA_GAS);
 
-        // +----------------------------------------------------------------------+
-        // | NOTE: All code after this must be accounted for by EXECUTE_EXTRA_GAS |
-        // +----------------------------------------------------------------------+
+        // // +----------------------------------------------------------------------+
+        // // | NOTE: All code after this must be accounted for by EXECUTE_EXTRA_GAS |
+        // // +----------------------------------------------------------------------+
 
         // Add the gas reimbursment amount to the payment.
-        self.paymentData.paymentOwed = measuredGasConsumption.safeMultiply(tx.gasprice)
-                                                             .safeAdd(self.paymentData.paymentOwed);
+        self.paymentData.paymentOwed = measuredGasConsumption.mul(tx.gasprice)
+                                                             .add(self.paymentData.paymentOwed);
 
+        DEBUG("Up to here works");
         // Log the two payment amounts.  Otherwise it is non-trivial to figure
         // out how much was payed.
         Executed(self.paymentData.paymentOwed,
@@ -422,8 +417,15 @@ library RequestLib {
                  measuredGasConsumption);
 
         // Send the payment.
+<<<<<<< HEAD
         // FIXME: no more pushes for payments. client needs to call
         self.paymentData.sendPayment();
+=======
+        //FIXME: NO MORE PUSHES FOR PAYMENTS, CLIENTS MUST CALL
+        // self.paymentData.sendPayment();
+
+        DEBUG("Here");
+>>>>>>> dev
 
         // Send all extra ether back to the owner.
         sendOwnerEther(self);
@@ -434,6 +436,8 @@ library RequestLib {
 
         return true;
     }
+
+    event DEBUG(string _msg);
 
     // This is the amount of gas that it takes to enter from the
     // `TransactionRequest.execute()` contract into the `RequestLib.execute()`
@@ -449,13 +453,13 @@ library RequestLib {
     function requiredExecutionGas(Request storage self) 
         public returns (uint)
     {
-        var requiredGas = self.txnData.callGas.safeAdd(_EXECUTION_GAS_OVERHEAD);
+        var requiredGas = self.txnData.callGas.add(_EXECUTION_GAS_OVERHEAD);
 
-        if (msg.sender != tx.origin) {
-            var stackCheckGas = ExecutionLib.GAS_PER_DEPTH()
-                                            .safeMultiply(self.txnData.requiredStackDepth);
-            requiredGas = requiredGas.safeAdd(stackCheckGas);
-        }
+        // if (msg.sender != tx.origin) {
+        //     var stackCheckGas = ExecutionLib.GAS_PER_DEPTH()
+        //                                     .mul(self.txnData.requiredStackDepth);
+        //     requiredGas = requiredGas.add(stackCheckGas);
+        // }
 
         return requiredGas;
     }
@@ -477,7 +481,7 @@ library RequestLib {
      *  The amount of gas used by the portion of the `execute` function
      *  that cannot be accounted for via gas tracking.
      */
-    uint private constant  _EXECUTE_EXTRA_GAS = 90000; // Check accuracy
+    uint private constant  _EXECUTE_EXTRA_GAS = 90000; // Same... Doubled this from Piper's original - Logan
 
     function EXECUTE_EXTRA_GAS() 
         public constant returns (uint)
@@ -533,10 +537,11 @@ library RequestLib {
         uint rewardPayment;
         uint measuredGasConsumption;
 
-        if (!isCancellable(self)) {
-            // revert(); ?
-            return false;
-        }
+        require(isCancellable(self));
+        // if (!isCancellable(self)) {
+        //     // revert(); ?
+        //     return false;
+        // }
 
         // set this here to prevent re-entrance attacks.
         self.meta.isCancelled = true;
@@ -553,13 +558,13 @@ library RequestLib {
             // should really be done with `rewardBenefactor` and `rewardOwed`
             // fields.
             self.paymentData.paymentBenefactor = msg.sender;
-            self.paymentData.paymentOwed = self.paymentData.paymentOwed.safeAdd(
-                self.paymentData.payment.safeMultiply(self.paymentData.getMultiplier()) / 100 / 100
+            self.paymentData.paymentOwed = self.paymentData.paymentOwed.add(
+                self.paymentData.payment.mul(self.paymentData.getMultiplier()) / 100 / 100
             );
-            measuredGasConsumption = startGas.flooredSub(msg.gas)
-                                             .safeAdd(_CANCEL_EXTRA_GAS);
-            self.paymentData.paymentOwed = measuredGasConsumption.safeMultiply(tx.gasprice)
-                                                                 .safeAdd(self.paymentData.paymentOwed);
+            measuredGasConsumption = startGas.sub(msg.gas)
+                                             .add(_CANCEL_EXTRA_GAS);
+            self.paymentData.paymentOwed = measuredGasConsumption.mul(tx.gasprice)
+                                                                 .add(self.paymentData.paymentOwed);
             // take note of the reward payment so we can log it.
             rewardPayment = self.paymentData.paymentOwed;
 
@@ -580,17 +585,14 @@ library RequestLib {
     function isClaimable(Request storage self) 
         public returns (bool)
     {
-        if (self.claimData.isClaimed()) {
-            return false;
-        } else if (self.meta.isCancelled) {
-            return false;
-        } else if (!self.schedule.inClaimWindow()) {
-            return false;
-        } else if (msg.value < ClaimLib.minimumDeposit(self.paymentData.payment)) {
-            return false;
-        } else {
-            return true;
-        }
+        /// Require not claimed and not cancelled.
+        // require(!self.claimData.isClaimed());
+        // require(!self.meta.isCancelled);
+
+        // Require that it's in the claim window and the value sent is over the min deposit.
+        require(self.schedule.inClaimWindow());
+        // require(msg.value > ClaimLib.minimumDeposit(self.paymentData.payment));
+        return true;
     }
 
     /*
@@ -599,12 +601,7 @@ library RequestLib {
     function claim(Request storage self) 
         public returns (bool)
     {
-        if (!isClaimable(self)) {
-            if (msg.sender.sendOrThrow(msg.value)) {    // TODO: change this to transfer
-                return false;
-            }
-            revert();
-        }
+        require(isClaimable(self));
         self.claimData.claim(self.schedule.computePaymentModifier());
         Claimed();
         return true;
@@ -617,7 +614,7 @@ library RequestLib {
         public returns (bool)
     {
         if (self.meta.isCancelled || self.schedule.isAfterWindow()) {
-            return self.claimData.refundDeposit(0);
+            return self.claimData.refundDeposit();
         }
         return false;
     }
@@ -629,7 +626,7 @@ library RequestLib {
         public returns (bool)
     {
         if (self.schedule.isAfterWindow()) {
-            return self.paymentData.sendDonation(0);
+            return self.paymentData.sendDonation();
         }
         return false;
     }
@@ -641,29 +638,21 @@ library RequestLib {
         public returns (bool)
     {
         if (self.schedule.isAfterWindow()) {
-            return self.paymentData.sendPayment(0);
+            return self.paymentData.sendPayment();
         }
         return false;
     }
 
-    /*
-     * Send all extra ether in the request contract back to the owner.
-     */
     function sendOwnerEther(Request storage self) 
-        public returns (bool)
-    {
-        return sendOwnerEther(self, SafeSendLib.DEFAULT_SEND_GAS());
-    }
-
-    function sendOwnerEther(Request storage self, uint sendGas) 
         internal returns (bool)
     {
         if (self.meta.isCancelled || self.schedule.isAfterWindow()) {
-            var ownerRefund = this.balance.flooredSub(self.claimData.claimDeposit)
-                                          .flooredSub(self.paymentData.paymentOwed)
-                                          .flooredSub(self.paymentData.donationOwed);
-            var amountSent = self.meta.owner.safeSend(ownerRefund, sendGas);
-            return (ownerRefund == 0 || amountSent > 0);
+            var ownerRefund = this.balance.sub(self.claimData.claimDeposit)
+                                          .sub(self.paymentData.paymentOwed)
+                                          .sub(self.paymentData.donationOwed);
+            self.meta.owner.transfer(ownerRefund);
+            return true;
+            // return (ownerRefund == 0 || amountSent > 0);
         }
         return false;
     }
