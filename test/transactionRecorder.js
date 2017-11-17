@@ -1,30 +1,26 @@
-/**
- * Usecases from a client's perspective.
- */
-let should = require("should");
+require('chai')
+    .use(require('chai-as-promised'))
+    .should()  
 
-let RequestTracker      = artifacts.require("./RequestTracker.sol"),
-    RequestFactory      = artifacts.require("./RequestFactory.sol"),
-    RequestLib          = artifacts.require("./RequestLib.sol"),
-    PaymentLib          = artifacts.require("./PaymentLib.sol"),
-    TransactionRequest  = artifacts.require("./TransactionRequest.sol"),
-    TransactionRecorder = artifacts.require("./TransactionRecorder.sol");
+const expect = require('chai').expect
 
-let config = require("../../config");
+const TransactionRecorder = artifacts.require("./TransactionRecorder.sol");
+
+const config = require("../config");
 
 contract('Test TransactionRecorder', function(accounts) {
+    it("should send a transaction as specified", async function() {
 
-    it("should send a transaction as specified", async () => {
         let txRecorder = await TransactionRecorder.new();
 
-        let wasCalled     = await txRecorder.wasCalled();
-        let lastCaller    = await txRecorder.lastCaller();
+        let wasCalled = await txRecorder.wasCalled();
+        let lastCaller = await txRecorder.lastCaller();
         let lastCallValue = await txRecorder.lastCallValue();
-        let lastCallGas   = await txRecorder.lastCallGas();
-        let lastCallData  = await txRecorder.lastCallData();
+        let lastCallGas = await txRecorder.lastCallGas();
+        let lastCallData = await txRecorder.lastCallData();
 
-        (wasCalled).should.not.be.true();
-        (lastCaller).should.be.exactly('0x0000000000000000000000000000000000000000');
+        expect(wasCalled).to.be.false;
+        (lastCaller).should.equal('0x0000000000000000000000000000000000000000');
         (lastCallValue.toNumber()).should.equal(0);
         (lastCallGas.toNumber()).should.equal(0);
         (lastCallData).should.equal("0x");
@@ -43,8 +39,8 @@ contract('Test TransactionRecorder', function(accounts) {
         lastCallGas   = await txRecorder.lastCallGas();
         lastCallData  = await txRecorder.lastCallData();
 
-        (wasCalled).should.be.true();
-        (lastCaller).should.be.exactly(accounts[0]);
+        expect(wasCalled).to.be.true;        
+        (lastCaller).should.equal(accounts[0]);
 
         assert(wasCalled, "Should have been called.");
         assert(lastCaller === accounts[0], "Should have registered the correct address.");
@@ -57,6 +53,5 @@ contract('Test TransactionRecorder', function(accounts) {
         /// Here we take out the `0x` of the test call data in hex representation
         ///  and also remove the first 4 hex characters from the call data.
         assert(testCallData.slice(2) === lastCallData.slice(6), "The call data should be the same.");
-
     });
 });

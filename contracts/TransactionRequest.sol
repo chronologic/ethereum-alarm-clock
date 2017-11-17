@@ -67,6 +67,10 @@ contract TransactionRequest is TransactionRequestInterface {
         public returns (address[6], bool[3], uint[14], uint8[1])
     {
         if (txnRequest.serialize()) {
+            RequestData(txnRequest.serializedValues.addressValues,
+                        txnRequest.serializedValues.boolValues,
+                        txnRequest.serializedValues.uintValues,
+                        txnRequest.serializedValues.uint8Values);
             return (
                 txnRequest.serializedValues.addressValues,
                 txnRequest.serializedValues.boolValues,
@@ -78,6 +82,8 @@ contract TransactionRequest is TransactionRequestInterface {
         }
     }
 
+    event RequestData(address[6] addressArgs, bool[3] bools, uint[14] uintArgs, uint8[1] uint8Args);
+
     function callData() public view returns (bytes32) {
         return txnRequest.txnData.callData;
     }
@@ -85,8 +91,8 @@ contract TransactionRequest is TransactionRequestInterface {
     /*
      *  Pull based payment functions.
      */
-    function refundClaimDeposit() public returns (bool) {
-        return txnRequest.refundClaimDeposit();
+    function refundClaimDeposit() public {
+        txnRequest.refundClaimDeposit(); // Will revert() if cannot be called.
     }
 
     function sendDonation() public returns (bool) {

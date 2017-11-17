@@ -3,13 +3,15 @@ pragma solidity ^0.4.17;
 import "contracts/Library/RequestScheduleLib.sol";
 import "contracts/Library/SchedulerLib.sol";
 
-
+/**
+ * @title SchedulerInterface
+ * @dev The base contract that the higher contracts: BaseScheduler, BlockScheduler and TimestampScheduler all inherit from.
+ */
 contract SchedulerInterface {
     using SchedulerLib for SchedulerLib.FutureTransaction;
 
-    /// Public variables 
-    address public factoryAddress;
-    RequestScheduleLib.TemporalUnit public temporalUnit;
+    address public factoryAddress;                          // The RequestFactory address which produces requests for this scheduler.
+    RequestScheduleLib.TemporalUnit public temporalUnit;    // The TemporalUnit of this scheduler.
 
     /*
      * Local storage variable used to house the data for transaction
@@ -29,11 +31,14 @@ contract SchedulerInterface {
             futureTransaction.resetAsBlock();
         } else if (uint(temporalUnit) == 2) {
             futureTransaction.resetAsTimestamp();
-        // } else {
-        //     revert();
+        } else {
+            revert();
         }
         _;
     }
+
+    // function scheduleTxSimple
+    // function scheduleTxFull
 
     /*
      *  Full scheduling API exposing all fields.

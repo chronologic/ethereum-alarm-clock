@@ -6,11 +6,9 @@ library ClaimLib {
     using SafeMath for uint;
 
     struct ClaimData {
-        // The address that has claimed this request
-        address claimedBy;
+        address claimedBy;        // The address that has claimed this request.
 
-        // The deposit amount that was put down by the claimer.
-        uint claimDeposit;
+        uint claimDeposit;        // The deposit amount that was put down by the claimer.
 
         // TODO: add `requiredDeposit` and remove the hard-coding of the `2 *
         // payment` minimum deposit size.
@@ -21,7 +19,9 @@ library ClaimLib {
     }
 
     /*
-     * Mark the request as being claimed
+     * @dev Mark the request as being claimed.
+     * @param self The ClaimData that is being accessed.
+     * @param paymentModifier The payment modifier.
      */
     function claim(ClaimData storage self, uint8 paymentModifier) returns (bool) {
         self.claimedBy = msg.sender;
@@ -37,25 +37,29 @@ library ClaimLib {
     }
 
     /*
-     * Amount that must be supplied as a deposit to claim.  This is set to the
-     * maximum possible payment value that could be paid out by this request.
+     * @dev Calculates the amount that must be supplied as a deposit to claim.  
+     * This is set to the maximum possible payment value that could be paid out by this request.
      */
-    function minimumDeposit(uint payment) pure returns (uint) {
+    function minimumDeposit(uint payment) 
+        pure returns (uint)
+    {
         return payment.mul(2);
     }
 
     /*
      * @dev Refund the claimer deposit.
+     * Called in RequestLib's `cancel()` and `refundClaimDeposit()`
      */
-    function refundDeposit(ClaimData storage self) returns (bool) {
+    function refundDeposit(ClaimData storage self) 
+        internal returns (bool)
+    {
+        // Check that the claim deposit is non-zero.
+        assert( self.claimDeposit > 0 );
+
         uint depositAmount;
-
         depositAmount = self.claimDeposit;
-        if (depositAmount > 0) {
-            self.claimDeposit = 0;
 
-            self.claimedBy.transfer(depositAmount);
-        }
+        self.claimedBy.transfer(depositAmount);
         return true;
     }
 }

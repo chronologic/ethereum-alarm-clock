@@ -12,6 +12,6 @@ contract RequestFactoryInterface {
                                    uint endowment) internal returns (bool[6]);
     function createValidatedRequest(address[3] addressArgs,
                                     uint[10] uintArgs,
-                                    bytes32 callData) payable returns (address);
+                                    bytes32 callData) public payable returns (address);
     function isKnownRequest(address _address) view returns (bool);
 }

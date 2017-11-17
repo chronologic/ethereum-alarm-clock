@@ -55,17 +55,14 @@ library RequestScheduleLib {
 
     /// FIXME: Should the block num be default?? I set it here to pass tests (line 67)
     function getNow(TemporalUnit temporalUnit) 
-        internal view  returns (uint)
+        internal view returns (uint)
     {
-        /// It should just default to blocks.
         if (temporalUnit == TemporalUnit.Timestamp) {
             return block.timestamp;
         } else if (temporalUnit == TemporalUnit.Blocks) {
             return block.number;
         } else {
-            /// THIS is a hack
-            return block.number;
-            // Unsupported unit.
+            // Unspecified OR unsupported unit.
             revert();
         }
     }

@@ -12,3 +12,5 @@ origContracts/
 node_modules/
 
 **/_build
+alarmClient
+alarmClient/*

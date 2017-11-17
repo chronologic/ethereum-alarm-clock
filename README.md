@@ -11,6 +11,8 @@ Source code for the [Ethereum Alarm Clock service](http://www.ethereum-alarm-clo
 
 _Tests are in the process of being ported over to ES6 JavaScript._
 
+Status : 8 / 19 tests ported over
+
 In progress ES6 test suite can be found in the test/ directory. Original Populus tests can be found in the tests/ directory.
 
 To run the test suite make sure you have a testrpc running and truffle v4.0.0 installed.

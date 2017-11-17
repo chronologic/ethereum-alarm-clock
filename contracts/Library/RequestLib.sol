@@ -122,8 +122,11 @@ library RequestLib {
                                                    _EXECUTION_GAS_OVERHEAD);
         is_valid[5] = ExecutionLib.validateToAddress(request.txnData.toAddress);
 
+        LogSwitches(is_valid);
         return is_valid;
     }
+
+    event LogSwitches(bool[6] switches);
 
     /*
      *  Initialize a new Request.
@@ -532,11 +535,7 @@ library RequestLib {
         uint rewardPayment;
         uint measuredGasConsumption;
 
-        require(isCancellable(self));
-        // if (!isCancellable(self)) {
-        //     // revert(); ?
-        //     return false;
-        // }
+        assert( isCancellable(self) );
 
         // set this here to prevent re-entrance attacks.
         self.meta.isCancelled = true;
@@ -581,12 +580,12 @@ library RequestLib {
         public returns (bool)
     {
         /// Require not claimed and not cancelled.
-        // require(!self.claimData.isClaimed());
-        // require(!self.meta.isCancelled);
+        require( !self.claimData.isClaimed() );
+        require( !self.meta.isCancelled );
 
         // Require that it's in the claim window and the value sent is over the min deposit.
-        require(self.schedule.inClaimWindow());
-        // require(msg.value > ClaimLib.minimumDeposit(self.paymentData.payment));
+        require( self.schedule.inClaimWindow() );
+        require( msg.value > ClaimLib.minimumDeposit(self.paymentData.payment) ); // minimumDeposit is * 2
         return true;
     }
 
@@ -596,22 +595,21 @@ library RequestLib {
     function claim(Request storage self) 
         public returns (bool)
     {
-        require(isClaimable(self));
+        require( isClaimable(self) );
+
         self.claimData.claim(self.schedule.computePaymentModifier());
         Claimed();
         return true;
     }
 
     /*
-     * Refund claimer deposit.
+     * @dev Refund claimer deposit.
      */
     function refundClaimDeposit(Request storage self)
-        public returns (bool)
+        public
     {
-        if (self.meta.isCancelled || self.schedule.isAfterWindow()) {
-            return self.claimData.refundDeposit();
-        }
-        return false;
+        assert( self.meta.isCancelled || self.schedule.isAfterWindow() );
+        assert( self.claimData.refundDeposit() );
     }
 
     /*
@@ -641,13 +639,14 @@ library RequestLib {
     function sendOwnerEther(Request storage self) 
         internal returns (bool)
     {
-        if (self.meta.isCancelled || self.schedule.isAfterWindow()) {
-            var ownerRefund = this.balance.sub(self.claimData.claimDeposit)
-                                          .sub(self.paymentData.paymentOwed)
-                                          .sub(self.paymentData.donationOwed);
+        assert( self.meta.isCancelled || self.schedule.isAfterWindow() );
+        uint ownerRefund = this.balance.sub(self.claimData.claimDeposit)
+                                        .sub(self.paymentData.paymentOwed)
+                                        .sub(self.paymentData.donationOwed);
+
+        if ( ownerRefund > 0 ) {
             self.meta.owner.transfer(ownerRefund);
             return true;
-            // return (ownerRefund == 0 || amountSent > 0);
         }
         return false;
     }

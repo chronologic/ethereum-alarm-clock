@@ -2,7 +2,6 @@ pragma solidity ^0.4.17;
 
 import "contracts/Library/ExecutionLib.sol";
 import "contracts/Library/MathLib.sol";
-
 import "contracts/zeppelin/SafeMath.sol";
 
 library PaymentLib {
@@ -148,19 +147,20 @@ library PaymentLib {
                               uint gasOverhead) 
         internal view returns (uint)
     {
+        uint gasPrice = tx.gasprice;
         return payment.add(donation)
                       .mul(2)
-                      .add(_computeHelper(callGas, callValue, gasOverhead));
+                      .add(_computeHelper(callGas, callValue, gasOverhead, gasPrice));
     }
 
     /// Was getting a stack depth error after replacing old MathLib with Zeppelin's SafeMath.
     ///  Added this function to fix it.
     ///  See for context: https://ethereum.stackexchange.com/questions/7325/stack-too-deep-try-removing-local-variables 
-    function _computeHelper(uint _callGas, uint _callValue, uint _gasOverhead)
-        internal view returns (uint)
+    function _computeHelper(uint _callGas, uint _callValue, uint _gasOverhead, uint _gasPrice)
+        internal pure returns (uint)
     {
-        return _callGas.mul(tx.gasprice).mul(2)
-                      .add(_gasOverhead.mul(tx.gasprice).mul(2))
+        return _callGas.mul(_gasPrice).mul(2)
+                      .add(_gasOverhead.mul(_gasPrice).mul(2))
                       .add(_callValue);
     }
     /*
@@ -179,11 +179,13 @@ library PaymentLib {
                                uint gasOverhead)
         view returns (bool)
     {
-        return true;
-        // return endowment >= computeEndowment(payment,
-        //                                      donation,
-        //                                      callGas,
-        //                                      callValue,
-        //                                      gasOverhead);
+        // return true;
+        Log(endowment);
+        return endowment >= computeEndowment(payment,
+                                             donation,
+                                             callGas,
+                                             callValue,
+                                             gasOverhead);
     }
+    event Log(uint num);
 }

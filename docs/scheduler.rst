@@ -70,7 +70,7 @@ arguments are passed in as an array.  The array values are mapped to the
 
 .. method:: Scheduler.scheduleTransaction(address toAddress, bytes callData, uint[4] uintArgs) returns (address)
 
-This method presents three extra fields allowing more fine controll for
+This method presents three extra fields allowing for more fine control of
 transaction scheduling.  Due to EVM restrictions, all of the unsigned integer
 arguments are passed in as an array.  The array values are mapped to the
 :class:`TransactionRequest` attributes as follows.

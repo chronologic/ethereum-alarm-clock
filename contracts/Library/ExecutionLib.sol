@@ -47,9 +47,8 @@ library ExecutionLib {
      function validateCallGas(uint callGas, uint EXTRA_GAS)
         internal view returns (bool)
     {
-         return true;
-         //callGas < CALL_GAS_CEILING(EXTRA_GAS);
-     }
+        return callGas < CALL_GAS_CEILING(EXTRA_GAS);
+    }
 
     /*
      * Validation: ensure that the toAddress is not set to the empty address.
@@ -57,6 +56,6 @@ library ExecutionLib {
      function validateToAddress(address toAddress)
         view returns (bool)
     {
-         return toAddress != 0x0;
+        return toAddress != 0x0;
     }
 }

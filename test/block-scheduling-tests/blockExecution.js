@@ -9,7 +9,7 @@ const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
 /// Brings in config.web3...
-const config = require("../config");
+const config = require("../../config");
 
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3);
 
@@ -44,7 +44,7 @@ contract('Block execution', async function(accounts) {
                 25, //claim window size
                 5, //freeze period
                 10, //reserved window size
-                0, // temporal unit
+                1, // temporal unit
                 executionWindow, //window size
                 windowStart, //windowStart
                 300000, //callGas

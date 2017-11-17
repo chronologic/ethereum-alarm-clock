@@ -274,7 +274,7 @@ before the *execution window* closes.
 
 So, to provide incentive to keep the gas cost reasonably low, the *gas
 multiplier* concept was introduced.  Simply put, the multiplier produces a
-number between 0 and 2 which is applid to the ``payment`` that will be sent for
+number between 0 and 2 which is applied to the ``payment`` that will be sent for
 fulfilling the request.
 
 At the time of scheduling, the ``gasPrice`` of the scheduling transaction is

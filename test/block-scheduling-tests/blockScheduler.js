@@ -11,7 +11,7 @@ const RequestTracker = artifacts.require('./RequestTracker.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
 /// Brings in config.web3...
-let config = require("../config");
+let config = require("../../config");
 
 contract('Block scheduling', function(accounts) {
     const Owner = accounts[0]
@@ -107,6 +107,7 @@ contract('Block scheduling', function(accounts) {
         expect(event.args.request).to.exist
     })
 
+    // This only passes because there is no value hard coded in.
     it('should do block scheduling with simplified args: legacy `scheduleTransaction`', async function() {
         let startBlockNum = await config.web3.eth.getBlockNumber()
         let windowStart = startBlockNum + 20
@@ -119,7 +120,7 @@ contract('Block scheduling', function(accounts) {
                                                                           255, //windowSize
                                                                           windowStart
                                                                       ],
-                                                                      {from: User1, value: config.web3.utils.toWei(10)}
+                                                                      {from: User1}
         )
 
         assert(scheduleTx.tx)
@@ -139,12 +140,13 @@ contract('Block scheduling', function(accounts) {
                                                                           255, //windowSize
                                                                           windowStart
                                                                       ],
-                                                                      {from: User1, value: config.web3.utils.toWei(10)}
+                                                                      {from: User1}
         )
 
         assert(scheduleTx.tx)
     })
 
+    // This only passes (fail) because of the hard coded value.
     it('should revert on invalid transaction', async function() {
         let lastBlock = await config.web3.eth.getBlockNumber()
         let windowStart = lastBlock + 20
@@ -153,12 +155,12 @@ contract('Block scheduling', function(accounts) {
         await blockScheduler.scheduleTransaction(transactionRecorder.address,
                                                                       'this-is-the-call-data',
                                                                       [
-                                                                          4e15, //callGas set crazy high
+                                                                          4e20, //callGas set crazy high
                                                                           123454321, //callValue
                                                                           0, //windowSize
                                                                           windowStart
                                                                       ],
-                                                                      {from: User2, value: config.web3.utils.toWei(10)}
+                                                                      {from: User2, value: config.web3.utils.toWei(10)} // this only fails because of the value
         ).should.be.rejectedWith('VM Exception while processing transaction: revert')
     })
 })

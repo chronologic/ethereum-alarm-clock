@@ -82,17 +82,17 @@ module.exports = function(deployer) {
     deployer.link(RequestLib, TransactionRequest);
     deployer.link(RequestScheduleLib, TransactionRequest);
     deployer.link(SafeMath, TransactionRequest);
-    deployer.deploy(TransactionRequest);
-
-    deployer.link(MathLib, RequestFactory);
-    deployer.link(RequestScheduleLib, RequestFactory);
-    deployer.link(IterTools, RequestFactory);
-    deployer.link(PaymentLib, RequestFactory);
-    deployer.link(RequestLib, RequestFactory);
-    deployer.link(RequestTracker, RequestFactory);
-    deployer.link(TransactionRequest, RequestFactory);
-    deployer.link(SafeMath, RequestFactory);
-    deployer.deploy(RequestFactory);
+    deployer.deploy(TransactionRequest).then(() => {
+        deployer.link(MathLib, RequestFactory);
+        deployer.link(RequestScheduleLib, RequestFactory);
+        deployer.link(IterTools, RequestFactory);
+        deployer.link(PaymentLib, RequestFactory);
+        deployer.link(RequestLib, RequestFactory);
+        deployer.link(RequestTracker, RequestFactory);
+        deployer.link(TransactionRequest, RequestFactory);
+        deployer.link(SafeMath, RequestFactory);
+        deployer.deploy(RequestFactory, RequestTracker.address);
+    })
 
     deployer.deploy(TransactionRecorder);
 

@@ -1,10 +1,13 @@
 pragma solidity ^0.4.17;
 
+import "contracts/Interface/RequestTrackerInterface.sol";
 import "contracts/Library/GroveLib.sol";
 import "contracts/Library/MathLib.sol";
 
-import "contracts/Interface/RequestTrackerInterface.sol";
-
+/**
+ * @title RequestTracker
+ * @dev The API for the GroveLib backend that keeps track of transaction requests.
+ */
 contract RequestTracker is RequestTrackerInterface {
     /*
      * testnet: 
@@ -17,21 +20,27 @@ contract RequestTracker is RequestTrackerInterface {
     /*
      * Returns the windowStart value for the given request.
      */
-    function getWindowStart(address factory, address request) view returns (uint) {
+    function getWindowStart(address factory, address request)
+        view returns (uint)
+    {
         return uint(requestsByAddress[factory].getNodeValue(bytes32(request)));
     }
 
     /*
      * Returns the request which comes directly before the given request.
      */
-    function getPreviousRequest(address factory, address request) view returns (address) {
+    function getPreviousRequest(address factory, address request)
+        view returns (address)
+    {
         return address(requestsByAddress[factory].getPreviousNode(bytes32(request)));
     }
 
     /*
      * Returns the request which comes directly after the given request.
      */
-    function getNextRequest(address factory, address request) view returns (address) {
+    function getNextRequest(address factory, address request)
+        view returns (address)
+    {
         return address(requestsByAddress[factory].getNextNode(bytes32(request)));
     }
 
@@ -39,7 +48,7 @@ contract RequestTracker is RequestTrackerInterface {
      * Add the given request.
      */
     function addRequest(address request, uint startWindow) 
-        returns (bool)
+        public returns (bool)
     {
         requestsByAddress[msg.sender].insert(bytes32(request), MathLib.safeCastSigned(startWindow));
         return true;
@@ -49,7 +58,7 @@ contract RequestTracker is RequestTrackerInterface {
      * Remove the given address from the index.
      */
     function removeRequest(address request)
-        returns (bool)
+        public returns (bool)
     {
         requestsByAddress[msg.sender].remove(bytes32(request));
         return true;
@@ -59,14 +68,18 @@ contract RequestTracker is RequestTrackerInterface {
      * Return boolean as to whether the given address is present for the given
      * factory.
      */
-    function isKnownRequest(address factory, address request) constant returns (bool) {
+    function isKnownRequest(address factory, address request)
+        view returns (bool)
+    {
         return requestsByAddress[factory].exists(bytes32(request));
     }
 
     /*
      * Query the index for the given factory.
      */
-    function query(address factory, bytes2 operator, uint value) constant returns (address) {
+    function query(address factory, bytes2 operator, uint value)
+        view returns (address)
+    {
         return address(requestsByAddress[factory].query(operator, MathLib.safeCastSigned(value)));
     }
 }
