@@ -11,7 +11,7 @@ const RequestTracker = artifacts.require('./RequestTracker.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
 /// Brings in config.web3...
-let config = require("../../config");
+let config = require("../../config")
 
 contract('Block scheduling', function(accounts) {
     const Owner = accounts[0]
