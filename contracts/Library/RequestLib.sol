@@ -359,8 +359,8 @@ library RequestLib {
         self.meta.wasCalled = true;
 
         // Send the transaction
-        // self.meta.wasSuccessful = self.txnData.sendTransaction();
-        // require( self.meta.wasSuccessful );
+        self.meta.wasSuccessful = self.txnData.sendTransaction();
+        require( self.meta.wasSuccessful );
 
         // +----------------+
         // | End: Execution |

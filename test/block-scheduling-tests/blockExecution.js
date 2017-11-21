@@ -9,7 +9,7 @@ const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
 /// Bring in config.web3 (v1.0.0)
-const config = require("../../config")
+const config = require('../../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3);
 
 contract('Block execution', async function(accounts) {
@@ -45,8 +45,8 @@ contract('Block execution', async function(accounts) {
                 1, // temporal unit
                 executionWindow, //window size
                 windowStart, //windowStart
-                300000, //callGas
-                12345 //callValue
+                200000, //callGas
+                0 //callValue
             ],
             'this-is-the-call-data'
         )
@@ -63,9 +63,13 @@ contract('Block execution', async function(accounts) {
         let res = await transactionRequest.claim({value: config.web3.utils.toWei(1)})
 
         /// Search for the claimed function and expect it to exist.
-        let claimed = res.logs.find(e => e.event === "Claimed")
+        let claimed = res.logs.find(e => e.event === 'Claimed')
         expect(claimed).to.exist
     })
+
+    /////////////
+    /// Tests ///
+    /////////////
 
     it('should reject the execution if its before the execution window', async function() {
         await waitUntilBlock(0, windowStart - 2)
@@ -85,7 +89,7 @@ contract('Block execution', async function(accounts) {
         await waitUntilBlock(0, windowStart)
 
         let res = await transactionRequest.execute({gas: 3000000})
-        let executed = res.logs.find(e => e.event === "Executed")
+        let executed = res.logs.find(e => e.event === 'Executed')
         expect(executed).to.exist
     })
 
@@ -93,7 +97,7 @@ contract('Block execution', async function(accounts) {
         await waitUntilBlock(0, windowStart + executionWindow -1)
 
         let res = await transactionRequest.execute({gas: 3000000})
-        let executed = res.logs.find(e => e.event === "Executed")
+        let executed = res.logs.find(e => e.event === 'Executed')
         expect(executed).to.exist
     })
 })

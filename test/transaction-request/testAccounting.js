@@ -9,7 +9,7 @@ const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
 /// Brings in config.web3 (v1.0.0)
-const config = require('../config')
+const config = require('../../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 const toBN = config.web3.utils.toBN
 
@@ -71,8 +71,8 @@ contract('Test accounting', async function(accounts) {
                 2, // temporalUnit
                 executionWindow,
                 windowStart,
-                43324, //callGas
-                12345  //callValue
+                2000000, //callGas
+                0  //callValue
             ],
             'some-call-data-goes-here',
             {from: accounts[0], value: config.web3.utils.toWei(1)}
@@ -130,7 +130,7 @@ contract('Test accounting', async function(accounts) {
         //         2, // temporalUnit
         //         executionWindow,
         //         windowStart,
-        //         43324, //callGas
+        //         2000000, //callGas
         //         12345  //callValue
         //     ],
         //     'some-call-data-goes-here',

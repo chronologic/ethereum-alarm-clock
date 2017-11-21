@@ -8,7 +8,7 @@ const expect = require('chai').expect
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
-// Bring in config.web3 
+// Bring in config.web3 (v1.0.0)
 const config = require('../../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 
@@ -57,8 +57,8 @@ contract('Timestamp execution', async function(accounts) {
                 2, // temporalUnit
                 executionWindow,
                 windowStart,
-                43324, //callGas
-                12345  //callValue
+                2000000, //callGas
+                0  //callValue
             ],
             'some-call-data-goes-here'
         )

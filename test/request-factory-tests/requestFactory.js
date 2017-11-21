@@ -10,8 +10,8 @@ const RequestLib = artifacts.require('./RequestLib.sol')
 const RequestTracker = artifacts.require('./RequestTracker.sol')
 const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 
-/// Brings in config.web3
-const config = require("../../config")
+/// Brings in config.web3 (v1.0.0)
+const config = require('../../config')
 const NULL_ADDR = '0x0000000000000000000000000000000000000000'
 
 /// Note - these tests were checked very well and should never be wrong.
@@ -57,12 +57,12 @@ contract('Request factory', async function(accounts) {
                 callGas,
                 callValue
             ],
-            "this-is-call-data",
+            'this-is-call-data',
             config.web3.utils.toWei(10) //endowment
         )
 
         /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === "LogSwitches")
+        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
         bools.args.switches.forEach((bool, index) => assert(bool === true, `Switch number ${index} didn't assert.`))
 
         /// Now let's set up a factory and launch the request.
@@ -93,17 +93,17 @@ contract('Request factory', async function(accounts) {
                 callGas,
                 callValue
             ],
-            "this-is-call-data"
+            'this-is-call-data'
         )
 
-        let event = createTx.logs.find(e => e.event === "RequestCreated")
+        let event = createTx.logs.find(e => e.event === 'RequestCreated')
         expect(event.args.request).to.exist
         
         /// Now let's create a transactionRequest instance
         let txRequest = await TransactionRequest.at(event.args.request)
         let requestData = await txRequest.requestData()
 
-        let logs = requestData.logs.find(e => e.event === "RequestData")
+        let logs = requestData.logs.find(e => e.event === 'RequestData')
         
         /// Assert correct address values
         let addressValues = logs.args.addressArgs
@@ -209,12 +209,12 @@ contract('Request factory', async function(accounts) {
                 callGas,
                 callValue
             ],
-            "this-is-call-data",
+            'this-is-call-data',
             1 //endowment ATTENTION THIS IS TOO SMALL, HENCE WHY IT FAILS
         )
 
         /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === "LogSwitches")
+        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
         bools.args.switches.forEach((bool, index) => {
             // Now we check that the first bool didn't fire off correctly,
             //  since the endowment is too small.
@@ -262,12 +262,12 @@ contract('Request factory', async function(accounts) {
                 callGas,
                 callValue
             ],
-            "this-is-call-data",
+            'this-is-call-data',
             config.web3.utils.toWei(10) //endowment
         )
 
         /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === "LogSwitches")
+        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
         bools.args.switches.forEach((bool, index) => {
             // Now we check that the second bool didn't fire off correctly,
             //  since the reserved window is too big
@@ -315,12 +315,12 @@ contract('Request factory', async function(accounts) {
                 callGas,
                 callValue
             ],
-            "this-is-call-data",
+            'this-is-call-data',
             config.web3.utils.toWei(10) //endowment
         )
 
         /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === "LogSwitches")
+        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
         bools.args.switches.forEach((bool, index) => {
             // Now we check that the third and fourth bool didn't fire off correctly.
             if (index === 2 || index === 3) {
@@ -367,12 +367,12 @@ contract('Request factory', async function(accounts) {
                 callGas,
                 callValue
             ],
-            "this-is-call-data",
+            'this-is-call-data',
             config.web3.utils.toWei(10) //endowment
         )
 
         /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === "LogSwitches")
+        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
         bools.args.switches.forEach((bool, index) => {
             // Now we check that the fourth bool didn't fire off correctly.
             if (index === 3) {
@@ -419,12 +419,12 @@ contract('Request factory', async function(accounts) {
                 callGas,
                 callValue
             ],
-            "this-is-call-data",
+            'this-is-call-data',
             config.web3.utils.toWei(10) //endowment
         )
 
         /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === "LogSwitches")
+        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
         bools.args.switches.forEach((bool, index) => {
             // Now we check that the fifth bool didn't fire off correctly.
             // Throws the first bool since endowment is based on callGas.
@@ -472,12 +472,12 @@ contract('Request factory', async function(accounts) {
                 callGas,
                 callValue
             ],
-            "this-is-call-data",
+            'this-is-call-data',
             config.web3.utils.toWei(10) //endowment
         )
 
         /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === "LogSwitches")
+        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
         bools.args.switches.forEach((bool, index) => {
             // Now we check that the sixth bool didn't fire off correctly.
             if (index === 5) {

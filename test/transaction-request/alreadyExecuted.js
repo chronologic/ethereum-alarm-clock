@@ -1,4 +1,6 @@
 require('chai')
+    .use(require('chai-as-promised'))
+    .should()
 
 const expect = require('chai').expect 
 
@@ -7,7 +9,7 @@ const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
 /// Bring in config.web3 (v1.0.0)
-const config = require('../config')
+const config = require('../../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 
 contract('Test already executed', async function(accounts) {
@@ -47,8 +49,8 @@ contract('Test already executed', async function(accounts) {
                 2, // temporalUnit
                 executionWindow,
                 windowStart,
-                43324, //callGas
-                12345  //callValue
+                2000000, //callGas
+                0  //callValue
             ],
             'some-call-data-goes-here'
         )
@@ -60,17 +62,17 @@ contract('Test already executed', async function(accounts) {
         const secondsToWait = windowStart - timestamp
         await waitUntilBlock(secondsToWait, 0)
 
-        const executeTx = await transactionRequest.executeNew({from: accounts[1], gas: 3000000})
-        console.log(executeTx)
+        const executeTx = await transactionRequest.execute({from: accounts[1], gas: 3000000})
+        // console.log(executeTx)
         const execute = executeTx.logs.find(e => e.event === 'Executed')
         expect(execute, 'should have fired off the execute log').to.exist
 
         const wasCalledAfter = await transactionRecorder.wasCalled()
-        console.log(wasCalledAfter)        
+        // console.log(wasCalledAfter)        
         expect(wasCalledAfter).to.be.true 
 
         /// Now try to duplicate the call
         const executeTx2 = await transactionRequest.execute({from: accounts[1], gas: 3000000})
-        
+            .should.be.rejectedWith('VM Exception while processing transaction: revert')
     })
 })

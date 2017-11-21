@@ -9,7 +9,7 @@ const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
 /// Bring in config.web3 (v1.0.0)
-const config = require('../config')
+const config = require('../../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 const toBN = config.web3.utils.toBN 
 
@@ -44,8 +44,8 @@ contract('tests execution rejected if cancelled', async function(accounts) {
                 1, //temporalUnit = 1, aka blocks
                 executionWindow,
                 windowStart,
-                43324, //callGas
-                12345 //callValue
+                2000000, //callGas
+                0 //callValue
             ],
             'some-call-data-could-be-anything'
         )
@@ -71,7 +71,7 @@ contract('tests execution rejected if cancelled', async function(accounts) {
         await waitUntilBlock(0, windowStart)
 
         const executeTx = await transactionRequest.execute({gas: 3000000})
-            // .should.be.rejectedWith('VM Exception while processing transaction: revert')
+            .should.be.rejectedWith('VM Exception while processing transaction: revert')
         /// TODO: Either change the smart contracts to revert the transaction or
         ///       pull out the logs here and check the abort reason.
         

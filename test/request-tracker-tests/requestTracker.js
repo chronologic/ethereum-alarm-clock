@@ -10,8 +10,8 @@ const RequestLib = artifacts.require('./RequestLib.sol')
 const RequestTracker = artifacts.require('./RequestTracker.sol')
 const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 
-/// Brings in config.web3
-const config = require("../../config")
+/// Brings in config.web3 (v1.0.0)
+const config = require('../../config')
 const NULL_ADDR = '0x0000000000000000000000000000000000000000'
 
 
@@ -91,15 +91,15 @@ contract('Request tracker', async function(accounts) {
         const requestTracker = await RequestTracker.new()
         expect(requestTracker.address).to.exist 
 
-        let isKnown = await requestTracker.isKnownRequest(mockSchedulerAddr, "0x0000000000000000000000000000000000000001")
+        let isKnown = await requestTracker.isKnownRequest(mockSchedulerAddr, '0x0000000000000000000000000000000000000001')
         expect(isKnown).to.equal(false)
 
-        let addTx = await requestTracker.addRequest("0x0000000000000000000000000000000000000001", 12345)
-        let isKnown2 = await requestTracker.isKnownRequest(mockSchedulerAddr, "0x0000000000000000000000000000000000000001")
+        let addTx = await requestTracker.addRequest('0x0000000000000000000000000000000000000001', 12345)
+        let isKnown2 = await requestTracker.isKnownRequest(mockSchedulerAddr, '0x0000000000000000000000000000000000000001')
         expect(isKnown2).to.equal(true)
 
-        let rmTx = await requestTracker.removeRequest("0x0000000000000000000000000000000000000001")
-        let isKnown3 = await requestTracker.isKnownRequest(mockSchedulerAddr, "0x0000000000000000000000000000000000000001")
+        let rmTx = await requestTracker.removeRequest('0x0000000000000000000000000000000000000001')
+        let isKnown3 = await requestTracker.isKnownRequest(mockSchedulerAddr, '0x0000000000000000000000000000000000000001')
         expect(isKnown3).to.equal(false)
     })
 })

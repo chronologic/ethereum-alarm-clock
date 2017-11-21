@@ -9,7 +9,7 @@ const RequestFactory = artifacts.require('./RequestFactory.sol')
 const RequestTracker = artifacts.require('./RequestTracker.sol')
 const TimestampScheduler = artifacts.require('./TimestampScheduler.sol')
 
-/// Brings in config.web3
+/// Brings in config.web3 (v1.0.0)
 const config = require('../../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3) // just pass truffle web3
 
@@ -17,7 +17,7 @@ const { wait, waitUntilBlock } = require('@digix/tempo')(web3) // just pass truf
 contract('Timestamp Scheduler', async function(accounts) {
 
     const MINUTE = 60 //seconds
-    const testData32 = "32".padEnd(32, "AF01")
+    const testData32 = '32'.padEnd(32, 'AF01')
 
     let requestFactory
     let requestTracker 

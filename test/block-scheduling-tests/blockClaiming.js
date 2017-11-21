@@ -8,9 +8,8 @@ const expect = require('chai').expect
 const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
-/// Brings in config.web3
-const config = require("../../config");
-
+/// Brings in config.web3 (v1.0.0)
+const config = require('../../config');
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3);
 
 contract('Block claiming', async function(accounts) {
@@ -24,10 +23,6 @@ contract('Block claiming', async function(accounts) {
     let curBlock // Holds the current block value before each test
     let firstClaimBlock
     let lastClaimBlock
-
-    /////////////
-    /// Tests ///
-    /////////////
 
     /// Before each test we deploy a new instance of Transaction Request so we have a fresh instance
     beforeEach(async function () {
@@ -49,8 +44,8 @@ contract('Block claiming', async function(accounts) {
                 1, // temporal unit - blocks is 1
                 10, //window size
                 curBlock + 38, //windowStart
-                300000, //callGas
-                12345 //callValue
+                100000, //callGas
+                0 //callValue
             ],
             'this-is-the-call-data'
         )
@@ -63,10 +58,14 @@ contract('Block claiming', async function(accounts) {
         lastClaimBlock = (curBlock + 38) - 5 - 1
     })
 
+    /////////////
+    /// Tests ///
+    /////////////
+
     it('should not claim before first claim block', async function() {
 
         curBlock = await config.web3.eth.getBlockNumber()
-        assert(firstClaimBlock > curBlock, "the first claim block should be in the future.")
+        assert(firstClaimBlock > curBlock, 'the first claim block should be in the future.')
         
         // No claiming before the window starts!
         await transactionRequest.claim().should.be.rejectedWith('VM Exception while processing transaction: revert')
@@ -78,20 +77,20 @@ contract('Block claiming', async function(accounts) {
         let res = await transactionRequest.claim({value: config.web3.utils.toWei(1)})
 
         /// Search for the claimed function and expect it to exist.
-        let claimed = res.logs.find(e => e.event === "Claimed")
+        let claimed = res.logs.find(e => e.event === 'Claimed')
         expect(claimed).to.exist
     })
 
     /// NOTICE THIS TEST IS OFF BY ONE ( SEE THE -1 ) NEEDS TO BE FIXED
     it('should allow claiming at the last claim block', async function() {
-        assert(lastClaimBlock > await config.web3.eth.getBlockNumber(), "The last block should be in the future before we time travel to it.")
+        assert(lastClaimBlock > await config.web3.eth.getBlockNumber(), 'The last block should be in the future before we time travel to it.')
         await waitUntilBlock(0, lastClaimBlock -1)
-        assert(lastClaimBlock -1 == await config.web3.eth.getBlockNumber(), "And after we time travel, it should be exactly the same.")
+        assert(lastClaimBlock -1 == await config.web3.eth.getBlockNumber(), 'And after we time travel, it should be exactly the same.')
 
         let res = await transactionRequest.claim({value: config.web3.utils.toWei(1)})
         
         /// Search for the claimed function and expect it to exist.
-        let claimed = res.logs.find(e => e.event === "Claimed")
+        let claimed = res.logs.find(e => e.event === 'Claimed')
         expect(claimed).to.exist
 
         let requestData = await transactionRequest.requestData()
@@ -100,9 +99,9 @@ contract('Block claiming', async function(accounts) {
 
     /// NOTICE THIS TEST IS CORRECT the +1 should be there
     it('cannot claim after the last block', async function() {
-        assert(lastClaimBlock > await config.web3.eth.getBlockNumber(), "The last block should be in the future before we time travel to it.")
+        assert(lastClaimBlock > await config.web3.eth.getBlockNumber(), 'The last block should be in the future before we time travel to it.')
         await waitUntilBlock(0, lastClaimBlock +1)
-        assert(lastClaimBlock +1 == await config.web3.eth.getBlockNumber(), "And after we time travel, it should be exactly the same.")
+        assert(lastClaimBlock +1 == await config.web3.eth.getBlockNumber(), 'And after we time travel, it should be exactly the same.')
 
         await transactionRequest.claim({value: config.web3.utils.toWei(1)})
             .should.be.rejectedWith('VM Exception while processing transaction: revert')
@@ -115,7 +114,7 @@ contract('Block claiming', async function(accounts) {
         let res = await transactionRequest.claim({value: config.web3.utils.toWei(2)})
 
         /// Search for the claimed function and expect it to exist.
-        let claimed = res.logs.find(e => e.event === "Claimed")
+        let claimed = res.logs.find(e => e.event === 'Claimed')
         expect(claimed).to.exist
 
         await waitUntilBlock(0, await config.web3.eth.getBlockNumber() + 30)
@@ -126,7 +125,7 @@ contract('Block claiming', async function(accounts) {
 
         // console.log(await config.web3.eth.getBalance(transactionRequest.address))
         
-        let executed = res2.logs.find(e => e.event === "Executed")
+        let executed = res2.logs.find(e => e.event === 'Executed')
         expect(executed).to.exist
         // console.log(executed.args)
 
@@ -139,14 +138,14 @@ contract('Block claiming', async function(accounts) {
         let res = await transactionRequest.claim({value: config.web3.utils.toWei(2)})
 
         /// Search for the claimed function and expect it to exist.
-        let claimed = res.logs.find(e => e.event === "Claimed")
+        let claimed = res.logs.find(e => e.event === 'Claimed')
         expect(claimed).to.exist
 
         await waitUntilBlock(0, lastClaimBlock+15)
 
         let res2 = await transactionRequest.execute({gas: 300000})
 
-        let executed = res2.logs.find(e => e.event === "Executed")
+        let executed = res2.logs.find(e => e.event === 'Executed')
         expect(executed).to.exist
     })
 
@@ -159,7 +158,7 @@ contract('Block claiming', async function(accounts) {
         let res = await transactionRequest.claim({value: config.web3.utils.toWei(2)})
         
         /// Search for the claimed function and expect it to exist.
-        let claimed = res.logs.find(e => e.event === "Claimed")
+        let claimed = res.logs.find(e => e.event === 'Claimed')
         expect(claimed).to.exist
 
         //TODO: validate the payment modifier

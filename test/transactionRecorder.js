@@ -4,12 +4,12 @@ require('chai')
 
 const expect = require('chai').expect
 
-const TransactionRecorder = artifacts.require("./TransactionRecorder.sol");
+const TransactionRecorder = artifacts.require('./TransactionRecorder.sol');
 
-const config = require("../config");
+const config = require('../config');
 
 contract('Test TransactionRecorder', function(accounts) {
-    it("should send a transaction as specified", async function() {
+    it('should send a transaction as specified', async function() {
 
         let txRecorder = await TransactionRecorder.new();
 
@@ -23,14 +23,14 @@ contract('Test TransactionRecorder', function(accounts) {
         (lastCaller).should.equal('0x0000000000000000000000000000000000000000');
         (lastCallValue.toNumber()).should.equal(0);
         (lastCallGas.toNumber()).should.equal(0);
-        (lastCallData).should.equal("0x");
+        (lastCallData).should.equal('0x');
         
-        let testCallData = config.web3.utils.toHex("this-is-call-data")
+        let testCallData = config.web3.utils.toHex('this-is-call-data')
 
         await txRecorder.sendTransaction({
             value: 121212,
             gas: 3000000,
-            data: "this-is-call-data"
+            data: 'this-is-call-data'
         });
 
         wasCalled     = await txRecorder.wasCalled();
@@ -42,16 +42,16 @@ contract('Test TransactionRecorder', function(accounts) {
         expect(wasCalled).to.be.true;        
         (lastCaller).should.equal(accounts[0]);
 
-        assert(wasCalled, "Should have been called.");
-        assert(lastCaller === accounts[0], "Should have registered the correct address.");
-        assert(lastCallValue.toNumber() === 121212, "Sent the correct value.");
+        assert(wasCalled, 'Should have been called.');
+        assert(lastCaller === accounts[0], 'Should have registered the correct address.');
+        assert(lastCallValue.toNumber() === 121212, 'Sent the correct value.');
 
         let callGasDelta = lastCallGas.toNumber() - 3000000
-        assert(lastCallGas.toNumber() > 0, "Should have used some gas.")
-        assert(callGasDelta < 10000, "But not too much gas...")
+        assert(lastCallGas.toNumber() > 0, 'Should have used some gas.')
+        assert(callGasDelta < 10000, 'But not too much gas...')
 
         /// Here we take out the `0x` of the test call data in hex representation
         ///  and also remove the first 4 hex characters from the call data.
-        assert(testCallData.slice(2) === lastCallData.slice(6), "The call data should be the same.");
+        assert(testCallData.slice(2) === lastCallData.slice(6), 'The call data should be the same.');
     });
 });
