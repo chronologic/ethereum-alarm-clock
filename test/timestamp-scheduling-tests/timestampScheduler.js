@@ -10,7 +10,7 @@ const RequestTracker = artifacts.require('./RequestTracker.sol')
 const TimestampScheduler = artifacts.require('./TimestampScheduler.sol')
 
 /// Brings in config.web3
-const config = require('../config')
+const config = require('../../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3) // just pass truffle web3
 
 
@@ -48,12 +48,12 @@ contract('Timestamp Scheduler', async function(accounts) {
         let scheduleTx = await timestampScheduler.scheduleTxSimple(accounts[4],
                                                                    testData32,
                                                                    [
-                                                                       4e15, //callGas
+                                                                       433243, //callGas
                                                                        123123, //callValue
                                                                        55*MINUTE, //windowSize
                                                                        windowStart
                                                                    ],
-                                                                //    {from: accounts[0], value: config.web3.utils.toWei(10)}
+                                                                   {from: accounts[0], value: config.web3.utils.toWei(10)}
                                                                    )
         expect(scheduleTx.receipt).to.exist
 
@@ -70,17 +70,17 @@ contract('Timestamp Scheduler', async function(accounts) {
         const donation = config.web3.utils.toWei(1)
         const payment = config.web3.utils.toWei(2)
 
-        let scheduleTx = await timestampScheduler.scheduleTxSimple(accounts[4],
+        let scheduleTx = await timestampScheduler.scheduleTxFull(accounts[4],
                                                                    testData32,
                                                                    [
-                                                                       4e15, //callGas
+                                                                       433243, //callGas
                                                                        123123, //callValue
                                                                        donation,
                                                                        payment,
                                                                        55*MINUTE, //windowSize
                                                                        windowStart
                                                                    ],
-                                                                //    {from: accounts[0], value: config.web3.utils.toWei(10)}
+                                                                   {from: accounts[0], value: config.web3.utils.toWei(10)}
                                                                    )
         expect(scheduleTx.receipt).to.exist
 
@@ -98,12 +98,12 @@ contract('Timestamp Scheduler', async function(accounts) {
         let scheduleTx = await timestampScheduler.scheduleTxSimple(accounts[4],
                                                                    testData32,
                                                                    [
-                                                                       4e15, //callGas
+                                                                       4e20, //callGas is too high
                                                                        123123, //callValue
                                                                        55*MINUTE, //windowSize
                                                                        windowStart
                                                                    ],
-                                                                   {from: accounts[0], value: config.web3.utils.toWei(10)}
+                                                                   {from: accounts[0]}
                                                                    )
             .should.be.rejectedWith('VM Exception while processing transaction: revert')
     })

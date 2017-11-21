@@ -44,7 +44,7 @@ contract('Block reserved window', async function(accounts) {
         await waitUntilBlock(0, firstClaimBlock)
 
         /// Claim it from account[4]
-        let claimTx = await txRequest.claim({from: accounts[4], value: config.web3.utils.toWei(2)})
+        let claimTx = await txRequest.claim({from: accounts[4], value: config.web3.utils.toWei(10)})
 
         /// Search for the claimed function and expect it to exist.
         let claimed = claimTx.logs.find(e => e.event === "Claimed")
@@ -53,12 +53,12 @@ contract('Block reserved window', async function(accounts) {
         await waitUntilBlock(0, windowStart)
 
         /// Now let's try to execute it from a third party account
-        await txRequest.execute({from: accounts[3], gas: 3000000})
+        await txRequest.execute({from: accounts[3], gas: 300000})
             .should.be.rejectedWith('VM Exception while processing transaction: revert')
 
         /// That shouldn't work, because accounts[4] claimed it...
         /// But this should!
-        let executeTx = await txRequest.execute({from: accounts[4], gas: 3000000})
+        let executeTx = await txRequest.execute({from: accounts[4], gas: 300000})
 
         /// Find the logs to prove it.
         let executed = executeTx.logs.find(e => e.event === "Executed")

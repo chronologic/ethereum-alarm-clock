@@ -21,7 +21,7 @@ contract TransactionRequest is TransactionRequestInterface {
      *  uintArgs[3]  - schedule.freezePeriod
      *  uintArgs[4]  - schedule.reservedWindowSize
      *  uintArgs[5]  - schedule.temporalUnit
-     *  uintArgs[7]  - schedule.windowSize
+     *  uintArgs[7]  - schedule.executionWindowSize
      *  uintArgs[6]  - schedule.windowStart
      *  uintArgs[8]  - txnData.callGas
      *  uintArgs[9]  - txnData.callValue
@@ -44,9 +44,13 @@ contract TransactionRequest is TransactionRequestInterface {
      *  Actions
      */
     function execute() public returns (bool) {
-        require(txnRequest.execute());
-        return true;
-        // return txnRequest.execute();
+        // require( txnRequest.execute() );
+        // return true;
+        return txnRequest.execute();
+    }
+
+    function executeNew() public returns (bool) {
+        return txnRequest.executeNew();
     }
 
     function cancel() public returns (bool) {

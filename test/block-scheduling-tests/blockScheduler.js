@@ -69,11 +69,12 @@ contract('Block scheduling', function(accounts) {
         let scheduleTx = await blockScheduler.scheduleTxSimple(transactionRecorder.address,
                                                             testData32,
                                                             [
-                                                                4e15, //callGas
+                                                                43324, //callGas
                                                                 123123, //callValue
                                                                 300, //windowSize
                                                                 windowStart
-                                                            ])
+                                                            ],
+                                                            {from: accounts[0], value: config.web3.utils.toWei(10)})
 
         assert(scheduleTx.tx, "The transaction fired off and returned.")
 
@@ -92,13 +93,14 @@ contract('Block scheduling', function(accounts) {
         let scheduleTx = await blockScheduler.scheduleTxFull(transactionRecorder.address,
                                                             testData32,
                                                             [
-                                                                4e15, //callGas
+                                                                43323, //callGas
                                                                 123123, //callValue
                                                                 808080, // donation
                                                                 100200300, // payment
                                                                 300, //windowSize
                                                                 windowStart
-                                                            ])
+                                                            ],
+                                                            {from: accounts[0], value: config.web3.utils.toWei(10)})
 
         assert(scheduleTx.tx, "The transaction fired off and returned.")
 
@@ -107,7 +109,6 @@ contract('Block scheduling', function(accounts) {
         expect(event.args.request).to.exist
     })
 
-    // This only passes because there is no value hard coded in.
     it('should do block scheduling with simplified args: legacy `scheduleTransaction`', async function() {
         let startBlockNum = await config.web3.eth.getBlockNumber()
         let windowStart = startBlockNum + 20
@@ -115,12 +116,12 @@ contract('Block scheduling', function(accounts) {
         let scheduleTx = await blockScheduler.scheduleTransaction(transactionRecorder.address,
                                                                       'this-is-call-data',
                                                                       [
-                                                                          4e15, //callGas
+                                                                          43324, //callGas
                                                                           123454321, //callValue
                                                                           255, //windowSize
                                                                           windowStart
                                                                       ],
-                                                                      {from: User1}
+                                                                      {from: User1, value: config.web3.utils.toWei(6)}
         )
 
         assert(scheduleTx.tx)
@@ -133,20 +134,20 @@ contract('Block scheduling', function(accounts) {
         let scheduleTx = await blockScheduler.scheduleTransaction(transactionRecorder.address,
                                                                       'this-is-call-data',
                                                                       [
-                                                                          4e15, //callGas
+                                                                          43324, //callGas
                                                                           123454321, //callValue
                                                                           808080, // donation
                                                                           100200300, // payment
                                                                           255, //windowSize
                                                                           windowStart
                                                                       ],
-                                                                      {from: User1}
+                                                                      {from: User1, value: config.web3.utils.toWei(4)}
         )
 
         assert(scheduleTx.tx)
     })
 
-    // This only passes (fail) because of the hard coded value.
+    // This test fails because the call gas is too damn high
     it('should revert on invalid transaction', async function() {
         let lastBlock = await config.web3.eth.getBlockNumber()
         let windowStart = lastBlock + 20
@@ -160,7 +161,7 @@ contract('Block scheduling', function(accounts) {
                                                                           0, //windowSize
                                                                           windowStart
                                                                       ],
-                                                                      {from: User2, value: config.web3.utils.toWei(10)} // this only fails because of the value
+                                                                      {from: User2, value: config.web3.utils.toWei(10)}
         ).should.be.rejectedWith('VM Exception while processing transaction: revert')
     })
 })

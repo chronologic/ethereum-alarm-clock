@@ -12,10 +12,10 @@ contract BaseScheduler is SchedulerInterface {
     using SchedulerLib for SchedulerLib.FutureTransaction;
 
     /*
-     * Fallback function to be able to receive ether. This can occur
+     * @dev Fallback function to be able to receive ether. This can occur
      *  legitimately when scheduling fails due to a validation error.
      */
-    function() payable public {}
+    function() public payable {}
 
     //------------------------
     // New API [WIP]
@@ -103,16 +103,10 @@ contract BaseScheduler is SchedulerInterface {
         return futureTransaction.schedule(factoryAddress);
     }
 
-    /*
-<<<<<<< HEAD
-     *  Full scheduling API exposing all fields.
-     *  TODO: ClaimWindow is fixed
-     * 
-=======
+    /**
      *  @dev Full scheduling API exposing all fields.
      *  FIXME: ClaimWindow is fixed
      *
->>>>>>> dev
      *  uintArgs[0] callGas
      *  uintArgs[1] callValue
      *  uintArgs[2] donation

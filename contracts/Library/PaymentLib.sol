@@ -79,7 +79,7 @@ library PaymentLib {
         if (getMultiplier(self) == 0) {
             return 0;
         } else {
-            return self.donation.mul(getMultiplier(self)).div(100);
+            return self.donation;//.mul(getMultiplier(self)).div(100);
         }
     }
 
@@ -89,7 +89,7 @@ library PaymentLib {
     function getPayment(PaymentData storage self)
         returns (uint)
     {
-        return self.payment.mul(getMultiplier(self)).div(100);
+        return self.payment;//.mul(getMultiplier(self)).div(100);
     }
  
     /*
@@ -114,10 +114,12 @@ library PaymentLib {
             // re-entrance protection.
             self.donationOwed = 0;
             self.donationBenefactor.transfer(donationAmount);
-            // self.donationOwed = donationAmount.flooredSub(self.donationBenefactor.transfer(donationAmount));
+            Sent(donationAmount);
         }
         return true;
     }
+
+    event Sent(uint num);
 
     /*
      * @dev Send the paymentOwed amount to the paymentBenefactor.
@@ -129,7 +131,7 @@ library PaymentLib {
         if (paymentAmount > 0) {
             // re-entrance protection.
             self.paymentOwed = 0;
-            // self.paymentBenefactor.transfer(paymentAmount);
+            self.paymentBenefactor.transfer(paymentAmount);
             // self.paymentOwed = paymentAmount.flooredSub(self.paymentBenefactor.transfer(paymentAmount));
         }
         return true;
@@ -145,7 +147,7 @@ library PaymentLib {
                               uint callGas,
                               uint callValue,
                               uint gasOverhead) 
-        internal view returns (uint)
+        public view returns (uint)
     {
         uint gasPrice = tx.gasprice;
         return payment.add(donation)
@@ -156,7 +158,10 @@ library PaymentLib {
     /// Was getting a stack depth error after replacing old MathLib with Zeppelin's SafeMath.
     ///  Added this function to fix it.
     ///  See for context: https://ethereum.stackexchange.com/questions/7325/stack-too-deep-try-removing-local-variables 
-    function _computeHelper(uint _callGas, uint _callValue, uint _gasOverhead, uint _gasPrice)
+    function _computeHelper(uint _callGas,
+                            uint _callValue,
+                            uint _gasOverhead,
+                            uint _gasPrice)
         internal pure returns (uint)
     {
         return _callGas.mul(_gasPrice).mul(2)

@@ -15,7 +15,7 @@ const { wait, waitUntilBlock } = require('@digix/tempo')(web3);
 
 const MINUTE = 60 //seconds
 
-contract('Block reserved window', async function(accounts) {
+contract('Timestamp reserved window', async function(accounts) {
     it('should reject execution if claimed by another', async function() {
         let curBlock = await config.web3.eth.getBlock('latest')
         let timestamp = curBlock.timestamp

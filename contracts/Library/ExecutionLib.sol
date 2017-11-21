@@ -21,8 +21,9 @@ library ExecutionLib {
     }
 
     function sendTransaction(ExecutionData storage self)
-        public returns (bool)
+        internal returns (bool)
     {
+        // return true;
         return self.toAddress.call.value(self.callValue)
                                   .gas(self.callGas)
                                   (self.callData);
@@ -41,7 +42,7 @@ library ExecutionLib {
     }
 
     /*
-     * Validation: ensure that the callGas is not above the total possible gas
+     * @dev Validation: ensure that the callGas is not above the total possible gas
      * for a call.
      */
      function validateCallGas(uint callGas, uint EXTRA_GAS)
@@ -51,10 +52,10 @@ library ExecutionLib {
     }
 
     /*
-     * Validation: ensure that the toAddress is not set to the empty address.
+     * @dev Validation: ensure that the toAddress is not set to the empty address.
      */
      function validateToAddress(address toAddress)
-        view returns (bool)
+        public pure returns (bool)
     {
         return toAddress != 0x0;
     }

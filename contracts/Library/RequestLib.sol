@@ -339,7 +339,7 @@ library RequestLib {
             Aborted(uint8(AbortReason.BeforeCallWindow));
             return false;
         } else if (self.schedule.isAfterWindow()) {
-            Aborted(uint8(AbortReason.AfterCallWindow));
+            Aborted(uint8(AbortReason.AfterCallWindow)); //3
             return false;
         } else if (self.claimData.isClaimed() &&
                    msg.sender != self.claimData.claimedBy &&
@@ -348,7 +348,6 @@ library RequestLib {
             return false;
         }
 
-        DEBUG("After auth");
         // +--------------------+
         // | End: Authorization |
         // +--------------------+
@@ -360,9 +359,9 @@ library RequestLib {
         self.meta.wasCalled = true;
 
         // Send the transaction
-        self.meta.wasSuccessful = self.txnData.sendTransaction();
+        // self.meta.wasSuccessful = self.txnData.sendTransaction();
+        // require( self.meta.wasSuccessful );
 
-        DEBUG("Made it up to here");
         // +----------------+
         // | End: Execution |
         // +----------------+
@@ -376,15 +375,11 @@ library RequestLib {
                                                             .add(self.paymentData.donationOwed);
         }
 
-        DEBUG("The above function is untested");
-
         // record this so that we can log it later.
         uint totalDonationPayment = self.paymentData.donationOwed;
-
+        debug(totalDonationPayment);
         // Send the donation.
         self.paymentData.sendDonation();
-
-        DEBUG("Up to here works");
 
         // Compute the payment amount and who it should be sent do.
         self.paymentData.paymentBenefactor = msg.sender;
@@ -399,7 +394,6 @@ library RequestLib {
             self.paymentData.paymentOwed = self.paymentData.getPayment()
                                                            .add(self.paymentData.paymentOwed);
         }
-        DEBUG("Up to here works");
 
         // Record the amount of gas used by execution.
         uint measuredGasConsumption = startGas.sub(msg.gas).add(_EXECUTE_EXTRA_GAS);
@@ -412,7 +406,6 @@ library RequestLib {
         self.paymentData.paymentOwed = measuredGasConsumption.mul(tx.gasprice)
                                                              .add(self.paymentData.paymentOwed);
 
-        DEBUG("Up to here works");
         // Log the two payment amounts.  Otherwise it is non-trivial to figure
         // out how much was payed.
         Executed(self.paymentData.paymentOwed,
@@ -423,10 +416,8 @@ library RequestLib {
         //FIXME: NO MORE PUSHES FOR PAYMENTS, CLIENTS MUST CALL
         // self.paymentData.sendPayment();
 
-        DEBUG("Here");
-
         // Send all extra ether back to the owner.
-        sendOwnerEther(self);
+        // sendOwnerEther(self);
 
         // +-----------------+
         // | End: Accounting |
@@ -435,7 +426,80 @@ library RequestLib {
         return true;
     }
 
-    event DEBUG(string _msg);
+    event debug(uint num);
+
+    function executeNew(Request storage self)
+        public returns (bool)
+    {
+        /// Store how much gas was sent in this transaction.
+        uint startGas = msg.gas;
+
+        /// Check gas
+        require( msg.gas > self.txnData.callGas.add(180000) );
+
+        /// Check not called
+        require( !self.meta.wasCalled );
+
+        /// Check not cancelled
+        require( !self.meta.isCancelled );
+
+        /// Check within window
+        require( !self.schedule.isBeforeWindow() && !self.schedule.isAfterWindow() );
+
+        /// Check if claimed
+        if (self.claimData.isClaimed()) {
+            if (msg.sender != self.claimData.claimedBy) {
+                require( !self.schedule.inReservedWindow() );
+            }
+        }
+
+        /// Send the transaction
+        self.meta.wasCalled = true;
+        require( self.txnData.toAddress.call.value(self.txnData.callValue)
+                                            .gas(self.txnData.callGas)
+                                            (0xFFFFFFFF) );
+
+        if (self.paymentData.hasBenefactor()) {
+            self.paymentData.donationOwed = SafeMath.add(self.paymentData.donation,
+                                                        self.paymentData.donationOwed
+                                                        );
+        }
+
+        require( self.paymentData.sendDonation() );
+
+        if (self.claimData.isClaimed()) {
+            self.paymentData.paymentOwed = self.claimData.claimDeposit
+                                                .add(self.paymentData.paymentOwed);
+            self.claimData.claimDeposit = 0;
+            self.paymentData.paymentOwed = self.paymentData.payment
+                                                .add(self.paymentData.paymentOwed);
+        } else {
+            self.paymentData.paymentOwed = self.paymentData.payment 
+                                                .add(self.paymentData.paymentOwed);
+        }
+
+        uint measuredGasConsumption = startGas.sub(msg.gas).add(90000);
+
+        // Add the gas reimbursement amount to the payment.
+        self.paymentData.paymentOwed = measuredGasConsumption.mul(tx.gasprice)
+                                                .add(self.paymentData.paymentOwed);
+        
+        // Log the payment amounts for accounting reasons.
+        Executed(self.paymentData.paymentOwed,
+                self.paymentData.donationOwed,
+                measuredGasConsumption);
+
+        if (self.paymentData.paymentOwed > 0) {
+            uint paymentAmount = self.paymentData.paymentOwed;
+            self.paymentData.paymentOwed = 0;
+            self.paymentData.paymentBenefactor.transfer(paymentAmount);
+        }
+
+        AnyMoneyLeft(this.balance);
+        return true;
+    }
+
+    event AnyMoneyLeft(uint _leftOver);
 
     // This is the amount of gas that it takes to enter from the
     // `TransactionRequest.execute()` contract into the `RequestLib.execute()`
@@ -449,9 +513,9 @@ library RequestLib {
     }
 
     function requiredExecutionGas(Request storage self) 
-        public returns (uint)
+        public view returns (uint)
     {
-        var requiredGas = self.txnData.callGas.add(_EXECUTION_GAS_OVERHEAD);
+        uint requiredGas = self.txnData.callGas.add(_EXECUTION_GAS_OVERHEAD);
 
         // if (msg.sender != tx.origin) {
         //     var stackCheckGas = ExecutionLib.GAS_PER_DEPTH()
@@ -570,7 +634,8 @@ library RequestLib {
         Cancelled(rewardPayment, measuredGasConsumption);
 
         // send the remaining ether to the owner.
-        return sendOwnerEther(self);
+        // return sendOwnerEther(self);
+        return true;
     }
 
     /*
@@ -639,7 +704,7 @@ library RequestLib {
     function sendOwnerEther(Request storage self) 
         internal returns (bool)
     {
-        assert( self.meta.isCancelled || self.schedule.isAfterWindow() );
+        // assert( self.meta.isCancelled || self.schedule.isAfterWindow() );
         uint ownerRefund = this.balance.sub(self.claimData.claimDeposit)
                                         .sub(self.paymentData.paymentOwed)
                                         .sub(self.paymentData.donationOwed);

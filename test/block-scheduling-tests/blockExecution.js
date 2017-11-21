@@ -8,9 +8,8 @@ const expect = require('chai').expect
 const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
-/// Brings in config.web3...
-const config = require("../../config");
-
+/// Bring in config.web3 (v1.0.0)
+const config = require("../../config")
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3);
 
 contract('Block execution', async function(accounts) {
@@ -31,13 +30,12 @@ contract('Block execution', async function(accounts) {
         curBlock = await config.web3.eth.getBlockNumber()
         windowStart = curBlock + 38
 
-        /// When you instantiate a TransactionRequest like this it does not have a `temporalUnit`
         transactionRequest = await TransactionRequest.new(
             [
-                Owner, // created by
-                Owner, // owner
-                Benefactor, // donation benefactor
-                ToAddress // To
+                Owner, //createdBy
+                Owner, //owner
+                Benefactor, //donationBenefactor
+                ToAddress //toAddress
             ], [
                 0, //donation
                 0, //payment

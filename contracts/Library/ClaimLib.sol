@@ -54,12 +54,12 @@ library ClaimLib {
         internal returns (bool)
     {
         // Check that the claim deposit is non-zero.
-        assert( self.claimDeposit > 0 );
+        if (self.claimDeposit > 0) {
+            uint depositAmount;
+            depositAmount = self.claimDeposit;
 
-        uint depositAmount;
-        depositAmount = self.claimDeposit;
-
-        self.claimedBy.transfer(depositAmount);
+            self.claimedBy.transfer(depositAmount);
+        }
         return true;
     }
 }

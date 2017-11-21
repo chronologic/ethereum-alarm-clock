@@ -114,14 +114,15 @@ library SchedulerLib {
         return true;
     }
 
-    /*
+    /**
      * @dev The low level interface for creating a transaction request.
      */
     function schedule(FutureTransaction storage self,
-                      address factoryAddress) 
+                      address _factoryAddress) 
         public returns (address) 
     {
-        RequestFactoryInterface factory = RequestFactoryInterface(factoryAddress);
+        RequestFactoryInterface factory = RequestFactoryInterface(_factoryAddress);
+
         uint endowment = MathLib.min(
             PaymentLib.computeEndowment(
                 self.payment,
@@ -129,14 +130,17 @@ library SchedulerLib {
                 self.callGas,
                 self.callValue,
                 RequestLib.EXECUTION_GAS_OVERHEAD() //180000, line 459 RequestLib
-        ), msg.value);
-        //), this.balance);
+        ), this.balance);
+        debug(endowment);
+        debug(msg.value);
+        debug(this.balance);
 
+        // address newRequestAddress = DONATION_BENEFACTOR;
         address newRequestAddress = factory.createValidatedRequest.value(endowment)(
             [
-                msg.sender,           // meta.owner
-                DONATION_BENEFACTOR,  // paymentData.donationBenefactor
-                self.toAddress        // txnData.toAddress
+                msg.sender,              // meta.owner
+                DONATION_BENEFACTOR,     // paymentData.donationBenefactor
+                self.toAddress           // txnData.toAddress
             ],
             [
                 self.donation,            // paymentData.donation
@@ -167,4 +171,6 @@ library SchedulerLib {
     
     /// Debugging purposes
     event ERROR();
+    event Debug(string msg);
+    event debug(uint num);
 }

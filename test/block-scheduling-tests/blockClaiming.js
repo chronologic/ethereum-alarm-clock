@@ -8,12 +8,12 @@ const expect = require('chai').expect
 const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
-/// Brings in config.web3...
+/// Brings in config.web3
 const config = require("../../config");
 
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3);
 
-contract('Block claiming', function(accounts) {
+contract('Block claiming', async function(accounts) {
     const Owner = accounts[0]
     const Benefactor = accounts[1]
     const ToAddress = accounts[2]
@@ -33,7 +33,7 @@ contract('Block claiming', function(accounts) {
     beforeEach(async function () {
         curBlock = await config.web3.eth.getBlockNumber()
         
-        /// When you instantiate a TransactionRequest like this it does not have a `temporalUnit`
+        /// Instantiate a TransactionRequest with temporal unit 1 - aka block
         transactionRequest = await TransactionRequest.new(
             [
                 Owner, // created by
@@ -121,7 +121,7 @@ contract('Block claiming', function(accounts) {
         await waitUntilBlock(0, await config.web3.eth.getBlockNumber() + 30)
 
 
-        let res2 = await transactionRequest.execute({gas: 3000000})
+        let res2 = await transactionRequest.execute({gas: 300000})
         // console.log(res2)
 
         // console.log(await config.web3.eth.getBalance(transactionRequest.address))
@@ -144,7 +144,7 @@ contract('Block claiming', function(accounts) {
 
         await waitUntilBlock(0, lastClaimBlock+15)
 
-        let res2 = await transactionRequest.execute({gas: 3000000})
+        let res2 = await transactionRequest.execute({gas: 300000})
 
         let executed = res2.logs.find(e => e.event === "Executed")
         expect(executed).to.exist
