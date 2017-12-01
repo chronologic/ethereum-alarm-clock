@@ -1,3 +1,6 @@
+const fs = require('fs')
+
+/// Contract artifacts (located in the build/ folder)
 const BaseScheduler               = artifacts.require("./BaseScheduler.sol"),
       BlockScheduler              = artifacts.require("./BlockScheduler.sol"),
       ClaimLib                    = artifacts.require("./ClaimLib.sol"),
@@ -20,7 +23,7 @@ const BaseScheduler               = artifacts.require("./BaseScheduler.sol"),
       TransactionRequest          = artifacts.require("./TransactionRequest.sol"),
       TransactionRequestInterface = artifacts.require("./TransactionRequestInterface.sol");
 
-const TransactionRecorder = artifacts.require("./test/TransactionRecorder.sol");
+const TransactionRecorder = artifacts.require("./TransactionRecorder.sol");
 
 module.exports = function(deployer) {
 
@@ -111,27 +114,50 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS`)
         return deployer.deploy(TransactionRequest)
     })
     .then(() => {
-        console.log(RequestTracker.address)        
-        deployer.link(ClaimLib, RequestFactory)
-        deployer.link(MathLib, RequestFactory)
-        deployer.link(RequestScheduleLib, RequestFactory)
-        deployer.link(IterTools, RequestFactory)
-        deployer.link(PaymentLib, RequestFactory)
-        deployer.link(RequestLib, RequestFactory)
-        deployer.link(RequestTracker, RequestFactory)
-        deployer.link(TransactionRequest, RequestFactory)
-        deployer.link(SafeMath, RequestFactory)
-            console.log(RequestTracker.address)
-        return deployer.deploy(RequestFactory, RequestTracker.address)
-    })
-    .then((tx) => {
-        console.log(tx)
-        // return deployer.deploy(TransactionRecorder)
+        // console.log(RequestTracker.address)        
+        // deployer.link(ClaimLib, RequestFactory)
+        // deployer.link(MathLib, RequestFactory)
+        // deployer.link(RequestScheduleLib, RequestFactory)
+        // deployer.link(IterTools, RequestFactory)
+        // deployer.link(PaymentLib, RequestFactory)
+        // deployer.link(RequestLib, RequestFactory)
+        // deployer.link(RequestTracker, RequestFactory)
+        // deployer.link(TransactionRequest, RequestFactory)
+        // deployer.link(SafeMath, RequestFactory)
+        //     console.log(RequestTracker.address)
+        // return deployer.deploy(RequestFactory, RequestTracker.address)
     })
     .then(() => {
+        return deployer.deploy(TransactionRecorder)
+    })
+    .then(() => {
+        const contracts = {
+            baseScheduler: BaseScheduler.address,
+            blockSceduler: BlockScheduler.address,
+            claimLib: ClaimLib.address,
+            executionLib: ExecutionLib.address,
+            groveLib: GroveLib.address,
+            iterTools: IterTools.address,
+            mathLib: MathLib.address,
+            paymentLib: PaymentLib.address,
+            // requestFactory: RequestFactory.address,
+            requestLib: RequestLib.address,
+            requestMetaLib: RequestMetaLib.address,
+            requestScheduleLib: RequestScheduleLib.address,
+            requestTracker: RequestTracker.address,
+            safeMath: SafeMath.address,
+            schedulerLib: SchedulerLib.address,
+            timestampScheduler: TimestampScheduler.address,
+            transactionRequest: TransactionRequest.address,
+            transactionRecorder: TransactionRecorder.address
+        }
+        Object.keys(contracts).forEach((key) => {
+            fs.appendFileSync('deployed.info', `${key}, ${contracts[key]}\n`)
+        })
+        fs.appendFileSync('deployed.json', JSON.stringify(contracts))
         console.log(`CONTRACTS SUCCESSFULLY DEPLOYED
 ${"-".repeat(30)}
-see contract-info.txt for information about the deployment
+see deployed.info for addresses of all contracts
         `)
     })
 }
