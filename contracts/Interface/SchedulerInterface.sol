@@ -37,8 +37,18 @@ contract SchedulerInterface {
         _;
     }
 
-    // function scheduleTxSimple
-    // function scheduleTxFull
+    function scheduleTxSimple(address _toAddress,
+                              bytes32 _callData,
+                              uint[5] _uintArgs)
+        doReset
+        public payable returns (address);
+    
+    function scheduleTxFull(address _toAddress,
+                            bytes32 _callData,
+                            uint[7] _uintArgs)
+        doReset
+        public payable returns (address);
+
 
     /*
      *  Full scheduling API exposing all fields.
@@ -50,10 +60,10 @@ contract SchedulerInterface {
      *  bytes32 callData;
      *  address toAddress;
      */
-    function scheduleTransaction(address toAddress,
-                                 bytes callData,
-                                 uint[5] uintArgs) 
-                                 doReset public payable returns (address);
+    // function scheduleTransaction(address toAddress,
+    //                              bytes32 callData,
+    //                              uint[5] uintArgs) 
+    //                              doReset public payable returns (address);
 
     /*
      *  Full scheduling API exposing all fields.
@@ -67,8 +77,8 @@ contract SchedulerInterface {
      *  bytes32 callData;
      *  address toAddress;
      */
-    function scheduleTransaction(address toAddress,
-                                 bytes callData,
-                                 uint[7] uintArgs) 
-                                 doReset public payable returns (address);
+    // function scheduleTransaction(address toAddress,
+    //                              bytes32 callData,
+    //                              uint[7] uintArgs) 
+    //                              doReset public payable returns (address);
 }

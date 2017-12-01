@@ -1,0 +1,207 @@
+
+======= contracts/Interface/RequestFactoryInterface.sol:RequestFactoryInterface =======
+Gas estimation:
+
+======= contracts/Interface/RequestTrackerInterface.sol:RequestTrackerInterface =======
+Gas estimation:
+
+======= contracts/Interface/TransactionRequestInterface.sol:TransactionRequestInterface =======
+Gas estimation:
+
+======= contracts/IterTools.sol:IterTools =======
+Gas estimation:
+construction:
+   100 + 52600 = 52700
+external:
+   all(bool[6]):	infinite
+
+======= contracts/Library/ClaimLib.sol:ClaimLib =======
+Gas estimation:
+construction:
+   154 + 110400 = 110554
+external:
+   claim(ClaimLib.ClaimData storage,uint8):	60858
+   isClaimed(ClaimLib.ClaimData storage):	505
+   minimumDeposit(uint256):	infinite
+internal:
+   refundDeposit(struct ClaimLib.ClaimData storage pointer):	infinite
+
+======= contracts/Library/ExecutionLib.sol:ExecutionLib =======
+Gas estimation:
+construction:
+   61 + 10600 = 10661
+internal:
+   CALL_GAS_CEILING(uint256):	infinite
+   sendTransaction(struct ExecutionLib.ExecutionData storage pointer):	infinite
+   validateCallGas(uint256,uint256):	infinite
+   validateToAddress(address):	infinite
+
+======= contracts/Library/GroveLib.sol:GroveLib =======
+Gas estimation:
+construction:
+   1836 + 1750400 = 1752236
+external:
+   exists(GroveLib.Index storage,bytes32):	817
+   getNextNode(GroveLib.Index storage,bytes32):	infinite
+   getNodeHeight(GroveLib.Index storage,bytes32):	645
+   getNodeId(GroveLib.Index storage,bytes32):	729
+   getNodeLeftChild(GroveLib.Index storage,bytes32):	597
+   getNodeParent(GroveLib.Index storage,bytes32):	619
+   getNodeRightChild(GroveLib.Index storage,bytes32):	575
+   getNodeValue(GroveLib.Index storage,bytes32):	623
+   getPreviousNode(GroveLib.Index storage,bytes32):	infinite
+   insert(GroveLib.Index storage,bytes32,int256):	infinite
+   query(GroveLib.Index storage,bytes2,int256):	infinite
+   remove(GroveLib.Index storage,bytes32):	infinite
+internal:
+   _compare(int256,bytes2,int256):	269
+   _getBalanceFactor(struct GroveLib.Index storage pointer,bytes32):	1185
+   _getMaximum(struct GroveLib.Index storage pointer,bytes32):	infinite
+   _getMinimum(struct GroveLib.Index storage pointer,bytes32):	infinite
+   _rebalanceTree(struct GroveLib.Index storage pointer,bytes32):	infinite
+   _rotateLeft(struct GroveLib.Index storage pointer,bytes32):	infinite
+   _rotateRight(struct GroveLib.Index storage pointer,bytes32):	infinite
+   _updateNodeHeight(struct GroveLib.Index storage pointer,bytes32):	21276
+   max(uint256,uint256):	70
+
+======= contracts/Library/MathLib.sol:MathLib =======
+Gas estimation:
+construction:
+   124 + 79600 = 79724
+external:
+   max(uint256,uint256):	280
+   min(uint256,uint256):	302
+   safeCastSigned(uint256):	290
+
+======= contracts/Library/PaymentLib.sol:PaymentLib =======
+Gas estimation:
+construction:
+   148 + 104800 = 104948
+external:
+   validateEndowment(uint256,uint256,uint256,uint256,uint256,uint256):	infinite
+internal:
+   _computeHelper(uint256,uint256,uint256,uint256):	infinite
+   computeEndowment(uint256,uint256,uint256,uint256,uint256,uint256):	infinite
+   getDonation(struct PaymentLib.PaymentData storage pointer):	infinite
+   getPayment(struct PaymentLib.PaymentData storage pointer):	infinite
+   getPaymentWithModifier(struct PaymentLib.PaymentData storage pointer,uint8):	infinite
+   hasBenefactor(struct PaymentLib.PaymentData storage pointer):	infinite
+   sendDonation(struct PaymentLib.PaymentData storage pointer):	infinite
+   sendPayment(struct PaymentLib.PaymentData storage pointer):	infinite
+
+======= contracts/Library/RequestLib.sol:RequestLib =======
+Gas estimation:
+construction:
+   852 + 824400 = 825252
+external:
+   CANCEL_EXTRA_GAS():	351
+   EXECUTE_EXTRA_GAS():	197
+   EXECUTION_GAS_OVERHEAD():	263
+   PRE_EXECUTION_GAS():	373
+   cancel(RequestLib.Request storage):	infinite
+   executeNew(RequestLib.Request storage):	infinite
+   refundClaimDeposit(RequestLib.Request storage):	infinite
+   requiredExecutionGas(RequestLib.Request storage):	infinite
+   sendDonation(RequestLib.Request storage):	infinite
+   sendPayment(RequestLib.Request storage):	infinite
+internal:
+   claim(struct RequestLib.Request storage pointer):	infinite
+   deserialize(struct RequestLib.Request storage pointer,address[6] memory,bool[3] memory,uint256[15] memory,uint8[1] memory,bytes32):	infinite
+   execute(struct RequestLib.Request storage pointer):	infinite
+   initialize(struct RequestLib.Request storage pointer,address[4] memory,uint256[11] memory,bytes32):	infinite
+   isCancellable(struct RequestLib.Request storage pointer):	infinite
+   isClaimable(struct RequestLib.Request storage pointer):	infinite
+   sendOwnerEther(struct RequestLib.Request storage pointer):	infinite
+   serialize(struct RequestLib.Request storage pointer):	infinite
+   validate(address[4] memory,uint256[11] memory,bytes32,uint256):	infinite
+
+======= contracts/Library/RequestMetaLib.sol:RequestMetaLib =======
+Gas estimation:
+construction:
+   61 + 10600 = 10661
+
+======= contracts/Library/RequestScheduleLib.sol:RequestScheduleLib =======
+Gas estimation:
+construction:
+   240 + 200800 = 201040
+external:
+   computePaymentModifier(RequestScheduleLib.ExecutionWindow storage):	infinite
+   getNow(RequestScheduleLib.ExecutionWindow storage):	731
+   validateReservedWindowSize(uint256,uint256):	infinite
+   validateTemporalUnit(uint256):	394
+   validateWindowStart(RequestScheduleLib.TemporalUnit,uint256,uint256):	infinite
+internal:
+   firstClaimBlock(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   freezeStart(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   getNow(enum RequestScheduleLib.TemporalUnit):	194
+   inClaimWindow(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   inReservedWindow(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   inWindow(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   isAfterWindow(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   isBeforeClaimWindow(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   isBeforeFreeze(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   isBeforeWindow(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   reservedWindowEnd(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+   windowEnd(struct RequestScheduleLib.ExecutionWindow storage pointer):	infinite
+
+======= contracts/Migrations.sol:Migrations =======
+Gas estimation:
+construction:
+   20451 + 146200 = 166651
+external:
+   last_completed_migration():	408
+   owner():	478
+   setCompleted(uint256):	20517
+   upgrade(address):	infinite
+
+======= contracts/RequestFactory.sol:RequestFactory =======
+Gas estimation:
+construction:
+   24565 + 3713000 = 3737565
+external:
+   createRequest(address[3],uint256[11],bytes32):	infinite
+   createValidatedRequest(address[3],uint256[11],bytes32):	infinite
+   isKnownRequest(address):	643
+   requestTracker():	434
+internal:
+   validateRequestParams(address[3] memory,uint256[11] memory,bytes32,uint256):	infinite
+
+======= contracts/RequestTracker.sol:RequestTracker =======
+Gas estimation:
+construction:
+   659 + 630800 = 631459
+external:
+   addRequest(address,uint256):	infinite
+   getNextRequest(address,address):	infinite
+   getPreviousRequest(address,address):	infinite
+   getWindowStart(address,address):	infinite
+   isKnownRequest(address,address):	infinite
+   query(address,bytes2,uint256):	infinite
+   removeRequest(address):	infinite
+
+======= contracts/TransactionRequest.sol:TransactionRequest =======
+Gas estimation:
+construction:
+   infinite + 2014600 = infinite
+external:
+   fallback:	283
+   callData():	424
+   cancel():	infinite
+   claim():	infinite
+   execute():	infinite
+   executeNew():	infinite
+   refundClaimDeposit():	infinite
+   requestData():	infinite
+   sendDonation():	infinite
+   sendOwnerEther():	infinite
+   sendPayment():	infinite
+
+======= contracts/zeppelin/SafeMath.sol:SafeMath =======
+Gas estimation:
+construction:
+   61 + 10600 = 10661
+internal:
+   add(uint256,uint256):	infinite
+   div(uint256,uint256):	infinite
+   mul(uint256,uint256):	infinite
+   sub(uint256,uint256):	infinite

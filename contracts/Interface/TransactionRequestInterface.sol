@@ -11,11 +11,12 @@ contract TransactionRequestInterface {
     /*
      * @dev Data accessors
      */
-    function requestData() returns (address[6],
-                                    bool[3],
-                                    uint[15],
-                                    uint8[1]);
-    function callData() constant returns (bytes);
+    function requestData() public returns (address[6],
+                                            bool[3],
+                                            uint[15],
+                                            uint8[1]);
+
+    function callData() public view returns (bytes32);
 
     /*
      * @dev Pull mechanisms for payments.

@@ -33,9 +33,10 @@ contract BaseScheduler is SchedulerInterface {
      * @return The address of the new TransactionRequest.
      */
     function scheduleTxSimple(address _toAddress,
-                              bytes _callData,
+                              bytes32 _callData,
                               uint[5] _uintArgs)
-        doReset public payable returns (address)
+        doReset
+        public payable returns (address)
     {
         futureTransaction.toAddress = _toAddress;
         futureTransaction.callData = _callData;
@@ -68,9 +69,10 @@ contract BaseScheduler is SchedulerInterface {
      * @return The address of the new TransactionRequest.   
      */
     function scheduleTxFull(address _toAddress,
-                            bytes _callData,
+                            bytes32 _callData,
                             uint[7] _uintArgs)
-        doReset public payable returns (address)
+        doReset
+        public payable returns (address)
     {
         futureTransaction.toAddress = _toAddress;
         futureTransaction.callData = _callData;
@@ -98,71 +100,71 @@ contract BaseScheduler is SchedulerInterface {
     // Deperecated API below
     //------------------------
 
-    /*
-     *  @dev Smaller scheduling API.
-     *  FIXME: Use explicit calls.
-     * 
-     *  @param uintArgs[0] callGas
-     *  @param uintArgs[1] callValue
-     *  @param uintArgs[2] windowSize
-     *  @param uintArgs[3] windowStart
-     *  @param bytes callData;
-     *  @param address toAddress;
-     */
-    function scheduleTransaction(address _toAddress,
-                                 bytes callData,
-                                 uint[4] uintArgs)
-        doReset public payable returns (address)
-    {
-        futureTransaction.toAddress = _toAddress;
-        futureTransaction.callData = callData;
-        futureTransaction.callGas = uintArgs[0];
-        futureTransaction.callValue = uintArgs[1];
-        futureTransaction.windowSize = uintArgs[2];
-        futureTransaction.windowStart = uintArgs[3];
+    // /*
+    //  *  @dev Smaller scheduling API.
+    //  *  FIXME: Use explicit calls.
+    //  * 
+    //  *  @param uintArgs[0] callGas
+    //  *  @param uintArgs[1] callValue
+    //  *  @param uintArgs[2] windowSize
+    //  *  @param uintArgs[3] windowStart
+    //  *  @param bytes32 callData;
+    //  *  @param address toAddress;
+    //  */
+    // function scheduleTransaction(address _toAddress,
+    //                              bytes32 callData,
+    //                              uint[4] uintArgs)
+    //     doReset public payable returns (address)
+    // {
+    //     futureTransaction.toAddress = _toAddress;
+    //     futureTransaction.callData = callData;
+    //     futureTransaction.callGas = uintArgs[0];
+    //     futureTransaction.callValue = uintArgs[1];
+    //     futureTransaction.windowSize = uintArgs[2];
+    //     futureTransaction.windowStart = uintArgs[3];
 
-        // This is here to make this explicit.  While it should remain the same
-        // across multiple calls, this ensures that it is clear what this value
-        // is set to as well as keeping the setting close to where the other
-        // transaction details are set.
-        futureTransaction.temporalUnit = temporalUnit;
-        // return 0x0;
-        return futureTransaction.schedule(factoryAddress);
-    }
+    //     // This is here to make this explicit.  While it should remain the same
+    //     // across multiple calls, this ensures that it is clear what this value
+    //     // is set to as well as keeping the setting close to where the other
+    //     // transaction details are set.
+    //     futureTransaction.temporalUnit = temporalUnit;
+    //     // return 0x0;
+    //     return futureTransaction.schedule(factoryAddress);
+    // }
 
-    /**
-     *  @dev Full scheduling API exposing all fields.
-     *  FIXME: ClaimWindow is fixed
-     *
-     *  uintArgs[0] callGas
-     *  uintArgs[1] callValue
-     *  uintArgs[2] donation
-     *  uintArgs[3] payment
-     *  uintArgs[4] windowSize
-     *  uintArgs[5] windowStart
-     *  bytes callData;
-     *  address toAddress;
-     */
-    function scheduleTransaction(address toAddress,
-                                 bytes callData,
-                                 uint[6] uintArgs)
-        doReset public payable returns (address)
-    {
-        futureTransaction.toAddress = toAddress;
-        futureTransaction.callData = callData;
-        futureTransaction.callGas = uintArgs[0];
-        futureTransaction.callValue = uintArgs[1];
-        futureTransaction.donation = uintArgs[2];
-        futureTransaction.payment = uintArgs[3];
-        futureTransaction.windowSize = uintArgs[4];
-        futureTransaction.windowStart = uintArgs[5];
+    // /**
+    //  *  @dev Full scheduling API exposing all fields.
+    //  *  FIXME: ClaimWindow is fixed
+    //  *
+    //  *  uintArgs[0] callGas
+    //  *  uintArgs[1] callValue
+    //  *  uintArgs[2] donation
+    //  *  uintArgs[3] payment
+    //  *  uintArgs[4] windowSize
+    //  *  uintArgs[5] windowStart
+    //  *  bytes32 callData;
+    //  *  address toAddress;
+    //  */
+    // function scheduleTransaction(address toAddress,
+    //                              bytes32 callData,
+    //                              uint[6] uintArgs)
+    //     doReset public payable returns (address)
+    // {
+    //     futureTransaction.toAddress = toAddress;
+    //     futureTransaction.callData = callData;
+    //     futureTransaction.callGas = uintArgs[0];
+    //     futureTransaction.callValue = uintArgs[1];
+    //     futureTransaction.donation = uintArgs[2];
+    //     futureTransaction.payment = uintArgs[3];
+    //     futureTransaction.windowSize = uintArgs[4];
+    //     futureTransaction.windowStart = uintArgs[5];
 
-        // This is here to make this explicit.  While it should remain the same
-        // across multiple calls, this ensures that it is clear what this value
-        // is set to as well as keeping the setting close to where the other
-        // transaction details are set.
-        futureTransaction.temporalUnit = temporalUnit;
+    //     // This is here to make this explicit.  While it should remain the same
+    //     // across multiple calls, this ensures that it is clear what this value
+    //     // is set to as well as keeping the setting close to where the other
+    //     // transaction details are set.
+    //     futureTransaction.temporalUnit = temporalUnit;
 
-        return futureTransaction.schedule(factoryAddress);
-    }
+    //     return futureTransaction.schedule(factoryAddress);
+    // }
 }

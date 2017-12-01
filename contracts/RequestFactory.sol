@@ -13,7 +13,7 @@ import "contracts/IterTools.sol";
 contract RequestFactory is RequestFactoryInterface {
     using IterTools for bool[6];
 
-    RequestTrackerInterface public requestTracker;          // RequestTracker associated with this contract.
+    RequestTrackerInterface public requestTracker; // RequestTracker associated with this contract.
 
     function RequestFactory(address _trackerAddress) {
         require( _trackerAddress != 0x0 );
@@ -41,8 +41,8 @@ contract RequestFactory is RequestFactoryInterface {
      * @param callData        -  The call data
      */
     function createRequest(address[3] _addressArgs,
-                           uint[11] uintArgs,
-                           bytes callData)
+                           uint[11]   uintArgs,
+                           bytes32    callData)
         public payable returns (address)
     {
         TransactionRequest request = (new TransactionRequest).value(msg.value)(
@@ -63,7 +63,6 @@ contract RequestFactory is RequestFactoryInterface {
         RequestCreated(address(request));
 
         // Add the request to the RequestTracker
-        ///FIXED - IMPORTANT BUG LIVES IN THIS FUNCTION BELOW
         requestTracker.addRequest(address(request), uintArgs[7]); // windowStart
 
         return request;
@@ -77,7 +76,7 @@ contract RequestFactory is RequestFactoryInterface {
      */
     function createValidatedRequest(address[3] addressArgs,
                                     uint[11] uintArgs,
-                                    bytes callData) 
+                                    bytes32 callData) 
         public payable returns (address)
     {
         var is_valid = validateRequestParams(addressArgs,
@@ -137,7 +136,7 @@ contract RequestFactory is RequestFactoryInterface {
      */
     function validateRequestParams(address[3] addressArgs,
                                    uint[11] uintArgs,
-                                   bytes callData,
+                                   bytes32 callData,
                                    uint endowment) 
         internal returns (bool[6])
     {

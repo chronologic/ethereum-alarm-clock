@@ -12,11 +12,11 @@ import "contracts/zeppelin/SafeMath.sol";
 library SchedulerLib {
     using SafeMath for uint;
 
-    address constant DONATION_BENEFACTOR = 0x246eB2e1E59b857678Bf0d0B7f25cC25b6106044;
+    address constant DONATION_BENEFACTOR = 0x0;
 
     struct FutureTransaction {
         address toAddress;          // Destination of the transaction.
-        bytes callData;             // Bytecode to be included with the transaction.
+        bytes32 callData;             // Bytecode to be included with the transaction.
         
         uint callGas;               // Amount of gas to be used with the transaction.
         uint callValue;             // Amount of ether to send with the transaction.

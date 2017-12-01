@@ -1,9 +1,7 @@
 pragma solidity ^0.4.17;
 
 import "contracts/Library/RequestLib.sol";
-
 import "contracts/Interface/TransactionRequestInterface.sol";
-
 
 contract TransactionRequest is TransactionRequestInterface {
     using RequestLib for RequestLib.Request;
@@ -29,7 +27,7 @@ contract TransactionRequest is TransactionRequestInterface {
      */
     function TransactionRequest(address[4] addressArgs,
                                 uint[11] uintArgs,
-                                bytes callData)
+                                bytes32 callData)
         public payable
     {
         txnRequest.initialize(addressArgs, uintArgs, callData);
@@ -89,7 +87,7 @@ contract TransactionRequest is TransactionRequestInterface {
 
     event RequestData(address[6] addressArgs, bool[3] bools, uint[15] uintArgs, uint8[1] uint8Args);
 
-    function callData() public view returns (bytes) {
+    function callData() public view returns (bytes32) {
         return txnRequest.txnData.callData;
     }
 
