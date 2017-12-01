@@ -42,7 +42,9 @@ library MathLib {
     /*
      * Return the larger of a or b.  Returns a if a == b.
      */
-    function max(uint a, uint b) returns (uint) {
+    function max(uint a, uint b) 
+        public pure returns (uint)
+    {
         if (a >= b) {
             return a;
         } else {
@@ -53,7 +55,9 @@ library MathLib {
     /*
      * Return the larger of a or b.  Returns a if a == b.
      */
-    function min(uint a, uint b) returns (uint) {
+    function min(uint a, uint b) 
+        public pure returns (uint)
+    {
         if (a <= b) {
             return a;
         } else {
@@ -66,8 +70,11 @@ library MathLib {
      * exception if casting to signed integer would result in a negative
      * number.
      */
-    function safeCastSigned(uint a) returns (int) {
+    function safeCastSigned(uint a) 
+        public pure returns (int)
+    {
         assert(a <= INT_MAX);
         return int(a);
     }
+    
 }

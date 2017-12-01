@@ -1,20 +1,21 @@
 pragma solidity ^0.4.17;
 
+/**
+ * @title RequestMetaLib
+ * @dev Small library holding all the metadata about a TransactionRequest.
+ */
 library RequestMetaLib {
+
     struct RequestMeta {
-        // The address that created this request
-        address owner;
+        address owner;              /// The address that created this request.
 
-        // The address of the request factory that created this request.
-        address createdBy;
+        address createdBy;          /// The address of the RequestFactory which created this request.
 
-        // Was the request cancelled.
-        bool isCancelled;
+        bool isCancelled;           /// Was the TransactionRequest cancelled?
         
-        // Was the request called.
-        bool wasCalled;
+        bool wasCalled;             /// Was the TransactionRequest called?
 
-        // Was the return value from the call successful.
-        bool wasSuccessful;
+        bool wasSuccessful;         /// Was the return value from the TransactionRequest execution successful?
     }
+
 }

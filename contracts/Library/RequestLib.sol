@@ -26,7 +26,7 @@ library RequestLib {
     struct SerializedRequest {
         address[6] addressValues;
         bool[3] boolValues;
-        uint[14] uintValues;
+        uint[15] uintValues;
         uint8[1] uint8Values;
     }
 
@@ -51,20 +51,18 @@ library RequestLib {
 
     event Cancelled(uint rewardPayment, uint measuredGasConsumption);
     event Claimed();
-    // TODO: Figure out how log topics are constructed for events that use
-    // Enums as args.
-    //event Aborted(AbortReason reason);
     event Aborted(uint8 reason);
     event Executed(uint payment, uint donation, uint measuredGasConsumption);
 
-    /*
-     *  Validate the initialization parameters for a transaction request.
+    /**
+     * @dev Validate the initialization parameters for a transaction request.
+     
      */
     function validate(address[4] addressArgs,
-                      uint[10] uintArgs,
-                      bytes32 callData,
+                      uint[11] uintArgs,
+                      bytes callData,
                       uint endowment) 
-        public returns (bool[6] is_valid)
+        internal returns (bool[6] is_valid)
     {
         Request memory request;
 
@@ -86,7 +84,7 @@ library RequestLib {
 
         // UInt values
         request.claimData.claimDeposit = 0;
-        request.paymentData.anchorGasPrice = tx.gasprice;
+        request.paymentData.gasPrice = tx.gasprice;
         request.paymentData.donation = uintArgs[0];
         request.paymentData.payment = uintArgs[1];
         request.paymentData.donationOwed = 0;
@@ -133,9 +131,9 @@ library RequestLib {
      */
     function initialize(Request storage self,
                         address[4] addressArgs,
-                        uint[10] uintArgs,
-                        bytes32 callData) 
-        public returns (bool)
+                        uint[11] uintArgs,
+                        bytes callData) 
+        internal returns (bool)
     {
         address[6] memory addressValues = [
             0x0,             // self.claimData.claimedBy
@@ -148,9 +146,9 @@ library RequestLib {
 
         bool[3] memory boolValues = [false, false, false];
 
-        uint[14] memory uintValues = [
+        uint[15] memory uintValues = [
             0,               // self.claimData.claimDeposit
-            tx.gasprice,     // self.paymentData.anchorGasPrice
+            tx.gasprice,     // self.paymentData.gasPrice
             uintArgs[0],     // self.paymentData.donation
             0,               // self.paymentData.donationOwed
             uintArgs[1],     // self.paymentData.payment
@@ -162,7 +160,8 @@ library RequestLib {
             uintArgs[6],     // self.schedule.windowSize
             uintArgs[7],     // self.schedule.windowStart
             uintArgs[8],     // self.txnData.callGas
-            uintArgs[9]     // self.txnData.callValue
+            uintArgs[9],     // self.txnData.callValue
+            uintArgs[10]     // self.txnData.gasPrice
         ];
 
         uint8[1] memory uint8Values = [
@@ -204,7 +203,7 @@ library RequestLib {
 
         // UInt256 values
         self.serializedValues.uintValues[0] = self.claimData.claimDeposit;
-        self.serializedValues.uintValues[1] = self.paymentData.anchorGasPrice;
+        self.serializedValues.uintValues[1] = self.paymentData.gasPrice;
         self.serializedValues.uintValues[2] = self.paymentData.donation;
         self.serializedValues.uintValues[3] = self.paymentData.donationOwed;
         self.serializedValues.uintValues[4] = self.paymentData.payment;
@@ -217,6 +216,7 @@ library RequestLib {
         self.serializedValues.uintValues[11] = self.schedule.windowStart;
         self.serializedValues.uintValues[12] = self.txnData.callGas;
         self.serializedValues.uintValues[13] = self.txnData.callValue;
+        self.serializedValues.uintValues[14] = self.txnData.gasPrice;
 
         // Uint8 values
         self.serializedValues.uint8Values[0] = self.claimData.paymentModifier;
@@ -232,9 +232,9 @@ library RequestLib {
     function deserialize(Request storage self,
                          address[6] addressValues,
                          bool[3] boolValues,
-                         uint[14] uintValues,
+                         uint[15] uintValues,
                          uint8[1] uint8Values,
-                         bytes32 callData)
+                         bytes callData)
         internal returns (bool) // TODO public or internal?
     {
         // callData is special.
@@ -255,7 +255,7 @@ library RequestLib {
 
         // UInt values
         self.claimData.claimDeposit = uintValues[0];
-        self.paymentData.anchorGasPrice = uintValues[1];
+        self.paymentData.gasPrice = uintValues[1];
         self.paymentData.donation = uintValues[2];
         self.paymentData.donationOwed = uintValues[3];
         self.paymentData.payment = uintValues[4];
@@ -276,7 +276,7 @@ library RequestLib {
     }
 
     function execute(Request storage self) 
-        public returns (bool)
+        internal returns (bool)
     {
         /*
          *  Execute the TransactionRequest
@@ -507,7 +507,7 @@ library RequestLib {
     uint private constant _PRE_EXECUTION_GAS = 25000;   // TODO is this number still accurate?
 
     function PRE_EXECUTION_GAS()
-        public constant returns (uint)
+        public pure returns (uint)
     {
         return _PRE_EXECUTION_GAS;
     }
@@ -533,7 +533,7 @@ library RequestLib {
     uint private constant _EXECUTION_GAS_OVERHEAD = 180000; // TODO check accuracy of this number
 
     function EXECUTION_GAS_OVERHEAD()
-        public constant returns (uint)
+        public pure returns (uint)
     {
         return _EXECUTION_GAS_OVERHEAD;
     }
@@ -546,14 +546,14 @@ library RequestLib {
     uint private constant  _EXECUTE_EXTRA_GAS = 90000; // Same... Doubled this from Piper's original - Logan
 
     function EXECUTE_EXTRA_GAS() 
-        public constant returns (uint)
+        public pure returns (uint)
     {
         return _EXECUTE_EXTRA_GAS;
     }
 
     /*
-     *  Return boolean whether the call can be cancelled.  Must satisfy the
-     *  following conditions.
+     * @dev Performs the checks to see if a request can be cancelled.
+     *  Must satisfy the following conditions.
      *
      *  1. Not Cancelled
      *  2. either:
@@ -561,15 +561,19 @@ library RequestLib {
      *    * not claimed && beforeFreezeWindow && msg.sender == owner
      */
     function isCancellable(Request storage self) 
-        public returns (bool)
+        internal returns (bool)
     {
         if (self.meta.isCancelled) {
+            // already cancelled!
             return false;
         } else if (!self.meta.wasCalled && self.schedule.isAfterWindow()) {
+            // not called but after the window
             return true;
         } else if (!self.claimData.isClaimed() && self.schedule.isBeforeFreeze() && msg.sender == self.meta.owner) {
+            // not claimed and before freezePeriod and owner is cancelling
             return true;
         } else {
+            // otherwise cannot cancel
             return false;
         }
     }
@@ -581,7 +585,7 @@ library RequestLib {
     uint private constant _CANCEL_EXTRA_GAS = 85000; // Check accuracy
 
     function CANCEL_EXTRA_GAS() 
-        public constant returns (uint)
+        public pure returns (uint)
     {
         return _CANCEL_EXTRA_GAS;
     }
@@ -599,38 +603,44 @@ library RequestLib {
         uint rewardPayment;
         uint measuredGasConsumption;
 
-        assert( isCancellable(self) );
+        /// Checks if this transactionRequest can be cancelled.
+        require( isCancellable(self) );
 
-        // set this here to prevent re-entrance attacks.
+        /// Set here to prevent re-entrance attacks.
         self.meta.isCancelled = true;
 
-        // refund any claim deposit.
-        self.claimData.refundDeposit();
+        /// Refund the claim deposit (if there is one)
+        require( self.claimData.refundDeposit() );
 
-        // send a reward to the canceller if it isn't the owner.  This also
-        // guarantees that it is being cancelled after the call window since
-        // the `isCancellable()` function checks this.
+        /// Send a reward to the canceller if they are not the owner.
+        /// This is to incentivize the cancelling of expired transactionRequests.
+        // This also guarantees that it is being cancelled after the call window
+        // since the `isCancellable()` function checks this.
         if (msg.sender != self.meta.owner) {
-            // TODO: using `paymentData.paymentBenefactor` and
-            // `paymentData.paymentOwed` is overloading those values. This
-            // should really be done with `rewardBenefactor` and `rewardOwed`
-            // fields.
-            self.paymentData.paymentBenefactor = msg.sender;
-            self.paymentData.paymentOwed = self.paymentData.paymentOwed.add(
-                self.paymentData.payment.mul(self.paymentData.getMultiplier()) / 100 / 100
+            /// Create the rewardBenefactor
+            address rewardBenefactor = msg.sender;
+            /// Create the rewardOwed variable, it is paymentOwed and one-hundredth
+            /// of the payment.
+            uint rewardOwed = self.paymentData.paymentOwed.add(
+                self.paymentData.payment.div(100)
             );
-            measuredGasConsumption = startGas.sub(msg.gas)
-                                             .add(_CANCEL_EXTRA_GAS);
-            self.paymentData.paymentOwed = measuredGasConsumption.mul(tx.gasprice)
-                                                                 .add(self.paymentData.paymentOwed);
-            // take note of the reward payment so we can log it.
-            rewardPayment = self.paymentData.paymentOwed;
 
-            // send the reward payment.
-            self.paymentData.sendPayment();
+            /// Calc the amount of gas caller used to call this function.
+            measuredGasConsumption = startGas.sub(msg.gas).add(_CANCEL_EXTRA_GAS);
+            /// Add their gas fees to the reward.
+            rewardOwed = measuredGasConsumption.mul(tx.gasprice).add(rewardOwed);
+
+            /// Take note of the rewardPayment to log it.
+            rewardPayment = rewardOwed;
+
+            /// Transfers the rewardPayment.
+            if (rewardOwed > 0) { // ? - will it ever not be above zero?
+                self.paymentData.paymentOwed = 0;
+                rewardBenefactor.transfer(rewardOwed);
+            }
         }
 
-        // Log the event
+        /// Logs are our friends.
         Cancelled(rewardPayment, measuredGasConsumption);
 
         // send the remaining ether to the owner.
@@ -639,10 +649,11 @@ library RequestLib {
     }
 
     /*
-     * Return boolean as to whether the request may be claimed.
+     * @dev Performs the checks to verify that a request is claimable.
+     * @param self The Request object.
      */
     function isClaimable(Request storage self) 
-        public returns (bool)
+        internal returns (bool)
     {
         /// Require not claimed and not cancelled.
         require( !self.claimData.isClaimed() );
@@ -655,10 +666,12 @@ library RequestLib {
     }
 
     /*
-     * Claim the request
+     * @dev Claims the request.
+     * @param self The Request object.
+     * Payable because it requires the sender to send enough ether to cover the claimDeposit.
      */
     function claim(Request storage self) 
-        public returns (bool)
+        internal returns (bool)
     {
         require( isClaimable(self) );
 

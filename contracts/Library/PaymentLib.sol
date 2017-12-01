@@ -8,151 +8,115 @@ library PaymentLib {
     using SafeMath for uint;
 
     struct PaymentData {
-        // The gas price that was used during creation of this request.
-        // FIXME: Going away
-        uint anchorGasPrice;
+        uint gasPrice;              /// The gasPrice needed to execute this TransactionRequest.
 
-        // The amount in wei that will be payed to the address that executes
-        // this request.
-        uint payment;
+        uint payment;               /// The amount in wei to be paid to the executor of this TransactionRequest.
 
-        // The address that the payment should be sent to.
-        address paymentBenefactor;
+        address paymentBenefactor;  /// The address that the payment should be sent to.
 
-        // The amount that is owed to the payment benefactor.
-        uint paymentOwed;
+        uint paymentOwed;           /// The amount that is owed to the paymentBenefactor.
 
-        // The amount in wei that will be payed to the donationBenefactor address.
-        // FIXME: call it affiliate
-        uint donation;
+        uint donation;              /// The amount in wei that will be paid to the donationBenefactor address.
 
-        // The address that the donation should be sent to.
-        // FIXME: Call it affiliate
-        address donationBenefactor;
+        address donationBenefactor; /// The address that the donation should be sent to.
 
-        // The amount that is owed to the donation benefactor.
-        uint donationOwed;
+        uint donationOwed;          /// The amount that is owed to the donationBenefactor.
     }
 
-    /*
+    ///---------------
+    /// GETTERS
+    ///---------------
+
+    /**
      * @dev Getter function that returns true if a request has a benefactor.
      */
     function hasBenefactor(PaymentData storage self)
-        public view returns (bool)
+        internal view returns (bool)
     {
         return self.donationBenefactor != 0x0;
     }
 
-    /*
-    *  Return a number between 0 - 200 to scale the donation based on the
-    *  gas price set for the calling transaction as compared to the gas
- {   *  price of the scheduling transaction.
-    *
-    *  - number approaches zero as the transaction gas price goes
-    *  above the gas price recorded when the call was scheduled.
-    *
-    *  - the number approaches 200 as the transaction gas price
-    *  drops under the price recorded when the call was scheduled.
-    *
-    *  This encourages lower gas costs as the lower the gas price
-    *  for the executing transaction, the higher the payout to the
-    *  caller.
-    */
-    function getMultiplier(PaymentData storage self) 
-        returns (uint)
-    {
-        if (tx.gasprice > self.anchorGasPrice) {
-            return self.anchorGasPrice.mul(100).div(tx.gasprice);
-        } else {
-            return 200 - MathLib.min(
-                (self.anchorGasPrice.mul(100).div(self.anchorGasPrice.mul(2)) ///.sub(tx.gasprice))
-                ), 200);
-        }
-    }
-
-    /*
+    /**
      * @dev Computes the amount to send to the donationBenefactor. 
      */
     function getDonation(PaymentData storage self) 
-        internal returns (uint)
+        internal view returns (uint)
     {
-        if (getMultiplier(self) == 0) {
-            return 0;
-        } else {
-            return self.donation;//.mul(getMultiplier(self)).div(100);
-        }
+        return self.donation;
     }
 
-    /*
+    /**
      * @dev Computes the amount to send to the address that fulfilled the request.
      */
     function getPayment(PaymentData storage self)
-        returns (uint)
+        internal view returns (uint)
     {
-        return self.payment;//.mul(getMultiplier(self)).div(100);
+        return self.payment;
     }
  
-    /*
+    /**
      * @dev Computes the amount to send to the address that fulfilled the request
      *       with an additional modifier. This is used when the call was claimed.
      */
     function getPaymentWithModifier(PaymentData storage self,
-                                    uint8 paymentModifier)
-        returns (uint)
+                                    uint8 _paymentModifier)
+        internal view returns (uint)
     {
-        return getPayment(self).mul(paymentModifier).div(100);
+        return getPayment(self).mul(_paymentModifier).div(100);
     }
 
-    /*
+    ///---------------
+    /// SENDERS
+    ///---------------
+
+    /**
      * @dev Send the donationOwed amount to the donationBenefactor.
      */
     function sendDonation(PaymentData storage self) 
-        returns (bool)
+        internal returns (bool)
     {
         uint donationAmount = self.donationOwed;
         if (donationAmount > 0) {
             // re-entrance protection.
             self.donationOwed = 0;
             self.donationBenefactor.transfer(donationAmount);
-            Sent(donationAmount);
         }
         return true;
     }
 
-    event Sent(uint num);
-
-    /*
+    /**
      * @dev Send the paymentOwed amount to the paymentBenefactor.
      */
     function sendPayment(PaymentData storage self)
-        returns (bool)
+        internal returns (bool)
     {
         uint paymentAmount = self.paymentOwed;
         if (paymentAmount > 0) {
             // re-entrance protection.
             self.paymentOwed = 0;
             self.paymentBenefactor.transfer(paymentAmount);
-            // self.paymentOwed = paymentAmount.flooredSub(self.paymentBenefactor.transfer(paymentAmount));
         }
         return true;
     }
 
+    ///---------------
+    /// HELPERS
+    ///---------------
 
-    /*
-     * @dev Compute the required endowment value for the given TransactionRequest
-     *       parameters.
+    /**
+     * @dev Compute the endowment value for the given TransactionRequest parameters.
      */
-    function computeEndowment(uint payment,
-                              uint donation,
-                              uint callGas,
-                              uint callValue,
-                              uint gasOverhead) 
-        public view returns (uint)
+    function computeEndowment(uint _payment,
+                              uint _donation,
+                              uint _callGas,
+                              uint _callValue,
+                              uint _gasPrice,
+                              uint _gasOverhead) 
+        internal pure returns (uint)
     {
-        uint gasPrice = tx.gasprice;
-        return payment.add(donation)
-                      .mul(2)
-                      .add(_computeHelper(callGas, callValue, gasOverhead, gasPrice));
+        return _payment.add(_donation)
+                       .mul(2)
+                       .add(_computeHelper(_callGas, _callValue, _gasOverhead, _gasPrice));
     }
 
     /// Was getting a stack depth error after replacing old MathLib with Zeppelin's SafeMath.
@@ -182,15 +146,13 @@ library PaymentLib {
                                uint callGas,
                                uint callValue,
                                uint gasOverhead)
-        view returns (bool)
+        public pure returns (bool)
     {
-        // return true;
-        Log(endowment);
         return endowment >= computeEndowment(payment,
                                              donation,
                                              callGas,
                                              callValue,
-                                             gasOverhead);
+                                             gasOverhead,
+                                             0);//for now);
     }
-    event Log(uint num);
 }

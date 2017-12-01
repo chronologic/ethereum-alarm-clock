@@ -15,21 +15,25 @@ library SchedulerLib {
     address constant DONATION_BENEFACTOR = 0x246eB2e1E59b857678Bf0d0B7f25cC25b6106044;
 
     struct FutureTransaction {
-        uint donation;
-        uint payment;
+        address toAddress;          // Destination of the transaction.
+        bytes callData;             // Bytecode to be included with the transaction.
+        
+        uint callGas;               // Amount of gas to be used with the transaction.
+        uint callValue;             // Amount of ether to send with the transaction.
 
-        uint windowSize;
-        uint windowStart;
-        RequestScheduleLib.TemporalUnit temporalUnit;
+        uint windowSize;            // The size of the execution window.
+        uint windowStart;           // Block or timestamp for when the window starts.
 
-        uint callGas;
-        uint callValue;
-        bytes32 callData;
-        address toAddress;
+        uint gasPrice;              // The gasPrice to be sent with the transaction.
+        
+        uint donation;              // Donation value attached to the transaction.
+        uint payment;               // Payment value attached to the transaction.
 
         uint reservedWindowSize;
         uint freezePeriod;
         uint claimWindowSize;
+
+        RequestScheduleLib.TemporalUnit temporalUnit;
     }
 
     /*
@@ -56,6 +60,9 @@ library SchedulerLib {
         }
         if (self.callData.length != 0) {
             self.callData = "";
+        }
+        if (self.gasPrice != 10) {
+            self.gasPrice = 10;
         }
         return true;
     }
@@ -115,11 +122,14 @@ library SchedulerLib {
     }
 
     /**
-     * @dev The low level interface for creating a transaction request.
+     * @dev The lower level interface for creating a transaction request.
+     * @param self The FutureTransaction object created in schedule transaction calls.
+     * @param _factoryAddress The address of the RequestFactory which creates TransactionRequests.
+     * @return The address of a new TransactionRequest.
      */
     function schedule(FutureTransaction storage self,
                       address _factoryAddress) 
-        public returns (address) 
+        internal returns (address) 
     {
         RequestFactoryInterface factory = RequestFactoryInterface(_factoryAddress);
 
@@ -129,13 +139,10 @@ library SchedulerLib {
                 self.donation,
                 self.callGas,
                 self.callValue,
+                self.gasPrice,
                 RequestLib.EXECUTION_GAS_OVERHEAD() //180000, line 459 RequestLib
         ), this.balance);
-        debug(endowment);
-        debug(msg.value);
-        debug(this.balance);
 
-        // address newRequestAddress = DONATION_BENEFACTOR;
         address newRequestAddress = factory.createValidatedRequest.value(endowment)(
             [
                 msg.sender,              // meta.owner
@@ -152,25 +159,26 @@ library SchedulerLib {
                 self.windowSize,          // scheduler.windowSize
                 self.windowStart,         // scheduler.windowStart
                 self.callGas,             // txnData.callGas
-                self.callValue            // txnData.callValue
+                self.callValue,           // txnData.callValue
+                self.gasPrice             // txnData.gasPrice
             ],
             self.callData
         );
         
-        if (newRequestAddress == 0x0) {
-            // Something went wrong during creation (likely a ValidationError).
-            // Try to return the ether that was sent.  If this fails then
-            // resort to throwing an exception to force reversion.
-            ERROR();
-            msg.sender.transfer(msg.value);
-            return 0x0;
-        }
+        require( newRequestAddress != 0x0 );
+        // if (newRequestAddress == 0x0) {
+        //     // Something went wrong during creation (likely a ValidationError).
+        //     // Try to return the ether that was sent.  If this fails then
+        //     // resort to throwing an exception to force reversion.
+        //     ERROR();
+        //     msg.sender.transfer(msg.value);
+        //     return 0x0;
+        // }
 
         return newRequestAddress;
     }
     
     /// Debugging purposes
     event ERROR();
-    event Debug(string msg);
-    event debug(uint num);
+
 }

@@ -12,6 +12,7 @@ library ClaimLib {
 
         // TODO: add `requiredDeposit` and remove the hard-coding of the `2 *
         // payment` minimum deposit size.
+        uint minimumDeposit;
 
         // An integer constrained between 0-100 that will be applied to the
         // request payment as a percentage.
@@ -47,7 +48,8 @@ library ClaimLib {
     }
 
     /*
-     * @dev Refund the claimer deposit.
+     * @dev Refund the claim deposit to claimer.
+     * @param self The Request.ClaimData
      * Called in RequestLib's `cancel()` and `refundClaimDeposit()`
      */
     function refundDeposit(ClaimData storage self) 
@@ -57,7 +59,8 @@ library ClaimLib {
         if (self.claimDeposit > 0) {
             uint depositAmount;
             depositAmount = self.claimDeposit;
-
+            self.claimDeposit = 0;
+            
             self.claimedBy.transfer(depositAmount);
         }
         return true;

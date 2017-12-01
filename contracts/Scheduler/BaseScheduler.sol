@@ -20,9 +20,21 @@ contract BaseScheduler is SchedulerInterface {
     //------------------------
     // New API [WIP]
     //------------------------
+
+    /**
+     * @dev Schedules a new TransactionRequest using the 'simple' parameters.
+     * @param _toAddress The address destination of the transaction.
+     * @param _callData The bytecode that will be included with the transaction.
+     * @param _uintArgs [0] The callGas of the transaction.
+     * @param _uintArgs [1] The value of ether to be send with the transaction.
+     * @param _uintArgs [2] The size of the execution window of the transaction.
+     * @param _uintArgs [3] The (block or timestamp) of when the execution window starts.
+     * @param _uintArgs [4] The gasPrice which will be used to exeute this transaction.
+     * @return The address of the new TransactionRequest.
+     */
     function scheduleTxSimple(address _toAddress,
-                              bytes32 _callData,
-                              uint[4] _uintArgs)
+                              bytes _callData,
+                              uint[5] _uintArgs)
         doReset public payable returns (address)
     {
         futureTransaction.toAddress = _toAddress;
@@ -31,37 +43,50 @@ contract BaseScheduler is SchedulerInterface {
         futureTransaction.callValue = _uintArgs[1];
         futureTransaction.windowSize = _uintArgs[2];
         futureTransaction.windowStart = _uintArgs[3];
+        futureTransaction.gasPrice = _uintArgs[4];
 
         futureTransaction.temporalUnit = temporalUnit;
 
         address newRequest = futureTransaction.schedule(factoryAddress);
-        assert( newRequest != 0x0 );
+        require( newRequest != 0x0 );
+
         NewRequest(newRequest);
         return newRequest;
     }
 
+    /**
+     * @dev Schedules a new TransactionRequest using the 'full' parameters.
+     * @param _toAddress The address destination of the transaction.
+     * @param _callData The bytecode that will be included with the transaction.
+     * @param _uintArgs [0] The callGas of the transaction.
+     * @param _uintArgs [1] The value of ether to be send with the transaction.
+     * @param _uintArgs [2] The size of the execution window of the transaction.
+     * @param _uintArgs [3] The (block or timestamp) of when the execution window starts.
+     * @param _uintArgs [4] The gasPrice which will be used to execute this transaction.
+     * @param _uintArgs [5] The donation value attached to this transaction.
+     * @param _uintArgs [6] The payment value attached to this transaction.
+     * @return The address of the new TransactionRequest.   
+     */
     function scheduleTxFull(address _toAddress,
-                            bytes32 _callData,
-                            uint[6] _uintArgs)
+                            bytes _callData,
+                            uint[7] _uintArgs)
         doReset public payable returns (address)
     {
         futureTransaction.toAddress = _toAddress;
         futureTransaction.callData = _callData;
         futureTransaction.callGas = _uintArgs[0];
         futureTransaction.callValue = _uintArgs[1];
-        futureTransaction.donation = _uintArgs[2];
-        futureTransaction.payment = _uintArgs[3];
-        futureTransaction.windowSize = _uintArgs[4];
-        futureTransaction.windowStart = _uintArgs[5];
+        futureTransaction.windowSize = _uintArgs[2];
+        futureTransaction.windowStart = _uintArgs[3];
+        futureTransaction.gasPrice = _uintArgs[4];
+        futureTransaction.donation = _uintArgs[5];
+        futureTransaction.payment = _uintArgs[6];
 
-        // This is here to make this explicit.  While it should remain the same
-        // across multiple calls, this ensures that it is clear what this value
-        // is set to as well as keeping the setting close to where the other
-        // transaction details are set.
         futureTransaction.temporalUnit = temporalUnit;
 
         address newRequest = futureTransaction.schedule(factoryAddress);
-        assert( newRequest != 0x0 );
+        require( newRequest != 0x0 );
+
         NewRequest(newRequest);
         return newRequest;
     }
@@ -69,7 +94,9 @@ contract BaseScheduler is SchedulerInterface {
     /// Event that bubbles up the address of new requests made with this scheduler.
     event NewRequest(address request);
 
-     /// OLD API BELOW... HERE FOR BACKWARD COMPATIBILITY
+    //------------------------
+    // Deperecated API below
+    //------------------------
 
     /*
      *  @dev Smaller scheduling API.
@@ -83,7 +110,7 @@ contract BaseScheduler is SchedulerInterface {
      *  @param address toAddress;
      */
     function scheduleTransaction(address _toAddress,
-                                 bytes32 callData,
+                                 bytes callData,
                                  uint[4] uintArgs)
         doReset public payable returns (address)
     {
@@ -113,11 +140,11 @@ contract BaseScheduler is SchedulerInterface {
      *  uintArgs[3] payment
      *  uintArgs[4] windowSize
      *  uintArgs[5] windowStart
-     *  bytes32 callData;
+     *  bytes callData;
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
-                                 bytes32 callData,
+                                 bytes callData,
                                  uint[6] uintArgs)
         doReset public payable returns (address)
     {

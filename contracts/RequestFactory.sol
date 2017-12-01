@@ -23,7 +23,7 @@ contract RequestFactory is RequestFactoryInterface {
 
     /**
      * @dev The lowest level interface for creating a transaction request.
-     *
+     * 
      * @param _addressArgs [0] -  meta.owner
      * @param _addressArgs [1] -  paymentData.donationBenefactor
      * @param _addressArgs [2] -  txnData.toAddress
@@ -37,11 +37,12 @@ contract RequestFactory is RequestFactoryInterface {
      * @param uintArgs [7]    -  schedule.windowStart
      * @param uintArgs [8]    -  txnData.callGas
      * @param uintArgs [9]    -  txnData.callValue
+     * @param uintArgs [10]   -  txnData.gasPrice
      * @param callData        -  The call data
      */
     function createRequest(address[3] _addressArgs,
-                           uint[10] uintArgs,
-                           bytes32 callData)
+                           uint[11] uintArgs,
+                           bytes callData)
         public payable returns (address)
     {
         TransactionRequest request = (new TransactionRequest).value(msg.value)(
@@ -75,9 +76,9 @@ contract RequestFactory is RequestFactoryInterface {
      *  Parameters are the same as `createRequest`
      */
     function createValidatedRequest(address[3] addressArgs,
-                                    uint[10] uintArgs,
-                                    bytes32 callData) 
-        payable public returns (address)
+                                    uint[11] uintArgs,
+                                    bytes callData) 
+        public payable returns (address)
     {
         var is_valid = validateRequestParams(addressArgs,
                                              uintArgs,
@@ -125,7 +126,6 @@ contract RequestFactory is RequestFactoryInterface {
         ReservedWindowBiggerThanExecutionWindow,
         InvalidTemporalUnit,
         ExecutionWindowTooSoon,
-        // InvalidRequiredStackDepth,
         CallGasTooHigh,
         EmptyToAddress
     }
@@ -136,8 +136,8 @@ contract RequestFactory is RequestFactoryInterface {
      * @dev Validate the constructor arguments for either `createRequest` or `createValidatedRequest`.
      */
     function validateRequestParams(address[3] addressArgs,
-                                   uint[10] uintArgs,
-                                   bytes32 callData,
+                                   uint[11] uintArgs,
+                                   bytes callData,
                                    uint endowment) 
         internal returns (bool[6])
     {
@@ -158,9 +158,8 @@ contract RequestFactory is RequestFactoryInterface {
     mapping (address => bool) requests;
 
     function isKnownRequest(address _address) 
-        view returns (bool)
+        public view returns (bool)
     {
-        assert( requests[_address] );
         return requests[_address];
     }
 }

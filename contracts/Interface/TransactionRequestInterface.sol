@@ -13,9 +13,9 @@ contract TransactionRequestInterface {
      */
     function requestData() returns (address[6],
                                     bool[3],
-                                    uint[14],
+                                    uint[15],
                                     uint8[1]);
-    function callData() constant returns (bytes32);
+    function callData() constant returns (bytes);
 
     /*
      * @dev Pull mechanisms for payments.

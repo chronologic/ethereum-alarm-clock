@@ -1,36 +1,34 @@
 pragma solidity ^0.4.17;
 
+/**
+ * @title ExecutionLib
+ * @dev Contains the logic for executing a scheduled transaction.
+ */
 library ExecutionLib {
+
     struct ExecutionData {
-        // The address that the txn will be sent to.
-        address toAddress;
-
-        // The bytes32 value that will be sent with the txn.
-        bytes32 callData;
-
-        // The value in wei that will be sent with the txn.
-        uint callValue;
-
-        // The amount of gas that will be sent with the txn
-        // FIXME: add callGasPrice
-
-        uint callGas;
-
-        // FIXME: Add callGasPrice
-        // uint callGasPrice;
+        address toAddress;                  /// The destination of the transaction.
+        bytes callData;                     /// The bytecode that will be sent with the transaction.
+        uint callValue;                     /// The wei value that will be sent with the transaction.
+        uint callGas;                       /// The amount of gas to be sent with the transaction.
+        uint gasPrice;                      /// The gasPrice that should be set for the transaction.
     }
 
+    /**
+     * @dev Send the transaction according to the parameters outlined in ExecutionData.
+     * @param self The ExecutionData object.
+     */
     function sendTransaction(ExecutionData storage self)
         internal returns (bool)
     {
-        // return true;
+        require( self.gasPrice == tx.gasprice );
         return self.toAddress.call//.value(self.callValue)
                                   .gas(self.callGas)
                                   (self.callData);
     }
 
 
-    /*
+    /**
      * Returns the maximum possible gas consumption that a transaction request
      * may consume.  The EXTRA_GAS value represents the overhead involved in
      * request execution.
@@ -55,7 +53,7 @@ library ExecutionLib {
      * @dev Validation: ensure that the toAddress is not set to the empty address.
      */
      function validateToAddress(address toAddress)
-        public pure returns (bool)
+        internal pure returns (bool)
     {
         return toAddress != 0x0;
     }

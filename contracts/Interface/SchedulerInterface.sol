@@ -51,8 +51,8 @@ contract SchedulerInterface {
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
-                                 bytes32 callData,
-                                 uint[4] uintArgs) 
+                                 bytes callData,
+                                 uint[5] uintArgs) 
                                  doReset public payable returns (address);
 
     /*
@@ -68,7 +68,7 @@ contract SchedulerInterface {
      *  address toAddress;
      */
     function scheduleTransaction(address toAddress,
-                                 bytes32 callData,
-                                 uint[6] uintArgs) 
+                                 bytes callData,
+                                 uint[7] uintArgs) 
                                  doReset public payable returns (address);
 }

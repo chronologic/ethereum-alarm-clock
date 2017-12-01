@@ -1,11 +1,8 @@
 TODOs
 -----
 
- - Update tests to truffle
- - There are 21 tests. [8/21] but two are client tests so... [8/19]
  - Theres a bug in the validateEndowment / computeEndowment function 
    that is causing 6 tests to fail, it needs to be figured out 
- - Alarm Client needs to be updated, maybe re-written in javascript / typescript so that we can compile it for browsers
  - Some clean up needs to happen in the contracts so the passed args are more organized.
  - Events are added to the contract so that the client can retrieve them / watch them to act accordingly.
 
@@ -13,12 +10,12 @@ TODOs
 -----------
 
  Added: 
- - Full rewrite of all contracts to modern solidity syntax. [70%][still finding bugs]
+ - Full rewrite of all contracts to modern solidity syntax. [90%][done - but still refining]
  - Integrate Truffle framework. [100%][rewriting tests]
- - Port test suite from Populus to Truffle. [5/21]
+ - Port test suite from Populus to Truffle. [done - but still refining]
  - New API for Schedulers [100%][need further tests]
- - (Add String Pool) [Needs discussion]
+ - Use Zeppelin SafeMath.sol for consistency instead of custom MathLib.sol (Some function in MathLib.sol retained)
  Removed: 
  - Digger.sol removed due to `EIP 150`_ making it obsolete. [done]
  - All stack depth checking also obsolete due to `EIP150` removed. [done]
- - SafeSendLib.sol removed due to Solidity keyword `transfer` and ``send` making it obsolete. [done]
+ - SafeSendLib.sol removed due to Solidity keyword `transfer` and `send` making it obsolete. [done]
