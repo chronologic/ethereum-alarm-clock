@@ -133,7 +133,7 @@ library RequestLib {
                         address[4] addressArgs,
                         uint[11] uintArgs,
                         bytes32 callData) 
-        internal returns (bool)
+        returns (bool)
     {
         address[6] memory addressValues = [
             0x0,             // self.claimData.claimedBy

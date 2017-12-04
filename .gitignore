@@ -16,3 +16,6 @@ alarmClient
 alarmClient/*
 coverage
 coverage/*
+
+deployed.info
+deployed.json

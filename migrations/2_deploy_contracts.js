@@ -114,18 +114,18 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS`)
         return deployer.deploy(TransactionRequest)
     })
     .then(() => {
-        // console.log(RequestTracker.address)        
-        // deployer.link(ClaimLib, RequestFactory)
-        // deployer.link(MathLib, RequestFactory)
-        // deployer.link(RequestScheduleLib, RequestFactory)
-        // deployer.link(IterTools, RequestFactory)
-        // deployer.link(PaymentLib, RequestFactory)
-        // deployer.link(RequestLib, RequestFactory)
-        // deployer.link(RequestTracker, RequestFactory)
-        // deployer.link(TransactionRequest, RequestFactory)
-        // deployer.link(SafeMath, RequestFactory)
-        //     console.log(RequestTracker.address)
-        // return deployer.deploy(RequestFactory, RequestTracker.address)
+        console.log(RequestTracker.address)        
+        deployer.link(ClaimLib, RequestFactory)
+        deployer.link(MathLib, RequestFactory)
+        deployer.link(RequestScheduleLib, RequestFactory)
+        deployer.link(IterTools, RequestFactory)
+        deployer.link(PaymentLib, RequestFactory)
+        deployer.link(RequestLib, RequestFactory)
+        deployer.link(RequestTracker, RequestFactory)
+        deployer.link(TransactionRequest, RequestFactory)
+        deployer.link(SafeMath, RequestFactory)
+            console.log(RequestTracker.address)
+        return deployer.deploy(RequestFactory, RequestTracker.address)
     })
     .then(() => {
         return deployer.deploy(TransactionRecorder)
@@ -140,7 +140,7 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS`)
             iterTools: IterTools.address,
             mathLib: MathLib.address,
             paymentLib: PaymentLib.address,
-            // requestFactory: RequestFactory.address,
+            requestFactory: RequestFactory.address,
             requestLib: RequestLib.address,
             requestMetaLib: RequestMetaLib.address,
             requestScheduleLib: RequestScheduleLib.address,

@@ -8,12 +8,13 @@ import "contracts/IterTools.sol";
 
 /**
  * @title RequestFactory
- * @dev wip
+ * @dev Contract which will produce new TransactionRequests.
  */
 contract RequestFactory is RequestFactoryInterface {
     using IterTools for bool[6];
 
-    RequestTrackerInterface public requestTracker; // RequestTracker associated with this contract.
+    // RequestTracker of this contract.
+    RequestTrackerInterface public requestTracker;
 
     function RequestFactory(address _trackerAddress) {
         require( _trackerAddress != 0x0 );
@@ -109,8 +110,8 @@ contract RequestFactory is RequestFactoryInterface {
             msg.sender.transfer(msg.value);
             revert();
         }
-
-        return createRequest(addressArgs, uintArgs, callData);
+        return 0x0;
+        // return createRequest(addressArgs, uintArgs, callData);
     }
 
     /// ----------------------------
