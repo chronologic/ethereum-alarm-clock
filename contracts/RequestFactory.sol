@@ -110,8 +110,8 @@ contract RequestFactory is RequestFactoryInterface {
             msg.sender.transfer(msg.value);
             revert();
         }
-        return 0x0;
-        // return createRequest(addressArgs, uintArgs, callData);
+        // return 0x0;
+        return createRequest(addressArgs, uintArgs, callData);
     }
 
     /// ----------------------------
