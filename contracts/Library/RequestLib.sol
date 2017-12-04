@@ -379,7 +379,8 @@ library RequestLib {
         uint totalDonationPayment = self.paymentData.donationOwed;
         debug(totalDonationPayment);
         // Send the donation.
-        self.paymentData.sendDonation();
+        /// Bug vvv
+        // self.paymentData.sendDonation();
 
         // Compute the payment amount and who it should be sent do.
         self.paymentData.paymentBenefactor = msg.sender;

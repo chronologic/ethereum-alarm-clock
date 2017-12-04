@@ -12,6 +12,8 @@ const config = require('../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 const toBN = config.web3.utils.toBN
 
+const { parseRequestData } = require('./requestData')
+
 contract('Exceptions', async function(accounts) {
     const Owner = accounts[0]
 
@@ -45,7 +47,7 @@ contract('Exceptions', async function(accounts) {
                 executionWindow,
                 windowStart,
                 43324, //callGas
-                12345 //callValue
+                0 //callValue
             ],
             'some-call-data-could-be-anything'
         )
@@ -54,7 +56,37 @@ contract('Exceptions', async function(accounts) {
     })
 
     it('tests transactionRequest for transactions that throw exception', async function() {
-        /// TODO
+    
+        const requestData = await parseRequestData(transactionRequest)
+        await waitUntilBlock(0, requestData.schedule.windowStart)
+
+        const executeTx = await transactionRequest.execute({
+            from: accounts[1],
+            gas: 3000000,
+            gasPrice: requestData.paymentData.gasPrice
+        })
+
+        expect(executeTx.receipt)
+        .to.exist 
+        
+        const gasUsed = executeTx.receipt.gasUsed 
+        const newRequestData = await parseRequestData(transactionRequest)
+
+        expect(newRequestData.meta.wasCalled)
+        .to.be.true 
+
+        // expect(newRequestData.meta.wasSuccessful)
+        // .to.be.false
+
+        const logExecuted = executeTx.logs.find(e => e.event === 'Executed')
+        const measuredGasConsumption = logExecuted.args.measuredGasConsumption.toNumber()
+
+        expect(measuredGasConsumption)
+        .to.be.above(gasUsed)
+
+        expect(measuredGasConsumption - gasUsed)
+        .to.be.below(120000)
+
     })
 
     it('tests transactionRequest when everything throws', async function() {

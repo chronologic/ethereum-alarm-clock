@@ -21,7 +21,7 @@ library ExecutionLib {
     function sendTransaction(ExecutionData storage self)
         internal returns (bool)
     {
-        require( self.gasPrice == tx.gasprice );
+        // require( self.gasPrice == tx.gasprice );
         return self.toAddress.call//.value(self.callValue)
                                   .gas(self.callGas)
                                   (self.callData);

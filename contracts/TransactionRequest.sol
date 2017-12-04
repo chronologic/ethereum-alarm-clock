@@ -43,9 +43,9 @@ contract TransactionRequest is TransactionRequestInterface {
      *  Actions
      */
     function execute() public returns (bool) {
-        require( txnRequest.execute() );
-        return true;
-        // return txnRequest.execute();
+        // require( txnRequest.execute() );
+        // return true;
+        return txnRequest.execute();
     }
 
     function executeNew() public returns (bool) {
@@ -67,7 +67,7 @@ contract TransactionRequest is TransactionRequestInterface {
     // TODO: figure out why returning RequestLib.serialize() isn't working.
     // FIXME: This needs to bubble up an event with all this data instead.
     function requestData() 
-        public returns (address[6], bool[3], uint[15], uint8[1])
+        public view returns (address[6], bool[3], uint[15], uint8[1])
     {
         if (txnRequest.serialize()) {
             RequestData(txnRequest.serializedValues.addressValues,
