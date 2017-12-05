@@ -71,7 +71,7 @@ library RequestScheduleLib {
      * @dev The modifier that will be applied to the payment value for a claimed call.
      */
     function computePaymentModifier(ExecutionWindow storage self) 
-        view returns (uint8)
+        internal view returns (uint8)
     {
         //require(inClaimWindow(self)); // This is not needed since it is already checked before sending this function.
         

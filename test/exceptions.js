@@ -24,8 +24,6 @@ contract('Exceptions', async function(accounts) {
     const freezePeriod = 5 //blocks
     const reservedWindowSize = 10 //blocks
     const executionWindow = 10 //blocks
-    let windowStart
-    let firstClaimBlock
 
     beforeEach(async function() {
         const curBlockNum = await config.web3.eth.getBlockNumber()
@@ -51,10 +49,9 @@ contract('Exceptions', async function(accounts) {
             ],
             'some-call-data-could-be-anything'
         )
-
-        firstClaimBlock = windowStart - freezePeriod - claimWindowSize
     })
 
+    /// TODO: Make this fail
     it('tests transactionRequest for transactions that throw exception', async function() {
     
         const requestData = await parseRequestData(transactionRequest)
@@ -89,7 +86,13 @@ contract('Exceptions', async function(accounts) {
 
     })
 
+    /// TODO: make this fail
     it('tests transactionRequest when everything throws', async function() {
+        
+        const requestData = await parseRequestData(transactionRequest)
+        await waitUntilBlock(0, requestData .schedule.windowStart)
+
         /// TODO
+
     })
 })

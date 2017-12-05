@@ -6,7 +6,7 @@ import "contracts/Interface/TransactionRequestInterface.sol";
 contract TransactionRequest is TransactionRequestInterface {
     using RequestLib for RequestLib.Request;
 
-    RequestLib.Request txnRequest; // TODO: Public? This is a data struct
+    RequestLib.Request txnRequest;
 
     /*
      *  addressArgs[0] - meta.owner
@@ -25,9 +25,11 @@ contract TransactionRequest is TransactionRequestInterface {
      *  uintArgs[9]  - txnData.callValue
      *  uintArgs[10] - txnData.gasPrice
      */
-    function TransactionRequest(address[4] addressArgs,
-                                uint[11] uintArgs,
-                                bytes32 callData)
+    function TransactionRequest(
+        address[4]  addressArgs,
+        uint[11]    uintArgs,
+        bytes32     callData
+    )
         public payable
     {
         txnRequest.initialize(addressArgs, uintArgs, callData);
@@ -65,7 +67,6 @@ contract TransactionRequest is TransactionRequestInterface {
      */
      
     // TODO: figure out why returning RequestLib.serialize() isn't working.
-    // FIXME: This needs to bubble up an event with all this data instead.
     function requestData() 
         public view returns (address[6], bool[3], uint[15], uint8[1])
     {
@@ -87,7 +88,10 @@ contract TransactionRequest is TransactionRequestInterface {
 
     event RequestData(address[6] addressArgs, bool[3] bools, uint[15] uintArgs, uint8[1] uint8Args);
 
-    function callData() public view returns (bytes32) {
+    //// TODO... This will need to bubble up an event of <bytes> eventually.
+    function callData() 
+        public view returns (bytes32)
+    {
         return txnRequest.txnData.callData;
     }
 

@@ -45,8 +45,7 @@ library RequestLib {
         BeforeCallWindow, //2
         AfterCallWindow, //3
         ReservedForClaimer, //4
-        StackTooDeep, //5 - DEPRECATED
-        InsufficientGas //6
+        InsufficientGas //5
     }
 
     event Cancelled(uint rewardPayment, uint measuredGasConsumption);
@@ -56,13 +55,14 @@ library RequestLib {
 
     /**
      * @dev Validate the initialization parameters for a transaction request.
-     
      */
-    function validate(address[4] addressArgs,
-                      uint[11] uintArgs,
-                      bytes32 callData,
-                      uint endowment) 
-        internal returns (bool[6] is_valid)
+    function validate(
+        address[4] addressArgs,
+        uint[11] uintArgs,
+        bytes32 callData,
+        uint endowment
+    ) 
+        internal returns (bool[6] isValid)
     {
         Request memory request;
 
@@ -104,24 +104,32 @@ library RequestLib {
 
         // The order of these errors matters as it determines which
         // ValidationError event codes are logged when validation fails.
-        is_valid[0] = PaymentLib.validateEndowment(endowment,
-                                                   request.paymentData.payment,
-                                                   request.paymentData.donation,
-                                                   request.txnData.callGas,
-                                                   request.txnData.callValue,
-                                                   _EXECUTION_GAS_OVERHEAD);
-        is_valid[1] = RequestScheduleLib.validateReservedWindowSize(request.schedule.reservedWindowSize,
-                                                                    request.schedule.windowSize);
-        is_valid[2] = RequestScheduleLib.validateTemporalUnit(uintArgs[5]);
-        is_valid[3] = RequestScheduleLib.validateWindowStart(request.schedule.temporalUnit,
-                                                             request.schedule.freezePeriod,
-                                                             request.schedule.windowStart);
-        is_valid[4] = ExecutionLib.validateCallGas(request.txnData.callGas,
-                                                   _EXECUTION_GAS_OVERHEAD);
-        is_valid[5] = ExecutionLib.validateToAddress(request.txnData.toAddress);
+        isValid[0] = PaymentLib.validateEndowment(
+            endowment,
+            request.paymentData.payment,
+            request.paymentData.donation,
+            request.txnData.callGas,
+            request.txnData.callValue,
+            _EXECUTION_GAS_OVERHEAD
+        );
+        isValid[1] = RequestScheduleLib.validateReservedWindowSize(
+            request.schedule.reservedWindowSize,
+            request.schedule.windowSize
+        );
+        isValid[2] = RequestScheduleLib.validateTemporalUnit(uintArgs[5]);
+        isValid[3] = RequestScheduleLib.validateWindowStart(
+            request.schedule.temporalUnit,
+            request.schedule.freezePeriod,
+            request.schedule.windowStart
+        );
+        isValid[4] = ExecutionLib.validateCallGas(
+            request.txnData.callGas,
+            _EXECUTION_GAS_OVERHEAD
+        );
+        isValid[5] = ExecutionLib.validateToAddress(request.txnData.toAddress);
 
-        LogSwitches(is_valid);
-        return is_valid;
+        LogSwitches(isValid);
+        /// Automatically returns isValid
     }
 
     event LogSwitches(bool[6] switches);
@@ -129,11 +137,13 @@ library RequestLib {
     /*
      *  Initialize a new Request.
      */
-    function initialize(Request storage self,
-                        address[4] addressArgs,
-                        uint[11] uintArgs,
-                        bytes32 callData) 
-        returns (bool)
+    function initialize(
+        Request storage self,
+        address[4] addressArgs,
+        uint[11] uintArgs,
+        bytes32 callData
+    ) 
+        public returns (bool initialized)
     {
         address[6] memory addressValues = [
             0x0,             // self.claimData.claimedBy
@@ -170,7 +180,7 @@ library RequestLib {
 
         deserialize(self, addressValues, boolValues, uintValues, uint8Values, callData);
 
-        return true;
+        initialized = true;
     }
 
     /*
@@ -186,7 +196,7 @@ library RequestLib {
      *  I used the trick of returning arrays of items.
      */
     function serialize(Request storage self) 
-        internal returns (bool) // TODO internal or public?
+        internal returns (bool serialized)
     {
         // Address values
         self.serializedValues.addressValues[0] = self.claimData.claimedBy;
@@ -221,7 +231,7 @@ library RequestLib {
         // Uint8 values
         self.serializedValues.uint8Values[0] = self.claimData.paymentModifier;
 
-        return true;
+        serialized = true;
     }
 
     /*
@@ -229,13 +239,15 @@ library RequestLib {
      *
      *  Parameter order is alphabetical by type, then namespace, then name.
      */
-    function deserialize(Request storage self,
-                         address[6] addressValues,
-                         bool[3] boolValues,
-                         uint[15] uintValues,
-                         uint8[1] uint8Values,
-                         bytes32 callData)
-        internal returns (bool) // TODO public or internal?
+    function deserialize(
+        Request storage self,
+        address[6] addressValues,
+        bool[3] boolValues,
+        uint[15] uintValues,
+        uint8[1] uint8Values,
+        bytes32 callData
+    )
+        internal returns (bool deserialized)
     {
         // callData is special.
         self.txnData.callData = callData;
@@ -272,7 +284,7 @@ library RequestLib {
         // Uint8 values
         self.claimData.paymentModifier = uint8Values[0];
 
-        return true;
+        deserialized = true;
     }
 
     function execute(Request storage self) 

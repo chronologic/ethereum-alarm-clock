@@ -32,11 +32,13 @@ contract BaseScheduler is SchedulerInterface {
      * @param _uintArgs [4] The gasPrice which will be used to exeute this transaction.
      * @return The address of the new TransactionRequest.
      */
-    function scheduleTxSimple(address _toAddress,
-                              bytes32 _callData,
-                              uint[5] _uintArgs)
-        doReset
-        public payable returns (address)
+    function scheduleTxSimple(
+        address _toAddress,
+        bytes32 _callData,
+        uint[5] _uintArgs
+    )
+        // doReset
+        public payable returns (address newRequest)
     {
         futureTransaction.toAddress = _toAddress;
         futureTransaction.callData = _callData;
@@ -48,11 +50,11 @@ contract BaseScheduler is SchedulerInterface {
 
         futureTransaction.temporalUnit = temporalUnit;
 
-        address newRequest = futureTransaction.schedule(factoryAddress);
-        require( newRequest != 0x0 );
+        newRequest = futureTransaction.schedule(factoryAddress);
+        require(newRequest!=0x0);
 
         NewRequest(newRequest);
-        return newRequest;
+        /// Automatically returns newRequest
     }
 
     /**

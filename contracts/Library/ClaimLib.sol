@@ -24,7 +24,9 @@ library ClaimLib {
      * @param self The ClaimData that is being accessed.
      * @param paymentModifier The payment modifier.
      */
-    function claim(ClaimData storage self, uint8 paymentModifier) returns (bool) {
+    function claim(ClaimData storage self, uint8 paymentModifier) 
+        internal returns (bool)
+    {
         self.claimedBy = msg.sender;
         self.claimDeposit = msg.value;
         self.paymentModifier = paymentModifier;
@@ -33,7 +35,9 @@ library ClaimLib {
     /*
      * Helper: returns whether this request is claimed.
      */
-    function isClaimed(ClaimData storage self) returns (bool) {
+    function isClaimed(ClaimData storage self) 
+        internal returns (bool)
+    {
         return self.claimedBy != 0x0;
     }
 
@@ -42,7 +46,7 @@ library ClaimLib {
      * This is set to the maximum possible payment value that could be paid out by this request.
      */
     function minimumDeposit(uint payment) 
-        pure returns (uint)
+        internal pure returns (uint)
     {
         return payment.mul(2);
     }

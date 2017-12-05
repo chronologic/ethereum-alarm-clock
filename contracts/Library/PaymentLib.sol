@@ -106,12 +106,14 @@ library PaymentLib {
     /**
      * @dev Compute the endowment value for the given TransactionRequest parameters.
      */
-    function computeEndowment(uint _payment,
-                              uint _donation,
-                              uint _callGas,
-                              uint _callValue,
-                              uint _gasPrice,
-                              uint _gasOverhead) 
+    function computeEndowment(
+        uint _payment,
+        uint _donation,
+        uint _callGas,
+        uint _callValue,
+        uint _gasPrice,
+        uint _gasOverhead
+    ) 
         internal pure returns (uint)
     {
         return _payment.add(_donation)
@@ -122,10 +124,12 @@ library PaymentLib {
     /// Was getting a stack depth error after replacing old MathLib with Zeppelin's SafeMath.
     ///  Added this function to fix it.
     ///  See for context: https://ethereum.stackexchange.com/questions/7325/stack-too-deep-try-removing-local-variables 
-    function _computeHelper(uint _callGas,
-                            uint _callValue,
-                            uint _gasOverhead,
-                            uint _gasPrice)
+    function _computeHelper(
+        uint _callGas,
+        uint _callValue,
+        uint _gasOverhead,
+        uint _gasPrice
+    )
         internal pure returns (uint)
     {
         return _callGas.mul(_gasPrice).mul(2)
@@ -148,11 +152,13 @@ library PaymentLib {
                                uint gasOverhead)
         public pure returns (bool)
     {
-        return endowment >= computeEndowment(payment,
-                                             donation,
-                                             callGas,
-                                             callValue,
-                                             gasOverhead,
-                                             0);//for now);
+        return endowment >= computeEndowment(
+            payment,
+            donation,
+            callGas,
+            callValue,
+            0,
+            gasOverhead
+        );
     }
 }

@@ -28,22 +28,24 @@ contract RequestFactory is RequestFactoryInterface {
      * @param _addressArgs [0] -  meta.owner
      * @param _addressArgs [1] -  paymentData.donationBenefactor
      * @param _addressArgs [2] -  txnData.toAddress
-     * @param uintArgs [0]    -  paymentData.donation
-     * @param uintArgs [1]    -  paymentData.payment
-     * @param uintArgs [2]    -  schedule.claimWindowSize
-     * @param uintArgs [3]    -  schedule.freezePeriod
-     * @param uintArgs [4]    -  schedule.reservedWindowSize
-     * @param uintArgs [5]    -  schedule.temporalUnit
-     * @param uintArgs [6]    -  schedule.windowSize
-     * @param uintArgs [7]    -  schedule.windowStart
-     * @param uintArgs [8]    -  txnData.callGas
-     * @param uintArgs [9]    -  txnData.callValue
-     * @param uintArgs [10]   -  txnData.gasPrice
-     * @param callData        -  The call data
+     * @param _uintArgs [0]    -  paymentData.donation
+     * @param _uintArgs [1]    -  paymentData.payment
+     * @param _uintArgs [2]    -  schedule.claimWindowSize
+     * @param _uintArgs [3]    -  schedule.freezePeriod
+     * @param _uintArgs [4]    -  schedule.reservedWindowSize
+     * @param _uintArgs [5]    -  schedule.temporalUnit
+     * @param _uintArgs [6]    -  schedule.windowSize
+     * @param _uintArgs [7]    -  schedule.windowStart
+     * @param _uintArgs [8]    -  txnData.callGas
+     * @param _uintArgs [9]    -  txnData.callValue
+     * @param _uintArgs [10]   -  txnData.gasPrice
+     * @param _callData        -  The call data
      */
-    function createRequest(address[3] _addressArgs,
-                           uint[11]   uintArgs,
-                           bytes32    callData)
+    function createRequest(
+        address[3] _addressArgs,
+        uint[11]   _uintArgs,
+        bytes32    _callData
+    )
         public payable returns (address)
     {
         TransactionRequest request = (new TransactionRequest).value(msg.value)(
@@ -53,8 +55,8 @@ contract RequestFactory is RequestFactoryInterface {
                 _addressArgs[1],  // paymentData.donationBenefactor
                 _addressArgs[2]   // txnData.toAddress
             ],
-            uintArgs,
-            callData
+            _uintArgs,
+            _callData
         );
 
         // Track the address locally
@@ -64,53 +66,57 @@ contract RequestFactory is RequestFactoryInterface {
         RequestCreated(address(request));
 
         // Add the request to the RequestTracker
-        requestTracker.addRequest(address(request), uintArgs[7]); // windowStart
+        requestTracker.addRequest(address(request), _uintArgs[7]); // windowStart
 
-        return request;
+        return address(request);
     }
 
-    /*
+    /**
      *  The same as createRequest except that it requires validation prior to
      *  creation.
      *
      *  Parameters are the same as `createRequest`
      */
-    function createValidatedRequest(address[3] addressArgs,
-                                    uint[11] uintArgs,
-                                    bytes32 callData) 
+    function createValidatedRequest(
+        address[3] addressArgs,
+        uint[11] uintArgs,
+        bytes32 callData
+    ) 
         public payable returns (address)
     {
-        var is_valid = validateRequestParams(addressArgs,
-                                             uintArgs,
-                                             callData,
-                                             msg.value);
+        bool[6] memory isValid = validateRequestParams(
+            addressArgs,
+            uintArgs,
+            callData,
+            msg.value
+        );
 
-        if (!is_valid.all()) {
-            if (!is_valid[0]) {
+        if (!isValid.all()) {
+            if (!isValid[0]) {
                 ValidationError(uint8(Errors.InsufficientEndowment));
             }
-            if (!is_valid[1]) {
+            if (!isValid[1]) {
                 ValidationError(uint8(Errors.ReservedWindowBiggerThanExecutionWindow));
             }
-            if (!is_valid[2]) {
+            if (!isValid[2]) {
                 ValidationError(uint8(Errors.InvalidTemporalUnit));
             }
-            if (!is_valid[3]) {
+            if (!isValid[3]) {
                 ValidationError(uint8(Errors.ExecutionWindowTooSoon));
             }
-            if (!is_valid[4]) {
+            if (!isValid[4]) {
                 ValidationError(uint8(Errors.CallGasTooHigh));
             }
-            if (!is_valid[5]) {
+            if (!isValid[5]) {
                 ValidationError(uint8(Errors.EmptyToAddress));
             }
 
             // Try to return the ether sent with the message.  If this failed
             // then revert() to force it to be returned.
-            msg.sender.transfer(msg.value);
-            revert();
+            // msg.sender.transfer(msg.value);
+            // revert();
         }
-        // return 0x0;
+
         return createRequest(addressArgs, uintArgs, callData);
     }
 
@@ -135,10 +141,12 @@ contract RequestFactory is RequestFactoryInterface {
     /*
      * @dev Validate the constructor arguments for either `createRequest` or `createValidatedRequest`.
      */
-    function validateRequestParams(address[3] addressArgs,
-                                   uint[11] uintArgs,
-                                   bytes32 callData,
-                                   uint endowment) 
+    function validateRequestParams(
+        address[3] addressArgs,
+        uint[11] uintArgs,
+        bytes32 callData,
+        uint endowment
+    ) 
         internal returns (bool[6])
     {
         return RequestLib.validate(

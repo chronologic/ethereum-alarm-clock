@@ -12,11 +12,11 @@ import "contracts/zeppelin/SafeMath.sol";
 library SchedulerLib {
     using SafeMath for uint;
 
-    address constant DONATION_BENEFACTOR = 0x0;
+    address constant DONATION_BENEFACTOR = 0x246eB2e1E59b857678Bf0d0B7f25cC25b6106044;
 
     struct FutureTransaction {
         address toAddress;          // Destination of the transaction.
-        bytes32 callData;             // Bytecode to be included with the transaction.
+        bytes32 callData;           // Bytecode to be included with the transaction.
         
         uint callGas;               // Amount of gas to be used with the transaction.
         uint callValue;             // Amount of ether to send with the transaction.
@@ -40,7 +40,7 @@ library SchedulerLib {
      * @dev Set common default values.
      */
     function resetCommon(FutureTransaction storage self) 
-        public returns (bool)
+        public returns (bool complete)
     {
         uint defaultPayment = tx.gasprice.mul(1000000);
         if (self.payment != defaultPayment) {
@@ -61,19 +61,20 @@ library SchedulerLib {
         if (self.callData.length != 0) {
             self.callData = "";
         }
-        if (self.gasPrice != 10) {
-            self.gasPrice = 10;
+        if (self.gasPrice != 100) {
+            self.gasPrice = 100;
         }
-        return true;
+
+        complete = true;
     }
 
     /*
      * @dev Set default values for block based scheduling.
      */
     function resetAsBlock(FutureTransaction storage self)
-        public returns (bool)
+        public returns (bool complete)
     {
-        assert(resetCommon(self));
+        require(resetCommon(self));
 
         if (self.windowSize != 255) {
             self.windowSize = 255;
@@ -91,16 +92,16 @@ library SchedulerLib {
             self.claimWindowSize = 255;
         }
 
-        return true;
+        complete = true;
     }
 
     /*
      * Set default values for timestamp based scheduling.
      */
     function resetAsTimestamp(FutureTransaction storage self)
-        public returns (bool)
+        public returns (bool complete)
     {
-        assert(resetCommon(self));
+        require(resetCommon(self));
 
         if (self.windowSize != 60 minutes) {
             self.windowSize = 60 minutes;
@@ -118,7 +119,7 @@ library SchedulerLib {
             self.claimWindowSize = 60 minutes;
         }
 
-        return true;
+        complete = true;
     }
 
     /**
@@ -127,9 +128,11 @@ library SchedulerLib {
      * @param _factoryAddress The address of the RequestFactory which creates TransactionRequests.
      * @return The address of a new TransactionRequest.
      */
-    function schedule(FutureTransaction storage self,
-                      address _factoryAddress) 
-        internal returns (address) 
+    function schedule(
+        FutureTransaction storage self,
+        address _factoryAddress
+    ) 
+        internal returns (address newRequestAddress) 
     {
         RequestFactoryInterface factory = RequestFactoryInterface(_factoryAddress);
 
@@ -143,7 +146,7 @@ library SchedulerLib {
                 RequestLib.EXECUTION_GAS_OVERHEAD() //180000, line 459 RequestLib
         ), this.balance);
 
-        address newRequestAddress = factory.createValidatedRequest.value(endowment)(
+        newRequestAddress = factory.createValidatedRequest.value(endowment)(
             [
                 msg.sender,              // meta.owner
                 DONATION_BENEFACTOR,     // paymentData.donationBenefactor
@@ -165,17 +168,8 @@ library SchedulerLib {
             self.callData
         );
         
-        require( newRequestAddress != 0x0 );
-        // if (newRequestAddress == 0x0) {
-        //     // Something went wrong during creation (likely a ValidationError).
-        //     // Try to return the ether that was sent.  If this fails then
-        //     // resort to throwing an exception to force reversion.
-        //     ERROR();
-        //     msg.sender.transfer(msg.value);
-        //     return 0x0;
-        // }
-
-        return newRequestAddress;
+        require(newRequestAddress!=0x0);
+        /// Automatically returns newRequestAddress
     }
     
     /// Debugging purposes
