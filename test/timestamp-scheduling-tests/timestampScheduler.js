@@ -5,23 +5,32 @@ require('chai')
 const expect = require('chai').expect 
 
 /// Contracts
-const RequestFactory = artifacts.require('./RequestFactory.sol')
-const RequestTracker = artifacts.require('./RequestTracker.sol')
-const TimestampScheduler = artifacts.require('./TimestampScheduler.sol')
+const RequestFactory        = artifacts.require('./RequestFactory.sol')
+const RequestTracker        = artifacts.require('./RequestTracker.sol')
+const TimestampScheduler    = artifacts.require('./TimestampScheduler.sol')
+const TransactionRecorder   = artifacts.require('./TransactionRecorder.sol')
+const TransactionRequest    = artifacts.require('./TransactionRequest.sol')
 
 /// Brings in config.web3 (v1.0.0)
 const config = require('../../config')
-const { wait, waitUntilBlock } = require('@digix/tempo')(web3) // just pass truffle web3
+const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
+const { parseRequestData } = require('../requestData.js')
 
+const ethUtil = require('ethereumjs-util')
 
-contract('Timestamp Scheduler', async function(accounts) {
+contract('Timestamp scheduling', function(accounts) {
 
-    const MINUTE = 60 //seconds
-    const testData32 = '32'.padEnd(32, 'AF01')
+    const MINUTE = 60//seconds
+
+    const gasPrice = 20000
+    const testData32 = ethUtil.bufferToHex(
+        Buffer.from('32'.padEnd(32, 'AF01'))
+    )
 
     let requestFactory
     let requestTracker 
     let timestampScheduler 
+    let transactionRecorder
 
     /// Deploy a fresh instance of contracts for each test.
     beforeEach(async function() {
@@ -37,56 +46,118 @@ contract('Timestamp Scheduler', async function(accounts) {
         // Timestamp scheduler
         timestampScheduler = await TimestampScheduler.new(requestFactory.address)
         expect(timestampScheduler.address).to.exist
+
+        // Transaction recorder
+        transactionRecorder = await TransactionRecorder.new()
+        expect(transactionRecorder.address).to.exist
     })
 
-    it('successfully timestamp schedules using `scheduleTxSimple`', async function() {
+    it('should do timestamp scheduling using `scheduleTxSimple`', async function() {
         const curBlock = await config.web3.eth.getBlock('latest')
         const timestamp = curBlock.timestamp 
+        const windowStart = timestamp + 6 * MINUTE
 
-        const windowStart = timestamp + 10*MINUTE
+        let scheduleTx = await timestampScheduler.scheduleTxSimple(
+            transactionRecorder.address,
+            testData32,         //callData
+            [
+                1212121,        //callGas
+                123454321,      //callValue
+                55 * MINUTE,    //windowSize
+                windowStart,
+                gasPrice
+            ],
+            {from: accounts[0], value: config.web3.utils.toWei(10)}
+        )
 
-        let scheduleTx = await timestampScheduler.scheduleTxSimple(accounts[4],
-                                                                   testData32,
-                                                                   [
-                                                                       433243, //callGas
-                                                                       123123, //callValue
-                                                                       55*MINUTE, //windowSize
-                                                                       windowStart
-                                                                   ],
-                                                                   {from: accounts[0], value: config.web3.utils.toWei(10)}
-                                                                   )
-        expect(scheduleTx.receipt).to.exist
+        expect(scheduleTx.receipt)
+        .to.exist
+
+        expect(scheduleTx.receipt.gasUsed)
+        .to.be.below(3000000)
 
         // Dig the logs out for proof
-        const event = scheduleTx.logs.find(e => e.event === 'NewRequest')
-        expect(event.args.request).to.exist 
+        const logNewRequest = scheduleTx.logs.find(e => e.event === 'NewRequest')
+
+        expect(logNewRequest.args.request, "Couldn't find the `NewRequst` log in receipt...")
+        .to.exist 
+
+        const txRequest = await TransactionRequest.at(logNewRequest.args.request)
+        const requestData = await parseRequestData(txRequest)
+
+        expect(requestData.txData.toAddress)
+        .to.equal(transactionRecorder.address)
+
+        expect(await txRequest.callData())
+        .to.equal(testData32)
+
+        expect(requestData.schedule.windowSize)
+        .to.equal(55 * MINUTE)
+
+        expect(requestData.txData.callGas)
+        .to.equal(1212121)
+
+        expect(requestData.schedule.windowStart)
+        .to.equal(windowStart)
     })
 
-    it('successfully timestamp schedules using `scheduleTxFull', async function() {
+    it('should do timestamp scheduling using `scheduleTxFull', async function() {
         const curBlock = await config.web3.eth.getBlock('latest')
         const timestamp = curBlock.timestamp 
-
         const windowStart = timestamp + 10*MINUTE
-        const donation = config.web3.utils.toWei(1)
-        const payment = config.web3.utils.toWei(2)
+        const donation = 98765
+        const payment = 80008
 
-        let scheduleTx = await timestampScheduler.scheduleTxFull(accounts[4],
-                                                                   testData32,
-                                                                   [
-                                                                       433243, //callGas
-                                                                       123123, //callValue
-                                                                       donation,
-                                                                       payment,
-                                                                       55*MINUTE, //windowSize
-                                                                       windowStart
-                                                                   ],
-                                                                   {from: accounts[0], value: config.web3.utils.toWei(10)}
-                                                                   )
-        expect(scheduleTx.receipt).to.exist
+        const scheduleTx = await timestampScheduler.scheduleTxFull(
+            transactionRecorder.address,
+            testData32,     //callData
+            [
+                1212121,    //callGas
+                123454321,  //callValue
+                55 * MINUTE,  //windowSize
+                windowStart,
+                gasPrice,
+                donation,
+                payment
+            ],
+            {from: accounts[0], value: config.web3.utils.toWei(10)}
+        )
+
+        expect(scheduleTx.receipt)
+        .to.exist
+
+        expect(scheduleTx.receipt.gasUsed)
+        .to.be.below(3000000)
 
         // Dig the logs out for proof
-        const event = scheduleTx.logs.find(e => e.event === 'NewRequest')
-        expect(event.args.request).to.exist 
+        const logNewRequest = scheduleTx.logs.find(e => e.event === 'NewRequest')
+        
+        expect(logNewRequest.args.request)
+        .to.exist
+        
+        const txRequest = await TransactionRequest.at(logNewRequest.args.request)
+        const requestData = await parseRequestData(txRequest)
+
+        expect(requestData.txData.toAddress)
+        .to.equal(transactionRecorder.address)
+
+        expect(await txRequest.callData())
+        .to.equal(testData32)
+
+        expect(requestData.schedule.windowSize)
+        .to.equal(55 * MINUTE)
+
+        expect(requestData.txData.callGas)
+        .to.equal(1212121)
+
+        expect(requestData.paymentData.donation)
+        .to.equal(donation)
+
+        expect(requestData.paymentData.payment)
+        .to.equal(payment)
+
+        expect(requestData.schedule.windowStart)
+        .to.equal(windowStart)
     })
 
     it('should revert an invalid transaction', async function() {
@@ -95,17 +166,18 @@ contract('Timestamp Scheduler', async function(accounts) {
 
         const windowStart = timestamp + 10*MINUTE
 
-        let scheduleTx = await timestampScheduler.scheduleTxSimple(accounts[4],
-                                                                   testData32,
-                                                                   [
-                                                                       4e20, //callGas is too high
-                                                                       123123, //callValue
-                                                                       55*MINUTE, //windowSize
-                                                                       windowStart
-                                                                   ],
-                                                                   {from: accounts[0]}
-                                                                   )
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        const scheduleTx = await timestampScheduler.scheduleTxSimple(
+            accounts[4],
+            testData32,         //callData
+            [
+                4e20,           //callGas is too high
+                123123,         //callValue
+                55 * MINUTE,    //windowSize
+                windowStart,
+                gasPrice
+            ],
+            {from: accounts[0]}
+        ).should.be.rejectedWith('VM Exception while processing transaction: revert')
     })
 
 })

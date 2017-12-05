@@ -114,7 +114,7 @@ contract RequestFactory is RequestFactoryInterface {
             // Try to return the ether sent with the message.  If this failed
             // then revert() to force it to be returned.
             // msg.sender.transfer(msg.value);
-            // revert();
+            revert();
         }
 
         return createRequest(addressArgs, uintArgs, callData);
