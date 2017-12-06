@@ -168,6 +168,9 @@ contract('Block execution', async function(accounts) {
 
         const endExecutionWindow = requestData.schedule.windowStart + requestData.schedule.windowSize 
         await waitUntilBlock(0, endExecutionWindow - 1)
+        /// Note: we go to one block before the endExecutionWindow
+        /// because the next transaction will be mined in the next
+        /// block, aka the exact block for `endExecutionWindow`
 
         const executeTx = await txRequest.execute({gas: 3000000})
 
