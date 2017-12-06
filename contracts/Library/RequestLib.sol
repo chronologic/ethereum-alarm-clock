@@ -55,6 +55,7 @@ library RequestLib {
 
     /**
      * @dev Validate the initialization parameters for a transaction request.
+     * Public view function
      */
     function validate(
         address[4] addressArgs,
@@ -62,7 +63,7 @@ library RequestLib {
         bytes32 callData,
         uint endowment
     ) 
-        internal returns (bool[6] isValid)
+        public view returns (bool[6] isValid)
     {
         Request memory request;
 

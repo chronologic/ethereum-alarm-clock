@@ -14,7 +14,7 @@ const TransactionRequest    = artifacts.require('./TransactionRequest.sol')
 /// Brings in config.web3 (v1.0.0)
 const config = require('../../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
-const { parseRequestData } = require('../requestData.js')
+const { parseRequestData } = require('../dataHelpers.js')
 
 const ethUtil = require('ethereumjs-util')
 

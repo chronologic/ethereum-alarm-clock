@@ -12,6 +12,9 @@ const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 
 /// Brings in config.web3 (v1.0.0)
 const config = require('../../config')
+const ethUtil = require('ethereumjs-util')
+const { parseRequestData } = require('../dataHelpers.js')
+
 const NULL_ADDR = '0x0000000000000000000000000000000000000000'
 
 /// Note - these tests were checked very well and should never be wrong.
@@ -20,26 +23,28 @@ contract('Request factory', async function(accounts) {
 
     it('should create a request with provided properties', async function() {
         /// Get the instance of the deployed RequestLib
-        let requestLib = await RequestLib.deployed()
-        expect(requestLib.address).to.exist
+        const requestLib = await RequestLib.deployed()
+        expect(requestLib.address)
+        .to.exist
 
         /// Get the current block
-        let curBlock = await config.web3.eth.getBlockNumber()
+        const curBlock = await config.web3.eth.getBlockNumber()
 
         /// Set up the data for our transaction request
-        let claimWindowSize = 255
-        let donation = 12345
-        let payment = 54321
-        let freezePeriod = 10
-        let windowStart = curBlock + 20
-        let windowSize = 511
-        let reservedWindowSize = 16
-        let temporalUnit = 1
-        let callValue = 123456789
-        let callGas = 1000000
+        const claimWindowSize = 255
+        const donation = 12345
+        const payment = 54321
+        const freezePeriod = 10
+        const windowStart = curBlock + 20
+        const windowSize = 511
+        const reservedWindowSize = 16
+        const temporalUnit = 1
+        const callValue = 123456789
+        const callGas = 1000000
+        const testCallData = 'this-is-call-data'
         
         /// Validate the data with the RequestLib
-        let validateTx = await requestLib.validate(
+        const isValid = await requestLib.validate(
             [
                 accounts[0],
                 accounts[0],
@@ -61,22 +66,22 @@ contract('Request factory', async function(accounts) {
             config.web3.utils.toWei(10) //endowment
         )
 
-        /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
-        bools.args.switches.forEach((bool, index) => assert(bool === true, `Switch number ${index} didn't assert.`))
+        isValid.forEach(bool => expect(bool).to.be.true)
 
         /// Now let's set up a factory and launch the request.
         
         /// We need a request tracker for the factory
-        let requestTracker = await RequestTracker.deployed()
-        expect(requestTracker.address).to.exist
+        const requestTracker = await RequestTracker.deployed()
+        expect(requestTracker.address)
+        .to.exist
 
         /// Pass the request tracker to the factory
-        let requestFactory = await RequestFactory.new(requestTracker.address)
-        expect(requestFactory.address).to.exist 
+        const requestFactory = await RequestFactory.new(requestTracker.address)
+        expect(requestFactory.address)
+        .to.exist 
 
         /// Create a request with the same args we validated
-        let createTx = await requestFactory.createRequest(
+        const createTx = await requestFactory.createRequest(
             [
                 accounts[0],
                 accounts[1], //donation benefactor
@@ -93,84 +98,100 @@ contract('Request factory', async function(accounts) {
                 callGas,
                 callValue
             ],
-            'this-is-call-data'
+            testCallData
         )
 
-        let event = createTx.logs.find(e => e.event === 'RequestCreated')
-        expect(event.args.request).to.exist
+        const logRequestCreated = createTx.logs.find(e => e.event === 'RequestCreated')
+        expect(logRequestCreated.args.request)
+        .to.exist
         
         /// Now let's create a transactionRequest instance
-        let txRequest = await TransactionRequest.at(event.args.request)
-        let requestData = await txRequest.requestData()
+        const txRequest = await TransactionRequest.at(logRequestCreated.args.request)
+        const requestData = await parseRequestData(txRequest)
+    
+        expect(requestData.meta.owner)
+        .to.equal(accounts[0])
 
-        let logs = requestData.logs.find(e => e.event === 'RequestData')
-        
-        /// Assert correct address values
-        let addressValues = logs.args.addressArgs
+        expect(requestData.meta.createdBy)
+        .to.equal(accounts[0])
 
-        // claimed by
-        assert(addressValues[0] === NULL_ADDR)
-        // created by
-        assert(addressValues[1] === accounts[0])
-        // owner
-        assert(addressValues[2] === accounts[0])
-        // donation benefactor
-        assert(addressValues[3] === accounts[1])
-        // payment benefactor
-        assert(addressValues[4] === NULL_ADDR)
-        // to address
-        assert(addressValues[5] === accounts[2])
+        expect(requestData.meta.isCancelled)
+        .to.be.false 
 
-        /// assert correct boolean values
-        let boolValues = logs.args.bools 
+        expect(requestData.meta.wasCalled)
+        .to.be.false 
 
-        // is cancelled
-        assert(boolValues[0] === false)
-        // was called
-        assert(boolValues[1] === false)
-        // was successful
-        assert(boolValues[2] === false)
+        expect(requestData.meta.wasSuccessful)
+        .to.be.false 
 
-        /// assert correct uint values
-        let uintValues = logs.args.uintArgs
+        expect(requestData.claimData.claimedBy)
+        .to.equal(NULL_ADDR)
 
-        // Since we got an array of bignumbers we convert them
-        uintValues = uintValues.map(val => val.toNumber())
+        expect(requestData.claimData.claimDeposit)
+        .to.equal(0)
 
-        // donation
-        assert(uintValues[2] === donation)
-        // donation owed
-        assert(uintValues[3] === 0)
-        // payment
-        assert(uintValues[4] === payment)
-        // payment owed
-        assert(uintValues[5] === 0)
-        // claim window size
-        assert(uintValues[6] === claimWindowSize)
-        // freeze period
-        assert(uintValues[7] === freezePeriod)
-        // reserved window size
-        assert(uintValues[8] === reservedWindowSize)
-        // temporal unit
-        assert(uintValues[9] === temporalUnit)
-        // window size
-        assert(uintValues[10] === windowSize)
-        // window start
-        assert(uintValues[11] === windowStart)
-        // callGas
-        assert(uintValues[12] === callGas)
-        // callValue
-        assert(uintValues[13] === callValue)
+        expect(requestData.claimData.paymentModifier)
+        .to.equal(0)
+
+        expect(requestData.paymentData.donation)
+        .to.equal(donation)
+
+        expect(requestData.paymentData.donationBenefactor)
+        .to.equal(accounts[1])
+
+        expect(requestData.paymentData.donationOwed)
+        .to.equal(0)
+
+        expect(requestData.paymentData.payment)
+        .to.equal(payment) 
+
+        expect(requestData.paymentData.paymentBenefactor)
+        .to.equal(NULL_ADDR)
+
+        expect(requestData.paymentData.paymentOwed)
+        .to.equal(0)
+
+        expect(requestData.schedule.claimWindowSize)
+        .to.equal(claimWindowSize)
+
+        expect(requestData.schedule.freezePeriod)
+        .to.equal(freezePeriod)
+
+        expect(requestData.schedule.windowStart)
+        .to.equal(windowStart)
+
+        expect(requestData.schedule.reservedWindowSize)
+        .to.equal(reservedWindowSize)
+
+        expect(requestData.schedule.temporalUnit)
+        .to.equal(1)
+
+        expect(requestData.txData.toAddress)
+        .to.equal(accounts[2])
+
+        expect(await txRequest.callData())
+        .to.equal(ethUtil.bufferToHex(
+            Buffer.from(
+                ethUtil.setLengthRight(
+                    Buffer.from(testCallData),
+                    32
+                )
+            )
+        ))
+
+        expect(requestData.txData.callValue)
+        .to.equal(callValue)
+
+        expect(requestData.txData.callGas)
+        .to.equal(callGas)
 
         /// Lastly, we just make sure that the transaction request
         ///  address is a known request for the factory.
-        await requestFactory.isKnownRequest(NULL_ADDR)
-            .should.be.rejectedWith('VM Exception while processing transaction: invalid opcode')
+        expect(await requestFactory.isKnownRequest(NULL_ADDR))
+        .to.be.false //sanity check
 
-        /// I don't know why or how, but this function actually returns a boolean
-        ///  from Solidity, so we check its truthiness
-        let isKnown = await requestFactory.isKnownRequest(txRequest.address)
-        assert(isKnown === true)
+        expect(await requestFactory.isKnownRequest(txRequest.address))
+        .to.be.true
     })
 
     it('should test request factory insufficient endowment validation error', async function() {
@@ -179,19 +200,19 @@ contract('Request factory', async function(accounts) {
         const requestLib = await RequestLib.deployed()
         expect(requestLib.address).to.exist
 
-        let claimWindowSize = 255
-        let donation = 12345
-        let payment = 54321
-        let freezePeriod = 10
-        let windowStart = curBlock + 20
-        let windowSize = 255
-        let reservedWindowSize = 16
-        let temporalUnit = 1
-        let callValue = 123456789
-        let callGas = 1000000
+        const claimWindowSize = 255
+        const donation = 12345
+        const payment = 54321
+        const freezePeriod = 10
+        const windowStart = curBlock + 20
+        const windowSize = 255
+        const reservedWindowSize = 16
+        const temporalUnit = 1
+        const callValue = 123456789
+        const callGas = 1000000
 
         /// Validate the data with the RequestLib
-        let validateTx = await requestLib.validate(
+        const isValid = await requestLib.validate(
             [
                 accounts[0],
                 accounts[0],
@@ -213,17 +234,10 @@ contract('Request factory', async function(accounts) {
             1 //endowment ATTENTION THIS IS TOO SMALL, HENCE WHY IT FAILS
         )
 
-        /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
-        bools.args.switches.forEach((bool, index) => {
-            // Now we check that the first bool didn't fire off correctly,
-            //  since the endowment is too small.
-            if (index === 0) {
-                assert(bool === false, `Switch number ${index} didn't assert.`)
-            } else { // The rest of them should be true.
-                assert(bool === true, `Switch number ${index} didn't assert.`)
-            }
-        })
+        expect(isValid[0])
+        .to.be.false 
+
+        isValid.slice(1).forEach(bool => expect(bool).to.be.true)
     })
 
     it('should test request factory throws validation error on too large of a reserve window', async function() {
@@ -232,19 +246,19 @@ contract('Request factory', async function(accounts) {
         const requestLib = await RequestLib.deployed()
         expect(requestLib.address).to.exist
 
-        let claimWindowSize = 255
-        let donation = 12345
-        let payment = 54321
-        let freezePeriod = 10
-        let windowStart = curBlock + 20
-        let windowSize = 255
-        let reservedWindowSize = 255 + 2 // 2 more than window size
-        let temporalUnit = 1
-        let callValue = 123456789
-        let callGas = 1000000
+        const claimWindowSize = 255
+        const donation = 12345
+        const payment = 54321
+        const freezePeriod = 10
+        const windowStart = curBlock + 20
+        const windowSize = 255
+        const reservedWindowSize = 255 + 2 // 2 more than window size
+        const temporalUnit = 1
+        const callValue = 123456789
+        const callGas = 1000000
 
          /// Validate the data with the RequestLib
-         let validateTx = await requestLib.validate(
+         const isValid = await requestLib.validate(
             [
                 accounts[0],
                 accounts[0],
@@ -266,17 +280,13 @@ contract('Request factory', async function(accounts) {
             config.web3.utils.toWei(10) //endowment
         )
 
-        /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
-        bools.args.switches.forEach((bool, index) => {
-            // Now we check that the second bool didn't fire off correctly,
-            //  since the reserved window is too big
-            if (index === 1) {
-                assert(bool === false, `Switch number ${index} didn't assert.`)
-            } else { // The rest of them should be true.
-                assert(bool === true, `Switch number ${index} didn't assert.`)
-            }
-        })
+        expect(isValid[1])
+        .to.be.false
+
+        expect(isValid[0])
+        .to.be.true 
+
+        isValid.slice(2).forEach(bool => expect(bool).to.be.true)
     })
 
     it('should test request factory throws invalid temporal unit validation error', async function() {
@@ -285,19 +295,19 @@ contract('Request factory', async function(accounts) {
         const requestLib = await RequestLib.deployed()
         expect(requestLib.address).to.exist
 
-        let claimWindowSize = 255
-        let donation = 12345
-        let payment = 54321
-        let freezePeriod = 10
-        let windowStart = curBlock + 20
-        let windowSize = 255
-        let reservedWindowSize = 16
-        let temporalUnit = 3 // Only 1 and 2 are supported
-        let callValue = 123456789
-        let callGas = 1000000
+        const claimWindowSize = 255
+        const donation = 12345
+        const payment = 54321
+        const freezePeriod = 10
+        const windowStart = curBlock + 20
+        const windowSize = 255
+        const reservedWindowSize = 16
+        const temporalUnit = 3 // Only 1 and 2 are supported
+        const callValue = 123456789
+        const callGas = 1000000
 
          /// Validate the data with the RequestLib
-         let validateTx = await requestLib.validate(
+         const isValid = await requestLib.validate(
             [
                 accounts[0],
                 accounts[0],
@@ -319,16 +329,14 @@ contract('Request factory', async function(accounts) {
             config.web3.utils.toWei(10) //endowment
         )
 
-        /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
-        bools.args.switches.forEach((bool, index) => {
-            // Now we check that the third and fourth bool didn't fire off correctly.
-            if (index === 2 || index === 3) {
-                assert(bool === false, `Switch number ${index} didn't assert.`)
-            } else { // The rest of them should be true.
-                assert(bool === true, `Switch number ${index} didn't assert.`)
-            }
-        })
+        expect(isValid[2])
+        .to.be.false 
+
+        expect(isValid[3])
+        .to.be.false 
+
+        isValid.slice(0, 2).forEach(bool => expect(bool).to.be.true)
+        isValid.slice(4).forEach(bool => expect(bool).to.be.true)
     })
 
     it('should test request factory too soon execution window validation error', async function() {
@@ -337,19 +345,19 @@ contract('Request factory', async function(accounts) {
         const requestLib = await RequestLib.deployed()
         expect(requestLib.address).to.exist
 
-        let claimWindowSize = 255
-        let donation = 12345
-        let payment = 54321
-        let freezePeriod = 11 // more than the blocks between now and the window start
-        let windowStart = curBlock + 10
-        let windowSize = 255
-        let reservedWindowSize = 16
-        let temporalUnit = 1
-        let callValue = 123456789
-        let callGas = 1000000
+        const claimWindowSize = 255
+        const donation = 12345
+        const payment = 54321
+        const freezePeriod = 11 // more than the blocks between now and the window start
+        const windowStart = curBlock + 10
+        const windowSize = 255
+        const reservedWindowSize = 16
+        const temporalUnit = 1
+        const callValue = 123456789
+        const callGas = 1000000
 
          /// Validate the data with the RequestLib
-         let validateTx = await requestLib.validate(
+         const isValid = await requestLib.validate(
             [
                 accounts[0],
                 accounts[0],
@@ -371,16 +379,11 @@ contract('Request factory', async function(accounts) {
             config.web3.utils.toWei(10) //endowment
         )
 
-        /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
-        bools.args.switches.forEach((bool, index) => {
-            // Now we check that the fourth bool didn't fire off correctly.
-            if (index === 3) {
-                assert(bool === false, `Switch number ${index} didn't assert.`)
-            } else { // The rest of them should be true.
-                assert(bool === true, `Switch number ${index} didn't assert.`)
-            }
-        })
+        expect(isValid[3])
+        .to.be.false 
+
+        isValid.slice(0, 3).forEach(bool => expect(bool).to.be.true)
+        isValid.slice(4).forEach(bool => expect(bool).to.be.true)
     })
 
     it('should test request factory has too high call gas validation error', async function() {
@@ -389,19 +392,19 @@ contract('Request factory', async function(accounts) {
         const requestLib = await RequestLib.deployed()
         expect(requestLib.address).to.exist
 
-        let claimWindowSize = 255
-        let donation = 12345
-        let payment = 54321
-        let freezePeriod = 10
-        let windowStart = curBlock + 20
-        let windowSize = 255
-        let reservedWindowSize = 16
-        let temporalUnit = 1
-        let callValue = 123456789
-        let callGas = 8.8e8 // cannot be over gas limit
+        const claimWindowSize = 255
+        const donation = 12345
+        const payment = 54321
+        const freezePeriod = 10
+        const windowStart = curBlock + 20
+        const windowSize = 255
+        const reservedWindowSize = 16
+        const temporalUnit = 1
+        const callValue = 123456789
+        const callGas = 8.8e8 // cannot be over gas limit
 
          /// Validate the data with the RequestLib
-         let validateTx = await requestLib.validate(
+         const isValid = await requestLib.validate(
             [
                 accounts[0],
                 accounts[0],
@@ -423,17 +426,11 @@ contract('Request factory', async function(accounts) {
             config.web3.utils.toWei(10) //endowment
         )
 
-        /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
-        bools.args.switches.forEach((bool, index) => {
-            // Now we check that the fifth bool didn't fire off correctly.
-            // Throws the first bool since endowment is based on callGas.
-            if (index === 0 || index === 4) {
-                assert(bool === false, `Switch number ${index} didn't assert.`)
-            } else { // The rest of them should be true.
-                assert(bool === true, `Switch number ${index} didn't assert.`)
-            }
-        })
+        expect(isValid[4])
+        .to.be.false 
+
+        isValid.slice(0, 4).forEach(bool => expect(bool).to.be.true)
+        isValid.slice(5).forEach(bool => expect(bool).to.be.true)
     })
 
     it('should test null to address validation error', async function() {
@@ -442,19 +439,19 @@ contract('Request factory', async function(accounts) {
         const requestLib = await RequestLib.deployed()
         expect(requestLib.address).to.exist
 
-        let claimWindowSize = 255
-        let donation = 12345
-        let payment = 54321
-        let freezePeriod = 10
-        let windowStart = curBlock + 20
-        let windowSize = 255
-        let reservedWindowSize = 16
-        let temporalUnit = 1
-        let callValue = 123456789
-        let callGas = 1000000
+        const claimWindowSize = 255
+        const donation = 12345
+        const payment = 54321
+        const freezePeriod = 10
+        const windowStart = curBlock + 20
+        const windowSize = 255
+        const reservedWindowSize = 16
+        const temporalUnit = 1
+        const callValue = 123456789
+        const callGas = 1000000
 
          /// Validate the data with the RequestLib
-         let validateTx = await requestLib.validate(
+         const isValid = await requestLib.validate(
             [
                 accounts[0],
                 accounts[0],
@@ -476,15 +473,9 @@ contract('Request factory', async function(accounts) {
             config.web3.utils.toWei(10) //endowment
         )
 
-        /// Assert that all the validity switches fired off as true.
-        let bools = validateTx.logs.find(e => e.event === 'LogSwitches')
-        bools.args.switches.forEach((bool, index) => {
-            // Now we check that the sixth bool didn't fire off correctly.
-            if (index === 5) {
-                assert(bool === false, `Switch number ${index} didn't assert.`)
-            } else { // The rest of them should be true.
-                assert(bool === true, `Switch number ${index} didn't assert.`)
-            }
-        })
+        expect(isValid[5])
+        .to.be.false 
+
+        isValid.slice(0, 5).forEach(bool => expect(bool).to.be.true)
     })
 })

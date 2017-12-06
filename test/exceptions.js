@@ -12,7 +12,7 @@ const config = require('../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 const toBN = config.web3.utils.toBN
 
-const { parseRequestData } = require('./requestData')
+const { parseRequestData } = require('./dataHelpers.js')
 
 contract('Exceptions', async function(accounts) {
     const Owner = accounts[0]
