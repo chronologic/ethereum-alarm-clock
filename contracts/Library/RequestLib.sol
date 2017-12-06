@@ -40,12 +40,12 @@ library RequestLib {
     }
 
     enum AbortReason {
-        WasCancelled, //0
-        AlreadyCalled, //1
-        BeforeCallWindow, //2
-        AfterCallWindow, //3
+        WasCancelled,       //0
+        AlreadyCalled,      //1
+        BeforeCallWindow,   //2
+        AfterCallWindow,    //3
         ReservedForClaimer, //4
-        InsufficientGas //5
+        InsufficientGas     //5
     }
 
     event Cancelled(uint rewardPayment, uint measuredGasConsumption);

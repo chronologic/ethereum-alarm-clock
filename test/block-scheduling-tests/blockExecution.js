@@ -10,60 +10,60 @@ const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
 /// Bring in config.web3 (v1.0.0)
 const config = require('../../config')
+const ethUtil = require('ethereumjs-util')
+const { parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3);
 
 contract('Block execution', async function(accounts) {
     const Owner = accounts[0]
     const Benefactor = accounts[1]
-    const ToAddress = accounts[2]
 
-    let transactionRequest
-    let transactionRecorder
+    let txRequest
+    let txRecorder
 
-    let curBlock // Holds the current block value before each test
-    let firstClaimBlock
-    let lastClaimBlock
-    let executionWindow = 10
-    let windowStart
+    const executionWindow = 10
+    const testData32 = ethUtil.bufferToHex(
+        Buffer.from('A1B2'.padEnd(32, 'FF'))
+    )
 
     beforeEach(async function () {
-        curBlock = await config.web3.eth.getBlockNumber()
-        windowStart = curBlock + 38
+        const curBlock = await config.web3.eth.getBlockNumber()
+        const windowStart = curBlock + 38
 
-        transactionRequest = await TransactionRequest.new(
+        txRecorder = await TransactionRecorder.new()
+        expect(txRecorder.address)
+        .to.exist
+
+        txRequest = await TransactionRequest.new(
             [
-                Owner, //createdBy
-                Owner, //owner
-                Benefactor, //donationBenefactor
-                ToAddress //toAddress
+                Owner,              //createdBy
+                Owner,              //owner
+                Benefactor,         //donationBenefactor
+                txRecorder.address //toAddress
             ], [
-                0, //donation
-                0, //payment
-                25, //claim window size
-                5, //freeze period
-                10, //reserved window size
-                1, // temporal unit
-                executionWindow, //window size
-                windowStart, //windowStart
-                200000, //callGas
-                0 //callValue
+                0,                  //donation
+                0,                  //payment
+                25,                 //claim window size
+                5,                  //freeze period
+                10,                 //reserved window size
+                1,                  // temporal unit
+                executionWindow,    //window size
+                windowStart,        //windowStart
+                200000,             //callGas
+                0                   //callValue
             ],
-            'this-is-the-call-data'
+            testData32              //callData
         )
 
         /// The first claim block is the current block + the number of blocks
         ///  until the window starts, minus the freeze period minus claim window size.
-        firstClaimBlock  = windowStart - 5 - 25
-        /// The last claim block is the currenct block + the number of blocks
-        ///  until the window starts, minus the freeze period minus 1
-        lastClaimBlock = windowStart - 5 - 1  
-
+        const firstClaimBlock  = windowStart - 5 - 25
         await waitUntilBlock(0, firstClaimBlock);
         
-        let res = await transactionRequest.claim({value: config.web3.utils.toWei(1)})
+        const claimTx = await txRequest.claim({value: config.web3.utils.toWei(1)})
 
         /// Search for the claimed function and expect it to exist.
-        let claimed = res.logs.find(e => e.event === 'Claimed')
+        const claimed = claimTx.logs.find(e => e.event === 'Claimed')
         expect(claimed).to.exist
     })
 
@@ -72,32 +72,111 @@ contract('Block execution', async function(accounts) {
     /////////////
 
     it('should reject the execution if its before the execution window', async function() {
-        await waitUntilBlock(0, windowStart - 2)
+        const requestData = await parseRequestData(txRequest)
 
-        await transactionRequest.execute({gas: 3000000})
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        expect(await txRecorder.wasCalled())
+        .to.be.false
+
+        expect(requestData.meta.wasCalled)
+        .to.be.false
+
+        const now = await config.web3.eth.getBlockNumber()
+
+        expect(now)
+        .to.be.below(requestData.schedule.windowStart)
+
+        const executeTx = await txRequest.execute({gas: 3000000})
+
+        const requestDataTwo = await parseRequestData(txRequest)
+
+        expect(await txRecorder.wasCalled())
+        .to.be.false 
+
+        expect(requestDataTwo.meta.wasCalled)
+        .to.be.false 
+
+        expect(wasAborted(executeTx))
+        .to.be.true
+
+        expect(parseAbortData(executeTx).find(reason => reason === 'BeforeCallWindow'))
+        .to.exist
     })
 
     it('should reject the execution if its after the execution window', async function() {
-        await waitUntilBlock(0, windowStart + executionWindow + 1)
+        const requestData = await parseRequestData(txRequest)
 
-        await transactionRequest.execute({gas: 3000000})
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        expect(await txRecorder.wasCalled())
+        .to.be.false 
+
+        expect(requestData.meta.wasCalled)
+        .to.be.false 
+
+        const endExecutionWindow = requestData.schedule.windowStart + requestData.schedule.windowSize
+        await waitUntilBlock(0, endExecutionWindow + 1)
+
+        expect(await config.web3.eth.getBlockNumber())
+        .to.be.above(endExecutionWindow)
+
+        const executeTx = await txRequest.execute({gas: 3000000})
+
+        const requestDataTwo = await parseRequestData(txRequest)
+
+        expect(await txRecorder.wasCalled())
+        .to.be.false 
+
+        expect(requestDataTwo.meta.wasCalled)
+        .to.be.false 
+
+        expect(wasAborted(executeTx))
+        .to.be.true 
+
+        expect(parseAbortData(executeTx).find(reason => reason === 'AfterCallWindow'))
+        .to.exist
     })
 
     it('should allow the execution at the start of the execution window', async function() {
-        await waitUntilBlock(0, windowStart)
+        const requestData = await parseRequestData(txRequest)
 
-        let res = await transactionRequest.execute({gas: 3000000})
-        let executed = res.logs.find(e => e.event === 'Executed')
-        expect(executed).to.exist
+        expect(await txRecorder.wasCalled())
+        .to.be.false 
+
+        expect(requestData.meta.wasCalled)
+        .to.be.false 
+
+        const startExecutionWindow = requestData.schedule.windowStart
+        await waitUntilBlock(0, startExecutionWindow)
+
+        const executeTx = await txRequest.execute({gas: 3000000})
+
+        const requestDataTwo = await parseRequestData(txRequest)
+
+        expect(await txRecorder.wasCalled())
+        .to.be.true 
+
+        expect(requestDataTwo.meta.wasCalled)
+        .to.be.true 
     })
 
     it('should allow the execution at the end of the execution window', async function() {
-        await waitUntilBlock(0, windowStart + executionWindow -1)
+        const requestData = await parseRequestData(txRequest) 
 
-        let res = await transactionRequest.execute({gas: 3000000})
-        let executed = res.logs.find(e => e.event === 'Executed')
-        expect(executed).to.exist
+        expect(await txRecorder.wasCalled())
+        .to.be.false 
+
+        expect(requestData.meta.wasCalled)
+        .to.be.false 
+
+        const endExecutionWindow = requestData.schedule.windowStart + requestData.schedule.windowSize 
+        await waitUntilBlock(0, endExecutionWindow - 1)
+
+        const executeTx = await txRequest.execute({gas: 3000000})
+
+        const requestDataTwo = await parseRequestData(txRequest) 
+
+        expect(await txRecorder.wasCalled())
+        .to.be.true 
+
+        expect(requestDataTwo.meta.wasCalled)
+        .to.be.true
     })
 })

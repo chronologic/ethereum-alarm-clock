@@ -1,3 +1,30 @@
+const wasAborted = (executeTx) => {
+    const Aborted = executeTx.logs.find(e => e.event === 'Aborted')
+    return Aborted ? true : false
+}
+
+const parseAbortData = (executeTx) => {
+    const reason = [
+        'WasCancelled',         //0
+        'AlreadyCalled',        //1
+        'BeforeCallWindow',     //2
+        'AfterCallWindow',      //3
+        'ReservedForClaimer',   //4
+        'InsufficientGas'       //5
+    ]
+
+    const abortedLogs = executeTx.logs.filter(e => e.event === 'Aborted')
+    let abortedNums = []
+    abortedLogs.forEach((log) => {
+        abortedNums.push(log.args.reason.toNumber())
+    })
+    const reasons = abortedNums.map((num) => {
+        return reason[num]
+    })
+
+    return reasons
+}
+
 const parseRequestData = async (transactionRequest) => {
     const data = await transactionRequest.requestData()
     return {
@@ -40,3 +67,5 @@ const parseRequestData = async (transactionRequest) => {
 }
 
 module.exports.parseRequestData = parseRequestData
+module.exports.parseAbortData = parseAbortData
+module.exports.wasAborted = wasAborted
