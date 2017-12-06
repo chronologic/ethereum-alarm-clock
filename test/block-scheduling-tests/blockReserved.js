@@ -9,22 +9,28 @@ const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
 /// Brings in config.web3 (v1.0.0)
-const config = require('../../config');
-const { wait, waitUntilBlock } = require('@digix/tempo')(web3);
+const config = require('../../config')
+const { parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
+const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 
-contract('Block reserved window', async function(accounts) {
+contract('Block reserved window', function(accounts) {
 
     it('should reject execution if claimed by another', async function() {
-        let curBlock = await config.web3.eth.getBlockNumber()
-        let windowStart = curBlock + 38
-        let executionWindow = 10
 
-        let txRequest = await TransactionRequest.new(
+        const txRecorder = await TransactionRecorder.new() 
+        expect(txRecorder.address)
+        .to.exist
+
+        const curBlock = await config.web3.eth.getBlockNumber()
+        const windowStart = curBlock + 38
+        const executionWindow = 10
+
+        const txRequest = await TransactionRequest.new(
             [
                 accounts[0], //created by
                 accounts[0], //owner
                 accounts[1], //donation benefactor
-                accounts[7]  // to
+                txRecorder.address  // to
             ], [
                 0, //donation
                 0, //payment
@@ -40,28 +46,42 @@ contract('Block reserved window', async function(accounts) {
             'this-is-the-call-data'
         )
 
-        let firstClaimBlock  = windowStart - 5 - 25
-        await waitUntilBlock(0, firstClaimBlock)
+        const requestData = await parseRequestData(txRequest)
 
-        /// Claim it from account[9]
-        let claimTx = await txRequest.claim({from: accounts[9], value: config.web3.utils.toWei(1)})
+        const claimAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 10
+        await waitUntilBlock(0, claimAt)
 
-        /// Search for the claimed function and expect it to exist.
-        let claimed = claimTx.logs.find(e => e.event === 'Claimed')
-        expect(claimed).to.exist
+        const claimTx = await txRequest.claim({from: accounts[7], value: config.web3.utils.toWei(2)})
+        expect(claimTx.receipt)
+        .to.exist 
 
-        await waitUntilBlock(0, windowStart)
+        const requestDataTwo = await parseRequestData(txRequest)
 
-        /// Now let's try to execute it from a third party account
-        await txRequest.execute({from: accounts[3], gas: 3000000})
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        expect(requestDataTwo.claimData.claimedBy)
+        .to.equal(accounts[7])
 
-        /// That shouldn't work, because accounts[4] claimed it...
-        /// But this should!
-        let executeTx = await txRequest.execute({from: accounts[9], gas: 3000000})
+        await waitUntilBlock(0, requestDataTwo.schedule.windowStart)
 
-        /// Find the logs to prove it.
-        let executed = executeTx.logs.find(e => e.event === 'Executed')
-        expect(executed).to.exist
+        expect(await txRecorder.wasCalled())
+        .to.be.false 
+
+        expect(requestDataTwo.meta.wasCalled)
+        .to.be.false 
+
+        const executeTx = await txRequest.execute({gas: 3000000})
+
+        const requestDataThree = await parseRequestData(txRequest)
+
+        expect(await txRecorder.wasCalled())
+        .to.be.false 
+
+        expect(requestDataThree.meta.wasCalled)
+        .to.be.false 
+
+        expect(wasAborted(executeTx))
+        .to.be.true 
+
+        expect(parseAbortData(executeTx).find(reason => reason === 'ReservedForClaimer'))
+        .to.exist
     })
 })
