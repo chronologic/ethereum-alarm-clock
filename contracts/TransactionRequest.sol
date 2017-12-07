@@ -45,13 +45,7 @@ contract TransactionRequest is TransactionRequestInterface {
      *  Actions
      */
     function execute() public returns (bool) {
-        // require( txnRequest.execute() );
-        // return true;
         return txnRequest.execute();
-    }
-
-    function executeNew() public returns (bool) {
-        return txnRequest.executeNew();
     }
 
     function cancel() public returns (bool) {
