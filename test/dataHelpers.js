@@ -69,6 +69,10 @@ const parseRequestData = async (transactionRequest) => {
 class RequestData {
 
     constructor(data, txRequest) {
+        if (typeof data === 'undefined' || typeof txRequest === 'undefined') {
+            throw new Error('Can not call the constructor!')
+        }
+        
         this.txRequest = txRequest
         this.claimData = {
             "claimedBy": data[0][0],
@@ -161,7 +165,6 @@ class RequestData {
             "toAddress": data[0][5],
         }
     }
-
 
 }
 
