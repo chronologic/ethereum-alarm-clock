@@ -64,7 +64,7 @@ contract('Timestamp execution', async function(accounts) {
         const requestData = await RequestData.from(txRequest)
 
         const firstClaimStamp = requestData.schedule.windowStart - requestData.schedule.freezePeriod - requestData.schedule.claimWindowSize
-
+        
         await waitUntilBlock(
             firstClaimStamp - (await config.web3.eth.getBlock('latest')).timestamp,
             0

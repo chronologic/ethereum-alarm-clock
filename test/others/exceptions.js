@@ -8,11 +8,11 @@ const expect = require('chai').expect
 const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
 /// Bring in config.web3 (v1.0.0)
-const config = require('../config')
+const config = require('../../config')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 const toBN = config.web3.utils.toBN
 
-const { parseRequestData } = require('./dataHelpers.js')
+const { parseRequestData } = require('../dataHelpers.js')
 
 contract('Exceptions', async function(accounts) {
     const Owner = accounts[0]

@@ -6,7 +6,7 @@ const expect = require('chai').expect
 
 const TransactionRecorder = artifacts.require('./TransactionRecorder.sol');
 
-const config = require('../config');
+const config = require('../../config');
 
 contract('Test TransactionRecorder', function(accounts) {
     it('should send a transaction as specified', async function() {
