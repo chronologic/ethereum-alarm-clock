@@ -11,7 +11,7 @@ const TransactionRequest  = artifacts.require('./TransactionRequest.sol')
 // Bring in config.web3 (v1.0.0)
 const config = require('../../config')
 const ethUtil = require('ethereumjs-util')
-const { parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
+const { RequestData, parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 
 const MINUTE = 60 //seconds
@@ -61,11 +61,14 @@ contract('Timestamp execution', async function(accounts) {
             'some-call-data-goes-here'
         )
 
-        const firstClaimStamp = windowStart - freezePeriod - claimWindowSize
+        const requestData = await RequestData.from(txRequest)
 
-        /// Should claim a transaction before each test
-        const secondsToWait = firstClaimStamp - timestamp +1
-        await waitUntilBlock(secondsToWait, 0)
+        const firstClaimStamp = requestData.schedule.windowStart - requestData.schedule.freezePeriod - requestData.schedule.claimWindowSize
+
+        await waitUntilBlock(
+            firstClaimStamp - (await config.web3.eth.getBlock('latest')).timestamp,
+            0
+        )
 
         const claimTx = await txRequest.claim({
             from: accounts[1],
