@@ -594,7 +594,7 @@ library RequestLib {
      * @param self The Request object.
      */
     function isClaimable(Request storage self) 
-        internal returns (bool)
+        internal view returns (bool)
     {
         /// Require not claimed and not cancelled.
         require( !self.claimData.isClaimed() );
@@ -602,7 +602,7 @@ library RequestLib {
 
         // Require that it's in the claim window and the value sent is over the min deposit.
         require( self.schedule.inClaimWindow() );
-        require( msg.value > ClaimLib.minimumDeposit(self.paymentData.payment) ); // minimumDeposit is * 2
+        require( msg.value > ClaimLib.requiredDeposit(self.paymentData.payment) ); // requiredDeposit is * 2
         return true;
     }
 
@@ -612,13 +612,13 @@ library RequestLib {
      * Payable because it requires the sender to send enough ether to cover the claimDeposit.
      */
     function claim(Request storage self) 
-        internal returns (bool)
+        internal returns (bool claimed)
     {
         require( isClaimable(self) );
 
         self.claimData.claim(self.schedule.computePaymentModifier());
         Claimed();
-        return true;
+        claimed = true;
     }
 
     /*

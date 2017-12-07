@@ -29,9 +29,9 @@ library SchedulerLib {
         uint donation;              // Donation value attached to the transaction.
         uint payment;               // Payment value attached to the transaction.
 
-        uint reservedWindowSize;
-        uint freezePeriod;
-        uint claimWindowSize;
+        uint reservedWindowSize;    // The size of the window in which claimer has exclusive rights to execute.
+        uint freezePeriod;          // The size of the window in which nothing happens... Is before execution
+        uint claimWindowSize;       // The size of the window in which someone can claim the txRequest
 
         RequestScheduleLib.TemporalUnit temporalUnit;
     }

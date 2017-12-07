@@ -6,13 +6,11 @@ library ClaimLib {
     using SafeMath for uint;
 
     struct ClaimData {
-        address claimedBy;        // The address that has claimed this request.
+        address claimedBy;          // The address that has claimed the txRequest.
 
-        uint claimDeposit;        // The deposit amount that was put down by the claimer.
+        uint claimDeposit;          // The deposit amount that was put down by the claimer.
 
-        // TODO: add `requiredDeposit` and remove the hard-coding of the `2 *
-        // payment` minimum deposit size.
-        uint minimumDeposit;
+        uint requiredDeposit;       // The required deposit to claim the txRequest.
 
         // An integer constrained between 0-100 that will be applied to the
         // request payment as a percentage.
@@ -36,7 +34,7 @@ library ClaimLib {
      * Helper: returns whether this request is claimed.
      */
     function isClaimed(ClaimData storage self) 
-        internal returns (bool)
+        internal view returns (bool)
     {
         return self.claimedBy != 0x0;
     }
@@ -45,11 +43,15 @@ library ClaimLib {
      * @dev Calculates the amount that must be supplied as a deposit to claim.  
      * This is set to the maximum possible payment value that could be paid out by this request.
      */
-    function minimumDeposit(uint payment) 
-        internal pure returns (uint)
+
+        // TODO: add `requiredDeposit` and remove the hard-coding of the `2 *
+        // payment` minimum deposit size.
+    function requiredDeposit(uint _payment)
+        internal pure returns (uint requiredDeposit)
     {
-        return payment.mul(2);
+        requiredDeposit = _payment.mul(2);
     }
+
 
     /*
      * @dev Refund the claim deposit to claimer.

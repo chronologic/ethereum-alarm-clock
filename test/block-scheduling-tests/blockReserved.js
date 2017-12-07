@@ -10,7 +10,7 @@ const TransactionRecorder = artifacts.require('./TransactionRecorder.sol')
 
 /// Brings in config.web3 (v1.0.0)
 const config = require('../../config')
-const { parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
+const { RequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 
 contract('Block reserved window', function(accounts) {
@@ -46,7 +46,7 @@ contract('Block reserved window', function(accounts) {
             'this-is-the-call-data'
         )
 
-        const requestData = await parseRequestData(txRequest)
+        const requestData = await RequestData.from(txRequest)
 
         const claimAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 10
         await waitUntilBlock(0, claimAt)
@@ -55,27 +55,27 @@ contract('Block reserved window', function(accounts) {
         expect(claimTx.receipt)
         .to.exist 
 
-        const requestDataTwo = await parseRequestData(txRequest)
+        await requestData.refresh()
 
-        expect(requestDataTwo.claimData.claimedBy)
+        expect(requestData.claimData.claimedBy)
         .to.equal(accounts[7])
 
-        await waitUntilBlock(0, requestDataTwo.schedule.windowStart)
+        await waitUntilBlock(0, requestData.schedule.windowStart)
 
         expect(await txRecorder.wasCalled())
         .to.be.false 
 
-        expect(requestDataTwo.meta.wasCalled)
+        expect(requestData.meta.wasCalled)
         .to.be.false 
 
         const executeTx = await txRequest.execute({gas: 3000000})
 
-        const requestDataThree = await parseRequestData(txRequest)
+        await requestData.refresh()
 
         expect(await txRecorder.wasCalled())
         .to.be.false 
 
-        expect(requestDataThree.meta.wasCalled)
+        expect(requestData.meta.wasCalled)
         .to.be.false 
 
         expect(wasAborted(executeTx))
