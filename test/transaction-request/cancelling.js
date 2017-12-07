@@ -8,14 +8,15 @@ const expect = require('chai').expect
 const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
 /// Bring in config.web3 (v1.0.0)
-const config = require("../../config")
+const config = require('../../config')
+const { parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 const toBN = config.web3.utils.toBN
 
 contract('Cancelling', async function(accounts) {
     const Owner = accounts[0]
 
-    let transactionRequest 
+    let txRequest 
 
     /// TransactionRequest constants
     const claimWindowSize = 25 //blocks
@@ -27,9 +28,9 @@ contract('Cancelling', async function(accounts) {
 
     beforeEach(async function() {
         const curBlockNum = await config.web3.eth.getBlockNumber()
-        windowStart = curBlockNum + 38
+        windowStart = curBlockNum + 38 + 10 + 5
 
-        transactionRequest = await TransactionRequest.new(
+        txRequest = await TransactionRequest.new(
             [
                 Owner, //createdBy
                 Owner, //owner
@@ -37,7 +38,7 @@ contract('Cancelling', async function(accounts) {
                 accounts[3] //toAddress
             ], [
                 0, //donation
-                0, //payment
+                1, //payment
                 claimWindowSize,
                 freezePeriod,
                 reservedWindowSize,
@@ -58,290 +59,321 @@ contract('Cancelling', async function(accounts) {
     /////////////
 
     it('tests cancelling before the claim window', async function() {
-        const cancelAt = firstClaimBlock - 3
+        const requestData = await parseRequestData(txRequest)
 
-        /// Some sanity checks
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
+        const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 3
 
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+        expect(cancelAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        expect(requestData.meta.owner)
+        .to.equal(Owner)
+
+        expect(requestData.meta.isCancelled)
+        .to.be.false 
 
         await waitUntilBlock(0, cancelAt)
 
-        const cancelTx = await transactionRequest.cancel({from: Owner})
+        const cancelTx = await txRequest.cancel({from: Owner})
         expect(cancelTx.receipt).to.exist
 
-        const updatedRequestData = await transactionRequest.requestData()
-        const updatedLogs = updatedRequestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === true
-        assert(updatedLogs.args.bools[0] === true)
+        const requestDataRefresh = await parseRequestData(txRequest)
+
+        expect(requestDataRefresh.meta.isCancelled)
+        .to.be.true
     })
 
     it('tests non-owner cannot cancel before the claim window', async function() {
-        const cancelAt = firstClaimBlock - 3
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
+        const requestData = await parseRequestData(txRequest)
 
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+        const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - requestData.schedule.claimWindowSize - 3
+
+        expect(cancelAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        expect(requestData.meta.owner)
+        .to.equal(Owner)
+
+        expect(requestData.meta.isCancelled)
+        .to.be.false 
 
         await waitUntilBlock(0, cancelAt)
 
-        const cancelTx = await transactionRequest.cancel({from: accounts[6]})
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        await txRequest.cancel({from: accounts[4]})
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
+
+        expect((await parseRequestData(txRequest)).meta.wasCalled)
+        .to.be.false
     })
 
     it('tests cancelling during claim window when unclaimed', async function() {
-        const cancelAt = windowStart - freezePeriod -20
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
+        const requestData = await parseRequestData(txRequest)
 
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+        const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 20
+
+        expect(cancelAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        expect(requestData.meta.owner)
+        .to.equal(Owner)
 
         await waitUntilBlock(0, cancelAt)
 
+        const cancelTx = await txRequest.cancel({from: Owner})
 
-        const cancelTx = await transactionRequest.cancel({from: Owner})
-        expect(cancelTx.receipt).to.exist
-
-        const updatedRequestData = await transactionRequest.requestData()
-        const updatedLogs = updatedRequestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === true
-        assert(updatedLogs.args.bools[0] === true)
+        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        .to.be.true
     })
 
     it('tests not cancellable once claimed', async function() {
-        const cancelAt = windowStart - freezePeriod -20
-        const claimAt = cancelAt - 5
+        const requestData = await parseRequestData(txRequest)
 
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
-        
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+        const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 20
+        const claimAt = cancelAt - 5
 
         await waitUntilBlock(0, claimAt)
 
-        const claimTx = await transactionRequest.claim({value: config.web3.utils.toWei(2), from: accounts[1]})
-        // console.log(claimTx)
-        expect(claimTx.receipt).to.exist
+        const claimTx = await txRequest.claim(
+            {
+                from: accounts[1],
+                value: config.web3.utils.toWei(2 * requestData.paymentData.payment)
+            }
+        )
 
+        expect(claimTx.receipt)
+        .to.exist 
 
-        const updatedRequestData = await transactionRequest.requestData()
-        const updatedLogs = updatedRequestData.logs.find(e => e.event === 'RequestData')
-     
-        /// The claim address should match up
-        assert(updatedLogs.args.addressArgs[0] === accounts[1])
+        expect((await parseRequestData(txRequest)).claimData.claimedBy)
+        .to.equal(accounts[1])
 
-        /// Should revert
-        const cancelTx = await transactionRequest.cancel({from: Owner})
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        await waitUntilBlock(0, cancelAt)
+
+        await txRequest.cancel()
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
+
+        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        .to.be.false
     })
 
     it('tests not cancellable during the freeze window', async function() {
-        const cancelAt = windowStart - freezePeriod
+        const requestData = await parseRequestData(txRequest)
 
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
-        
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+        const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod 
+
+        expect(cancelAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        expect(requestData.meta.owner)
+        .to.equal(Owner)
+
+        expect(requestData.meta.isCancelled)
+        .to.be.false 
 
         await waitUntilBlock(0, cancelAt)
 
-        const cancelTx = await transactionRequest.cancel({from: Owner})
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        await txRequest.cancel()
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
+
+        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        .to.be.false 
     })
 
     it('tests not cancellable during the execution window', async function() {
-        const cancelAt = windowStart 
+        const requestData = await parseRequestData(txRequest)
 
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
-        
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+        const cancelAt = requestData.schedule.windowStart 
+
+        expect(cancelAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        expect(requestData.meta.owner)
+        .to.equal(Owner)
+
+        expect(requestData.meta.isCancelled)
+        .to.be.false 
 
         await waitUntilBlock(0, cancelAt)
 
-        const cancelTx = await transactionRequest.cancel({from: Owner})
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        await txRequest.cancel()
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
+
+        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        .to.be.false 
     })
 
     it('tests not cancellable if was called', async function() {
-        const executeAt = windowStart 
-        const cancelAtFirst = windowStart + 10
-        const cancelAtSecond = windowStart + executionWindow + 5
+        const requestData = await parseRequestData(txRequest) 
 
-        assert(executeAt > await config.web3.eth.getBlockNumber())
-        
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+        const executeAt = requestData.schedule.windowStart 
+        const cancelFirst = requestData.schedule.windowStart + 10
+        const cancelSecond = requestData.schedule.windowStart + requestData.schedule.windowSize + 5 
+
+        expect(executeAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        expect(requestData.meta.owner)
+        .to.equal(Owner)
+
+        expect(requestData.meta.isCancelled)
+        .to.be.false 
 
         await waitUntilBlock(0, executeAt)
 
-        const executeTx = await transactionRequest.execute({gas: 3000000})
-        expect(executeTx.receipt).to.exist
+        const executeTx = await txRequest.execute({
+            gas: 3000000
+        })
+        expect(executeTx.receipt)
+        .to.exist 
 
-        const afterExecuteRequestData = await transactionRequest.requestData()
-        const afterExecutedLogs = afterExecuteRequestData.logs.find(e => e.event === 'RequestData')
-        /// wasCalled === true
-        assert(afterExecutedLogs.args.bools[1] === true)
-        // isCancelled === false 
-        assert(afterExecutedLogs.args.bools[0] === false)
+        expect((await parseRequestData(txRequest)).meta.wasCalled)
+        .to.be.true
 
-        await waitUntilBlock(0, cancelAtFirst)
+        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        .to.be.false
 
-        const firstCancelTx = await transactionRequest.cancel({from: Owner})
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        await waitUntilBlock(0, cancelFirst)
 
-        await waitUntilBlock(0, cancelAtSecond)
+        await txRequest.cancel()
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
 
-        const secondCancelTx = await transactionRequest.cancel({from: Owner})
-            .should.be.rejectedWith('VM Exception while processing transaction: revert')
+        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        .to.be.false 
+
+        await waitUntilBlock(0, cancelSecond)
+
+        await txRequest.cancel()
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
+
+        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        .to.be.false 
     })
 
     it('tests cancellable if call is missed', async function() {
-        const cancelAt = windowStart + executionWindow + 10
+        const requestData = await parseRequestData(txRequest)
 
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
+        const cancelAt = requestData.schedule.windowStart + requestData.schedule.windowSize + 10
+
+        expect(cancelAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
         
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+        expect(requestData.meta.owner)
+        .to.equal(Owner)
+
+        expect(requestData.meta.isCancelled)
+        .to.be.false 
 
         await waitUntilBlock(0, cancelAt)
 
-        const cancelTx = await transactionRequest.cancel({from: Owner})
+        const cancelTx = await txRequest.cancel() 
+        expect(cancelTx.receipt)
+        .to.exist 
 
-        const updatedRequestData = await transactionRequest.requestData()
-        const updatedLogs = updatedRequestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === true
-        assert(updatedLogs.args.bools[0] === true)
+        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        .to.be.true
     })
 
-    /// TODO
     it('tests accounting for pre-execution cancellation', async function() {
-        const cancelAt = windowStart - freezePeriod - 5
+        const requestData = await parseRequestData(txRequest)
 
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
+        const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 3
+
+        expect(cancelAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        expect(requestData.meta.owner)
+        .to.equal(Owner)
         
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+        expect(requestData.meta.isCancelled)
+        .to.be.false 
 
         await waitUntilBlock(0, cancelAt)
 
-        const beforeCancelBal = await config.web3.eth.getBalance(Owner)
-        const beforeContractBal = await config.web3.eth.getBalance(transactionRequest.address)
+        const balanceBeforeCancel = await config.web3.eth.getBalance(accounts[1])
+        const contractBalanceBefore = await config.web3.eth.getBalance(txRequest.address)
 
-        const cancelTx = await transactionRequest.cancel({from: Owner})
+        const cancelTx = await txRequest.cancel({
+            from: Owner // TODO: this throws if set to another account
+        })
+        expect(cancelTx.receipt)
+        .to.exist 
 
-        const afterCancelBal = await config.web3.eth.getBalance(Owner)
-        const afterContractBal = await config.web3.eth.getBalance(transactionRequest.address)
+        const balanceAfterCancel = await config.web3.eth.getBalance(accounts[1])
+        const contractBalanceAfter = await config.web3.eth.getBalance(txRequest.address)
 
-        const updatedRequestData = await transactionRequest.requestData()
-        const updatedLogs = updatedRequestData.logs.find(e => e.event === 'RequestData')
-        // isCancelled === true
-        assert(updatedLogs.args.bools[0] === true)
+        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        .to.be.true 
 
-        // console.log(beforeCancelBal, afterCancelBal)
-        // console.log(beforeContractBal, afterContractBal)
+        /// TODO: Get cancel data
+
+        console.log(balanceBeforeCancel)
+        console.log(balanceAfterCancel)
+        console.log(contractBalanceBefore)
+        console.log(contractBalanceAfter)
     })
 
-    /// TODO
-    it('tests accounting for missed execution cancellation by owner', async function() {
-        const cancelAt = windowStart + executionWindow + 1
+    // /// TODO
+    // it('tests accounting for missed execution cancellation by owner', async function() {
+    //     const cancelAt = windowStart + executionWindow + 1
 
-        /// Sanity checks
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
+    //     /// Sanity checks
+    //     assert(cancelAt > await config.web3.eth.getBlockNumber())
 
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+    //     const requestData = await transactionRequest.requestData()
+    //     const logs = requestData.logs.find(e => e.event === 'RequestData')
+    //     // requestData.meta.isCancelled === false
+    //     assert(logs.args.bools[0] === false)
+    //     // requestData.meta.owner === Owner
+    //     assert(logs.args.addressArgs[2] === Owner)
 
-        /// Get the balances before the cancellation calls
-        const beforeCancelBal = await config.web3.eth.getBalance(Owner)
-        const beforeContractBal = await config.web3.eth.getBalance(transactionRequest.address)
+    //     /// Get the balances before the cancellation calls
+    //     const beforeCancelBal = await config.web3.eth.getBalance(Owner)
+    //     const beforeContractBal = await config.web3.eth.getBalance(transactionRequest.address)
 
-        /// Wait until the cancellation block and cancel the transaction
-        await waitUntilBlock(0, cancelAt)
-        const cancelTx = await transactionRequest.cancel({from: Owner})
-        expect(cancelTx.receipt).to.exist 
+    //     /// Wait until the cancellation block and cancel the transaction
+    //     await waitUntilBlock(0, cancelAt)
+    //     const cancelTx = await transactionRequest.cancel({from: Owner})
+    //     expect(cancelTx.receipt).to.exist 
 
-        /// Get the balances after the cancellation calls
-        const afterCancelBal = await config.web3.eth.getBalance(Owner)
-        const afterContractBal = await config.web3.eth.getBalance(transactionRequest.address)
+    //     /// Get the balances after the cancellation calls
+    //     const afterCancelBal = await config.web3.eth.getBalance(Owner)
+    //     const afterContractBal = await config.web3.eth.getBalance(transactionRequest.address)
 
-        const updatedRequestData = await transactionRequest.requestData()
-        const updatedLogs = updatedRequestData.logs.find(e => e.event === 'RequestData')
-        // isCancelled === true
-        assert(updatedLogs.args.bools[0] === true)
+    //     const updatedRequestData = await transactionRequest.requestData()
+    //     const updatedLogs = updatedRequestData.logs.find(e => e.event === 'RequestData')
+    //     // isCancelled === true
+    //     assert(updatedLogs.args.bools[0] === true)
 
-        // console.log(beforeCancelBal, afterCancelBal)
-        // console.log(beforeContractBal, afterContractBal)
+    //     // console.log(beforeCancelBal, afterCancelBal)
+    //     // console.log(beforeContractBal, afterContractBal)
 
-    })
+    // })
 
-    /// TODO
-    it('tests accounting for missed execution cancellation not by owner', async function() {
-        const cancelAt = windowStart + executionWindow + 1
+    // /// TODO
+    // it('tests accounting for missed execution cancellation not by owner', async function() {
+    //     const cancelAt = windowStart + executionWindow + 1
 
-        /// Sanity checks
-        assert(cancelAt > await config.web3.eth.getBlockNumber())
+    //     /// Sanity checks
+    //     assert(cancelAt > await config.web3.eth.getBlockNumber())
         
-        const requestData = await transactionRequest.requestData()
-        const logs = requestData.logs.find(e => e.event === 'RequestData')
-        // requestData.meta.isCancelled === false
-        assert(logs.args.bools[0] === false)
-        // requestData.meta.owner === Owner
-        assert(logs.args.addressArgs[2] === Owner)
+    //     const requestData = await transactionRequest.requestData()
+    //     const logs = requestData.logs.find(e => e.event === 'RequestData')
+    //     // requestData.meta.isCancelled === false
+    //     assert(logs.args.bools[0] === false)
+    //     // requestData.meta.owner === Owner
+    //     assert(logs.args.addressArgs[2] === Owner)
 
-        /// Get the balances before the cancellation calls
-        const beforeCancelBal = await config.web3.eth.getBalance(Owner)
-        const beforeContractBal = await config.web3.eth.getBalance(transactionRequest.address)
+    //     /// Get the balances before the cancellation calls
+    //     const beforeCancelBal = await config.web3.eth.getBalance(Owner)
+    //     const beforeContractBal = await config.web3.eth.getBalance(transactionRequest.address)
 
-        /// Wait until the cancellation block and cancel the transaction
-        await waitUntilBlock(0, cancelAt)
-        const cancelTx = await transactionRequest.cancel({from: Owner})
-        expect(cancelTx.receipt).to.exist 
+    //     /// Wait until the cancellation block and cancel the transaction
+    //     await waitUntilBlock(0, cancelAt)
+    //     const cancelTx = await transactionRequest.cancel({from: Owner})
+    //     expect(cancelTx.receipt).to.exist 
 
-        /// Get the balances after the cancellation calls
-        const afterCancelBal = await config.web3.eth.getBalance(Owner)
-        const afterContractBal = await config.web3.eth.getBalance(transactionRequest.address)
+    //     /// Get the balances after the cancellation calls
+    //     const afterCancelBal = await config.web3.eth.getBalance(Owner)
+    //     const afterContractBal = await config.web3.eth.getBalance(transactionRequest.address)
 
-    })
+    // })
 })
