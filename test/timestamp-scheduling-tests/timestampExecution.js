@@ -64,12 +64,13 @@ contract('Timestamp execution', async function(accounts) {
         const firstClaimStamp = windowStart - freezePeriod - claimWindowSize
 
         /// Should claim a transaction before each test
-        const secondsToWait = firstClaimStamp - timestamp
+        const secondsToWait = firstClaimStamp - timestamp +1
         await waitUntilBlock(secondsToWait, 0)
 
-        const claimTx = await txRequest.claim({from: accounts[1], value: config.web3.utils.toWei(1)})
-        expect(claimTx.receipt)
-        .to.exist
+        const claimTx = await txRequest.claim({
+            from: accounts[1],
+            value: config.web3.utils.toWei(1)
+        })
     })
 
     /////////////

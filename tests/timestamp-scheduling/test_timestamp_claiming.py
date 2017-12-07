@@ -21,7 +21,7 @@ def test_cannot_claim_before_first_claim_timestamp(chain,
     # sanity
     assert first_claim_timestamp > web3.eth.getBlock('latest')['timestamp']
 
-    set_timestamp(first_claim_timestamp - 1)
+    set_timestamp(first_claim_timestamp - 10)
 
     claim_txn_hash = txn_request.transact({
         'value': 2 * request_data.paymentData.payment,

@@ -65,10 +65,10 @@ contract TransactionRequest is TransactionRequestInterface {
         public view returns (address[6], bool[3], uint[15], uint8[1])
     {
         if (txnRequest.serialize()) {
-            RequestData(txnRequest.serializedValues.addressValues,
-                        txnRequest.serializedValues.boolValues,
-                        txnRequest.serializedValues.uintValues,
-                        txnRequest.serializedValues.uint8Values);
+            // RequestData(txnRequest.serializedValues.addressValues,
+            //             txnRequest.serializedValues.boolValues,
+            //             txnRequest.serializedValues.uintValues,
+            //             txnRequest.serializedValues.uint8Values);
             return (
                 txnRequest.serializedValues.addressValues,
                 txnRequest.serializedValues.boolValues,
@@ -80,7 +80,7 @@ contract TransactionRequest is TransactionRequestInterface {
         }
     }
 
-    event RequestData(address[6] addressArgs, bool[3] bools, uint[15] uintArgs, uint8[1] uint8Args);
+    // event RequestData(address[6] addressArgs, bool[3] bools, uint[15] uintArgs, uint8[1] uint8Args);
 
     //// TODO... This will need to bubble up an event of <bytes> eventually.
     function callData() 

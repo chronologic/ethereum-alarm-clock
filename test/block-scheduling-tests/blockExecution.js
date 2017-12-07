@@ -60,11 +60,9 @@ contract('Block execution', async function(accounts) {
         const firstClaimBlock  = windowStart - 5 - 25
         await waitUntilBlock(0, firstClaimBlock);
         
-        const claimTx = await txRequest.claim({value: config.web3.utils.toWei(1)})
-
-        /// Search for the claimed function and expect it to exist.
-        const claimed = claimTx.logs.find(e => e.event === 'Claimed')
-        expect(claimed).to.exist
+        await txRequest.claim({
+            value: config.web3.utils.toWei(1)
+        })
     })
 
     /////////////
