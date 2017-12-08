@@ -2,9 +2,9 @@ sudo: required
 dist: trusty
 language: node_js
 node_js:
-  - '8'
+  - '8.0.0'
 install:
-  - npm install -g truffle
+  - npm install -g truffle@beta
   - npm install -g ethereumjs-testrpc
   - npm install
 script:
