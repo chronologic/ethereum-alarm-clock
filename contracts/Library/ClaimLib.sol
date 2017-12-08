@@ -12,9 +12,8 @@ library ClaimLib {
 
         uint requiredDeposit;       // The required deposit to claim the txRequest.
 
-        // An integer constrained between 0-100 that will be applied to the
-        // request payment as a percentage.
-        uint8 paymentModifier;
+        uint8 paymentModifier;      // An integer constrained between 0-100 that will be applied to the
+                                    // request payment as a percentage.
     }
 
     /*

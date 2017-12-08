@@ -52,7 +52,8 @@ contract('Block execution', async function(accounts) {
                 200000,             //callGas
                 0                   //callValue
             ],
-            testData32              //callData
+            testData32,              //callData
+            {value: config.web3.utils.toWei(1)}
         )
 
         /// The first claim block is the current block + the number of blocks

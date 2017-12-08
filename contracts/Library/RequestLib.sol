@@ -129,11 +129,8 @@ library RequestLib {
         );
         isValid[5] = ExecutionLib.validateToAddress(request.txnData.toAddress);
 
-        LogSwitches(isValid);
         /// Automatically returns isValid
     }
-
-    event LogSwitches(bool[6] switches);
 
     /*
      *  Initialize a new Request.
@@ -352,7 +349,7 @@ library RequestLib {
             Aborted(uint8(AbortReason.BeforeCallWindow));
             return false;
         } else if (self.schedule.isAfterWindow()) {
-            Aborted(uint8(AbortReason.AfterCallWindow)); //3
+            Aborted(uint8(AbortReason.AfterCallWindow));
             return false;
         } else if (self.claimData.isClaimed() &&
                    msg.sender != self.claimData.claimedBy &&
@@ -390,10 +387,10 @@ library RequestLib {
 
         // record this so that we can log it later.
         uint totalDonationPayment = self.paymentData.donationOwed;
-        debug(totalDonationPayment);
+        // debug(totalDonationPayment);
         // Send the donation.
         /// Bug vvv
-        // self.paymentData.sendDonation();
+        self.paymentData.sendDonation();
 
         // Compute the payment amount and who it should be sent do.
         self.paymentData.paymentBenefactor = msg.sender;
@@ -425,22 +422,20 @@ library RequestLib {
         Executed(self.paymentData.paymentOwed,
                  totalDonationPayment,
                  measuredGasConsumption);
-
+    
         // Send the payment.
-        //FIXME: NO MORE PUSHES FOR PAYMENTS, CLIENTS MUST CALL
-        // self.paymentData.sendPayment();
+        // FIXME: NO MORE PUSHES FOR PAYMENTS, CLIENTS MUST CALL
+        self.paymentData.sendPayment();
 
         // Send all extra ether back to the owner.
-        // sendOwnerEther(self);
+        sendOwnerEther(self);
 
         // +-----------------+
         // | End: Accounting |
         // +-----------------+
-
         return true;
     }
 
-    event debug(uint num);
 
     // This is the amount of gas that it takes to enter from the
     // `TransactionRequest.execute()` contract into the `RequestLib.execute()`
@@ -658,12 +653,10 @@ library RequestLib {
     function sendOwnerEther(Request storage self) 
         internal returns (bool)
     {
-        // assert( self.meta.isCancelled || self.schedule.isAfterWindow() );
-        uint ownerRefund = this.balance.sub(self.claimData.claimDeposit)
-                                        .sub(self.paymentData.paymentOwed)
-                                        .sub(self.paymentData.donationOwed);
-
-        if ( ownerRefund > 0 ) {
+        if ( self.meta.isCancelled || self.schedule.isAfterWindow() ) {
+            uint ownerRefund = this.balance.sub(self.claimData.claimDeposit)
+                                            .sub(self.paymentData.paymentOwed)
+                                            .sub(self.paymentData.donationOwed);
             self.meta.owner.transfer(ownerRefund);
             return true;
         }
