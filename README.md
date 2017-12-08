@@ -44,21 +44,40 @@ We _will soon_ host developer documentation via Doxitiy on github pages.
 
 The EAC contracts are deployed on Ropsten at the addresses below.
 
+```
 baseScheduler, 0x06eca20d5a4f9e9c1dac5d5e3a8b86d8264087e6
+
 blockSceduler, 0x756377d64d005357d68b09090973a19b52ef0b4e
+
 claimLib, 0xf0cb482306cd182c95e89a305680ad1c95aaef9c
+
 executionLib, 0x9c12065b57567727ab055a5cdf61862dfd75f7c3
+
 groveLib, 0x58d685a216aafee3e9ef77731cf0f8ce2801f9be
+
 iterTools, 0xed46c237c50cd46df738f4451a343f9657a28e31
+
 mathLib, 0x87e3c74941811bb0dcc8c38c03b8f0407b7cb0b5
+
 paymentLib, 0xb182f19b3368261d3a5ae5a1f89b3c1f1e00b128
+
 requestFactory, 0x76e0ad7d1dcdc36bd951ae320884c843f3613934
+
 requestLib, 0x64d0b1768a9dee29d2f389459b8ddd6ab832703c
+
 requestMetaLib, 0x3a1c8b73a149d0889c5516114d6e11b9b7c96cf6
+
 requestScheduleLib, 0x9d96b1eb1ef99272b2a9326fffdd8659a93041f9
+
 requestTracker, 0x71e49ac7b7058006f32e9946882c7fff59b571b3
+
 safeMath, 0x6fdac55a6b36a3d5c4588cf61ca5ccb595c4270b
+
 schedulerLib, 0x9e19c7f23c09e4b3fa89e799876e3cb29f86a73a
+
 timestampScheduler, 0x9ba22a74fd873b901a1f58e14760489fc42265ec
+
 transactionRequest, 0x0d8fabef45ec349d11d1a0eb4d3e1bcbba652459
+
 transactionRecorder, 0x9c5c57b400afd2f646cd063ff41eb3478455f5fa
+```
