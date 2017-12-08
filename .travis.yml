@@ -4,13 +4,13 @@ language: node_js
 node_js:
   - '8.0.0'
 install:
-  - npm install -g truffle@beta
-  - npm install -g ethereumjs-testrpc
+  - npm install -g truffle@4.0.1
+  - npm install -g ganache-cli
   - npm install
 script:
   - npm test
 before_script:
-  - testrpc > /dev/null &
+  - ganache-cli > /dev/null &
   - sleep 5
 after_script:
   - npm run coverage && cat coverage/lcov.info | coveralls
