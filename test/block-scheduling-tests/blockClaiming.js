@@ -36,23 +36,24 @@ contract('Block claiming', async function(accounts) {
         /// Instantiate a TransactionRequest with temporal unit 1 - aka block
         txRequest = await TransactionRequest.new(
             [
-                Owner, // created by
-                Owner, // owner
-                Benefactor, // donation benefactor
-                txRecorder.address // To
+                Owner,                  // created by
+                Owner,                  // owner
+                Benefactor,             // donation benefactor
+                txRecorder.address      // to
             ], [
-                0, //donation
-                0, //payment
-                25, //claim window size
-                5, //freeze period
-                10, //reserved window size
-                1, // temporal unit - blocks is 1
-                10, //window size
-                curBlock + 38, //windowStart
-                100000, //callGas
-                0 //callValue
+                0,                      //donation
+                0,                      //payment
+                25,                     //claim window size
+                5,                      //freeze period
+                10,                     //reserved window size
+                1,                      //temporal unit - blocks is 1
+                10,                     //window size
+                curBlock + 38,          //windowStart
+                100000,                 //callGas
+                0                       //callValue
             ],
-            'this-is-the-call-data'
+            'this-is-the-call-data',
+            {value: config.web3.utils.toWei('1')}
         )
     })
 
@@ -71,7 +72,9 @@ contract('Block claiming', async function(accounts) {
         await waitUntilBlock(0, firstClaimBlock - 1)
 
         await txRequest.claim({
-            value: config.web3.utils.toWei(2*requestData.paymentData.payment)
+            value: config.web3.utils.toWei(
+                (2*requestData.paymentData.payment).toString()
+            )
         }).should.be.rejectedWith('VM Exception while processing transaction: revert')
 
         await requestData.refresh()
@@ -92,7 +95,7 @@ contract('Block claiming', async function(accounts) {
 
         const claimTx = await txRequest.claim({
             from: accounts[0],
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         })
         expect(claimTx.receipt)
         .to.exist 
@@ -116,7 +119,7 @@ contract('Block claiming', async function(accounts) {
 
         const claimTx = await txRequest.claim({
             from: accounts[0],
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         })
         expect(claimTx.receipt)
         .to.exist 
@@ -139,7 +142,9 @@ contract('Block claiming', async function(accounts) {
 
         await txRequest.claim({
             from: accounts[0],
-            value: config.web3.utils.toWei(2*requestData.paymentData.payment)
+            value: config.web3.utils.toWei(
+                (2*requestData.paymentData.payment).toString()
+            )
         }).should.be.rejectedWith('VM Exception while processing transaction: revert')
 
         await requestData.refresh() 
@@ -161,7 +166,7 @@ contract('Block claiming', async function(accounts) {
 
         const claimTx = await txRequest.claim({
             from: accounts[1],
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         })
         expect(claimTx.receipt)
         .to.exist 
@@ -197,7 +202,7 @@ contract('Block claiming', async function(accounts) {
         await waitUntilBlock(0, firstClaimBlock)
 
         const claimTx = await txRequest.claim({
-            value: config.web3.utils.toWei(2),
+            value: config.web3.utils.toWei('2'),
             from: accounts[2]
         })
         expect(claimTx.receipt)
@@ -238,7 +243,7 @@ contract('Block claiming', async function(accounts) {
         await waitUntilBlock(0, claimAt)
 
         const claimTx = await txRequest.claim({
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         })
         expect(claimTx.receipt)
         .to.exist 

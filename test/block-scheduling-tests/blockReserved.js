@@ -51,7 +51,7 @@ contract('Block reserved window', function(accounts) {
         const claimAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 10
         await waitUntilBlock(0, claimAt)
 
-        const claimTx = await txRequest.claim({from: accounts[7], value: config.web3.utils.toWei(2)})
+        const claimTx = await txRequest.claim({from: accounts[7], value: config.web3.utils.toWei('2')})
         expect(claimTx.receipt)
         .to.exist 
 

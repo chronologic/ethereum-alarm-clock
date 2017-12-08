@@ -48,7 +48,8 @@ contract('Cancelling', async function(accounts) {
                 43324, //callGas
                 12345 //callValue
             ],
-            'some-call-data-could-be-anything'
+            'some-call-data-could-be-anything',
+            {value: config.web3.utils.toWei('1')}
         )
 
         firstClaimBlock = windowStart - freezePeriod - claimWindowSize
@@ -136,7 +137,9 @@ contract('Cancelling', async function(accounts) {
         const claimTx = await txRequest.claim(
             {
                 from: accounts[1],
-                value: config.web3.utils.toWei(2 * requestData.paymentData.payment)
+                value: config.web3.utils.toWei(
+                    (2 * requestData.paymentData.payment).toString()
+                )
             }
         )
 

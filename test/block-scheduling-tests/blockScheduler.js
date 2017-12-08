@@ -84,7 +84,7 @@ contract('Block scheduling', function(accounts) {
                 gasPrice
 
             ],
-            {from: accounts[0], value: config.web3.utils.toWei(20)}
+            {from: accounts[0], value: config.web3.utils.toWei('20')}
         )
 
         expect(scheduleTx.receipt)
@@ -138,7 +138,7 @@ contract('Block scheduling', function(accounts) {
                 98765,      //donation
                 80008,      //payment
             ],
-            {from: accounts[0], value: config.web3.utils.toWei(10)}
+            {from: accounts[0], value: config.web3.utils.toWei('10')}
         )
 
         expect(scheduleTx.receipt)
@@ -192,7 +192,7 @@ contract('Block scheduling', function(accounts) {
                 0, //windowSize
                 windowStart
             ],
-            {from: User2, value: config.web3.utils.toWei(10)}
+            {from: User2, value: config.web3.utils.toWei('10')}
         ).should.be.rejectedWith('VM Exception while processing transaction: revert')
     })
 })

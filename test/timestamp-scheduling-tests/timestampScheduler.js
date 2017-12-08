@@ -67,7 +67,7 @@ contract('Timestamp scheduling', function(accounts) {
                 windowStart,
                 gasPrice
             ],
-            {from: accounts[0], value: config.web3.utils.toWei(10)}
+            {from: accounts[0], value: config.web3.utils.toWei('10')}
         )
 
         expect(scheduleTx.receipt)
@@ -120,7 +120,7 @@ contract('Timestamp scheduling', function(accounts) {
                 donation,
                 payment
             ],
-            {from: accounts[0], value: config.web3.utils.toWei(10)}
+            {from: accounts[0], value: config.web3.utils.toWei('10')}
         )
 
         expect(scheduleTx.receipt)

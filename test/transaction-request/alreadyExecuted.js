@@ -53,7 +53,8 @@ contract('Test already executed', async function(accounts) {
                 2000000, //callGas
                 0  //callValue
             ],
-            'some-call-data-goes-here'
+            'some-call-data-goes-here',
+            {value: config.web3.utils.toWei('1')}
         )
 
         const requestData = await parseRequestData(txRequest)

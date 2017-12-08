@@ -48,7 +48,8 @@ contract('tests execution rejected if cancelled', async function(accounts) {
                 2000000, //callGas
                 0 //callValue
             ],
-            'some-call-data-could-be-anything'
+            'some-call-data-could-be-anything',
+            {value: config.web3.utils.toWei('1')}
         )
         const requestData = await parseRequestData(txRequest)         
 

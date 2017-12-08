@@ -61,7 +61,8 @@ contract('Timestamp claiming', async function(accounts) {
                 1200000, //callGas
                 0   //callValue
             ],
-            'just-some-call-data'
+            'just-some-call-data',
+            {value: config.web3.utils.toWei('1')}
         )
     })
 
@@ -83,7 +84,7 @@ contract('Timestamp claiming', async function(accounts) {
         )
 
         await txRequest.claim({
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         }).should.be.rejectedWith('VM Exception while processing transaction: revert')
 
         await requestData.refresh()
@@ -106,7 +107,7 @@ contract('Timestamp claiming', async function(accounts) {
         )
 
         const claimTx = await txRequest.claim({
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         })
         expect(claimTx.receipt)
         .to.exist 
@@ -131,7 +132,7 @@ contract('Timestamp claiming', async function(accounts) {
         )
 
         const claimTx = await txRequest.claim({
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         })
         expect(claimTx.receipt)
         .to.exist 
@@ -156,7 +157,7 @@ contract('Timestamp claiming', async function(accounts) {
         )
 
         await txRequest.claim({
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         }).should.be.rejectedWith('VM Exception while processing transaction: revert')
 
         await requestData.refresh()
@@ -180,7 +181,7 @@ contract('Timestamp claiming', async function(accounts) {
 
         const claimTx = await txRequest.claim({
             from: accounts[1],
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         })
         expect(claimTx.receipt)
         .to.exist 
@@ -221,7 +222,7 @@ contract('Timestamp claiming', async function(accounts) {
 
         const claimTx = await txRequest.claim({
             from: accounts[1],
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         })
         expect(claimTx.receipt)
         .to.exist 
@@ -266,7 +267,7 @@ contract('Timestamp claiming', async function(accounts) {
         )
 
         const claimTx = await txRequest.claim({
-            value: config.web3.utils.toWei(2)
+            value: config.web3.utils.toWei('2')
         })
         expect(claimTx.receipt)
         .to.exist 

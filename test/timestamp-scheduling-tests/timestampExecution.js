@@ -58,7 +58,8 @@ contract('Timestamp execution', async function(accounts) {
                 2000000, //callGas
                 0  //callValue
             ],
-            'some-call-data-goes-here'
+            'some-call-data-goes-here',
+            {value: config.web3.utils.toWei('1')}
         )
 
         const requestData = await RequestData.from(txRequest)
@@ -72,7 +73,7 @@ contract('Timestamp execution', async function(accounts) {
 
         const claimTx = await txRequest.claim({
             from: accounts[1],
-            value: config.web3.utils.toWei(1)
+            value: config.web3.utils.toWei('1')
         })
     })
 

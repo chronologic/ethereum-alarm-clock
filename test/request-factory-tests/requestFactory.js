@@ -63,7 +63,7 @@ contract('Request factory', async function(accounts) {
                 callValue
             ],
             'this-is-call-data',
-            config.web3.utils.toWei(10) //endowment
+            config.web3.utils.toWei('10') //endowment
         )
 
         isValid.forEach(bool => expect(bool).to.be.true)
@@ -277,7 +277,7 @@ contract('Request factory', async function(accounts) {
                 callValue
             ],
             'this-is-call-data',
-            config.web3.utils.toWei(10) //endowment
+            config.web3.utils.toWei('10') //endowment
         )
 
         expect(isValid[1])
@@ -326,7 +326,7 @@ contract('Request factory', async function(accounts) {
                 callValue
             ],
             'this-is-call-data',
-            config.web3.utils.toWei(10) //endowment
+            config.web3.utils.toWei('10') //endowment
         )
 
         expect(isValid[2])
@@ -376,7 +376,7 @@ contract('Request factory', async function(accounts) {
                 callValue
             ],
             'this-is-call-data',
-            config.web3.utils.toWei(10) //endowment
+            config.web3.utils.toWei('10') //endowment
         )
 
         expect(isValid[3])
@@ -423,7 +423,7 @@ contract('Request factory', async function(accounts) {
                 callValue
             ],
             'this-is-call-data',
-            config.web3.utils.toWei(10) //endowment
+            config.web3.utils.toWei('10') //endowment
         )
 
         expect(isValid[4])
@@ -470,7 +470,7 @@ contract('Request factory', async function(accounts) {
                 callValue
             ],
             'this-is-call-data',
-            config.web3.utils.toWei(10) //endowment
+            config.web3.utils.toWei('10') //endowment
         )
 
         expect(isValid[5])

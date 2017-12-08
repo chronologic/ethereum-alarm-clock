@@ -53,7 +53,7 @@ contract('Block execution', async function(accounts) {
                 0                   //callValue
             ],
             testData32,              //callData
-            {value: config.web3.utils.toWei(1)}
+            {value: config.web3.utils.toWei('1')}
         )
 
         /// The first claim block is the current block + the number of blocks
@@ -62,7 +62,7 @@ contract('Block execution', async function(accounts) {
         await waitUntilBlock(0, firstClaimBlock);
         
         await txRequest.claim({
-            value: config.web3.utils.toWei(1)
+            value: config.web3.utils.toWei('1')
         })
     })
 

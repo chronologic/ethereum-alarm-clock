@@ -28,7 +28,7 @@ const TransactionRecorder = artifacts.require("./TransactionRecorder.sol");
 module.exports = function(deployer) {
 
     console.log(`${"-".repeat(30)}
-NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS`)
+NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS...\n`)
 
     deployer.deploy([MathLib,
         GroveLib,
@@ -114,7 +114,6 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS`)
         return deployer.deploy(TransactionRequest)
     })
     .then(() => {
-        console.log(RequestTracker.address)        
         deployer.link(ClaimLib, RequestFactory)
         deployer.link(MathLib, RequestFactory)
         deployer.link(RequestScheduleLib, RequestFactory)
@@ -124,7 +123,6 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS`)
         deployer.link(RequestTracker, RequestFactory)
         deployer.link(TransactionRequest, RequestFactory)
         deployer.link(SafeMath, RequestFactory)
-            console.log(RequestTracker.address)
         return deployer.deploy(RequestFactory, RequestTracker.address)
     })
     .then(() => {
