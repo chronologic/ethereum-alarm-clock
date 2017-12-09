@@ -74,7 +74,7 @@ contract BaseScheduler is SchedulerInterface {
                             bytes32 _callData,
                             uint[7] _uintArgs)
         doReset
-        public payable returns (address)
+        public payable returns (address newRequest)
     {
         futureTransaction.toAddress = _toAddress;
         futureTransaction.callData = _callData;
@@ -88,11 +88,11 @@ contract BaseScheduler is SchedulerInterface {
 
         futureTransaction.temporalUnit = temporalUnit;
 
-        address newRequest = futureTransaction.schedule(factoryAddress);
+        newRequest = futureTransaction.schedule(factoryAddress);
         require( newRequest != 0x0 );
 
         NewRequest(newRequest);
-        return newRequest;
+        /// Automatically returns newRequest
     }
 
     /// Event that bubbles up the address of new requests made with this scheduler.
