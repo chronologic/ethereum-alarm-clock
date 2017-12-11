@@ -388,9 +388,8 @@ library RequestLib {
 
         // record this so that we can log it later.
         uint totalDonationPayment = self.paymentData.donationOwed;
-        // debug(totalDonationPayment);
+
         // Send the donation.
-        /// Bug vvv
         self.paymentData.sendDonation();
 
         // Compute the payment amount and who it should be sent do.
