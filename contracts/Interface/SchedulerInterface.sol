@@ -9,10 +9,9 @@ import "contracts/Library/SchedulerLib.sol";
  */
 contract SchedulerInterface {
     using SchedulerLib for SchedulerLib.FutureTransaction;
-    using RequestScheduleLib for TemporalUnit;
 
     address public factoryAddress;              // The RequestFactory address which produces requests for this scheduler.
-    TemporalUnit public temporalUnit;           // The TemporalUnit of this scheduler.
+    RequestScheduleLib.TemporalUnit public temporalUnit;           // The TemporalUnit of this scheduler.
 
     /*
      * Local storage variable used to house the data for transaction
@@ -25,9 +24,9 @@ contract SchedulerInterface {
      * get reset to it's defaults on each function call.
      */
     modifier doReset {
-        if (temporalUnit == TemporalUnit.Blocks) {
+        if (temporalUnit == RequestScheduleLib.TemporalUnit.Blocks) {
             futureTransaction.resetAsBlock();
-        } else if (temporalUnit == TemporalUnit.Timestamp) {
+        } else if (temporalUnit == RequestScheduleLib.TemporalUnit.Timestamp) {
             futureTransaction.resetAsTimestamp();
         } else {
             revert();
