@@ -9,9 +9,10 @@ import "contracts/Library/SchedulerLib.sol";
  */
 contract SchedulerInterface {
     using SchedulerLib for SchedulerLib.FutureTransaction;
+    using RequestScheduleLib for TemporalUnit;
 
-    address public factoryAddress;                          // The RequestFactory address which produces requests for this scheduler.
-    RequestScheduleLib.TemporalUnit public temporalUnit;    // The TemporalUnit of this scheduler.
+    address public factoryAddress;              // The RequestFactory address which produces requests for this scheduler.
+    TemporalUnit public temporalUnit;           // The TemporalUnit of this scheduler.
 
     /*
      * Local storage variable used to house the data for transaction
@@ -22,14 +23,11 @@ contract SchedulerInterface {
     /*
      * When applied to a function, causes the local futureTransaction to
      * get reset to it's defaults on each function call.
-     *
-     * TODO: Compare to actual enum values when solidity compiler error is fixed.
-     * https://github.com/ethereum/solidity/issues/1116
      */
     modifier doReset {
-        if (uint(temporalUnit) == 1) {
+        if (temporalUnit == TemporalUnit.Blocks) {
             futureTransaction.resetAsBlock();
-        } else if (uint(temporalUnit) == 2) {
+        } else if (temporalUnit == TemporalUnit.Timestamp) {
             futureTransaction.resetAsTimestamp();
         } else {
             revert();
