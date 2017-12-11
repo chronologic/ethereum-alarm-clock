@@ -50,7 +50,8 @@ contract('Block execution', async function(accounts) {
                 executionWindow,    //window size
                 windowStart,        //windowStart
                 200000,             //callGas
-                0                   //callValue
+                0,                  //callValue
+                0                   //gasPrice
             ],
             testData32,              //callData
             {value: config.web3.utils.toWei('1')}

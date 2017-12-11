@@ -278,6 +278,7 @@ library RequestLib {
         self.schedule.windowStart = uintValues[11];
         self.txnData.callGas = uintValues[12];
         self.txnData.callValue = uintValues[13];
+        self.txnData.gasPrice = uintValues[14];
 
         // Uint8 values
         self.claimData.paymentModifier = uint8Values[0];

@@ -22,7 +22,7 @@ library ExecutionLib {
         internal returns (bool)
     {
         // require( self.gasPrice == tx.gasprice );
-        return self.toAddress.call//.value(self.callValue)
+        return self.toAddress.call.value(self.callValue)
                                   .gas(self.callGas)
                                   (self.callData);
     }

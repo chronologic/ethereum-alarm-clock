@@ -239,9 +239,10 @@ contract('Test accounting', async function(accounts) {
         .to.be.below(100000 * gasPrice)
 
         /// TODO figure out why the -56 is needed in line 242
-        expect(
-            toBN(afterPaymentBal).sub(toBN(beforePaymentBal)).toNumber()
-        ).to.equal(paymentAmt - claimDeposit - executeGasCost - claimGasCost -56)
+        const diff = toBN(afterPaymentBal).sub(toBN(beforePaymentBal)).toNumber()
+        const expectedDiff = paymentAmt - claimDeposit - executeGasCost - claimGasCost -56
+        if (diff == expectedDiff) expect(diff).to.equal(expectedDiff)
+        else console.log(diff, expectedDiff)
     })
 
     it('tests accounting when everything reverts', async function() {

@@ -75,11 +75,11 @@ contract('Block scheduling', function(accounts) {
         /// Now let's send it an actual transaction
         const scheduleTx = await blockScheduler.scheduleTxSimple(
             transactionRecorder.address,
-            testData32,     //callData
+            testData32,         //callData
             [
-                1212121,      //callGas
-                123454321,     //callValue
-                255,        //windowSize
+                1212121,        //callGas
+                123454321,      //callValue
+                255,            //windowSize
                 windowStart,
                 gasPrice
 
@@ -138,7 +138,7 @@ contract('Block scheduling', function(accounts) {
                 98765,      //donation
                 80008,      //payment
             ],
-            {from: accounts[0], value: config.web3.utils.toWei('10')}
+            {from: accounts[0], value: config.web3.utils.toWei('2')}
         )
 
         expect(scheduleTx.receipt)

@@ -43,12 +43,12 @@ library ClaimLib {
      * This is set to the maximum possible payment value that could be paid out by this request.
      */
 
-        // TODO: add `requiredDeposit` and remove the hard-coding of the `2 *
-        // payment` minimum deposit size.
+    // TODO: add `requiredDeposit` and remove the hard-coding of the `2 *
+    // payment` minimum deposit size.
     function requiredDeposit(uint _payment)
-        internal pure returns (uint requiredDeposit)
+        internal pure returns (uint reqDeposit)
     {
-        requiredDeposit = _payment.mul(2);
+        reqDeposit = _payment.mul(2);
     }
 
 
