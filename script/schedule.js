@@ -3,11 +3,10 @@ const Web3 = require('web3')
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 const web3 = new Web3(Web3.giveProvider || provider)
 
-const expect = require('chai').expect
-
 const RopstenAddresses = require('../deployed.json')
 
-const BlockSchedulerABI = require('../build/contracts/BlockScheduler.json').abi
+const { getABI } = require('./util.js')
+const BlockSchedulerABI = getABI('BlockScheduler')
 
 const verbose = false 
 const log = (msg) => {

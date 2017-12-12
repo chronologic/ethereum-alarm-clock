@@ -14,6 +14,10 @@ const { RequestData } = require('./requestData.js')
 const { Cache } = require('./cache.js')
 const cache = new Cache(true)
 
+const { Conf, scan } = require('./scanning.js')
+
+const { GT_HEX, NULL_ADDRESS } = require('./constants.js')
+
 const verbose = true 
 const log = (msg) => {
     if (verbose) console.log(msg)
@@ -28,54 +32,14 @@ async function main () {
     const requestTracker = new web3.eth.Contract(RequestTrackerABI, RopstenAddresses.requestTracker)
     // log(requestTracker.options.address)
 
-    /// Number of blocks in the future to check.
-    const maxBlocks = 300
-
-    /// Maximum number of contracts to track.
-    const numContracts = 2**8
-
-    const headBlock = await web3.eth.getBlock('latest')
-    // log(headBlock)
-    const currentBlockNum = headBlock.number 
-
-    const GT_HEX  = web3.utils.utf8ToHex(">")
-    const LT_HEX  = web3.utils.utf8ToHex("<")
-    const GTE_HEX = web3.utils.utf8ToHex(">=")
-    const LTE_HEX = web3.utils.utf8ToHex("<=")
-    const EQ_HEX  = web3.utils.utf8ToHex("==")
-
-    const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
-
-    const res = await requestTracker.methods.query(rfAddr, GT_HEX, currentBlockNum).call()
-    // log(web3.utils.isAddress(res))
-    // log(res)
-
-    if (!web3.utils.isAddress(res)) throw new Error('Did not receive a valid Ethereum address from requestTracker.')
-    if (res === NULL_ADDRESS) throw new Error('No upcoming transactions registered in requestTracker!')
-
-    /// Validation
-    const isKnown = await requestFactory.methods.isKnownRequest(res).call()
-
-    let txRequest = new web3.eth.Contract(
-        TransactionRequestABI,
-        res
+    const conf = new Conf(
+        cache,
+        requestFactory,
+        requestTracker,
+        web3
     )
-    // const requestData = await txRequest.methods.requestData().call()
-    const requestData = await RequestData.from(txRequest)
-    // log(requestData.schedule.windowStart)
 
-    if (requestData.schedule.windowStart < await web3.eth.getBlockNumber()) {
-        throw new Error('Cannot monitor! Window is already started.')
-    }
-
-    if (requestData.schedule.windowStart >= (await web3.eth.getBlockNumber()) + maxBlocks) {
-        throw new Error('Too far away. Please change maxBlocks variable.')
-    }
-
-    if (requestData.meta.isCancelled) throw new Error('This transaction is cancelled.')
-
-    cache.set(res, requestData.schedule.windowStart)
-    // cache.get(res)
+    scan(conf)
 
     const running = true
     while (running) {
