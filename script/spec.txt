@@ -1,0 +1,43 @@
+This issue attempts to capture the important elements necessary to implement a script which monitors the EAC smart contracts and executes scheduled transactions.
+
+Basic minimal execution logic.
+
+The basic control flow for such a script is as follows.
+
+Let RF be the address of the RequestFactory
+Let RT be the address of the RequestTracker
+Let N be the number of blocks into the future that will be checked.
+Let M be the maximum number of contracts to track.
+Let currentBlockNumber be the current head block number.
+The script should query the RT.query(RF, ">=", currentBlockNumber) which will return the address of the next scheduled txn request who's execution block is >= currentBlockNumber.
+
+If this returns 0x0 then there is no next scheduled request and the script should exit.
+Otherwise let R be the returned address.
+The script should then run the following validation on R
+
+Ensure that RF.isKnownRequest(R) returns true to ensure the contract at R was in-fact created by the RF contract.
+Check that the currentBlockNumber <= R.windowStart <= currentBlockNumber + N
+Check that R has not been cancelled.
+If all checks pass, R should be added to the set of addresses that the script is monitoring.
+
+Let X be the set of addresses being monitored by the script.
+Now, we find the next R by using the RT.getNextRequest(RF, R). We apply all of the same logic from above, repeating this loop until one of the following exit conditions are met.
+
+length(X) > M: The number of addresses in X is greater than the maximum number of addresses we can track M.
+R.windowStart > currentBlockNumber + N: The startWindow is too far in the future.
+R == 0x0: There is no next scheduled transaction.
+Now that we have the set X, we need to run the following logic periodically for each R.
+
+if R is cancelled, evict R from X.
+if currentBlockNumber > R.windowStart + R.windowSize, evict R from X.
+if R has been executed, evict R from X.
+if R is claimed and currentBlockNumber <= R.windowStart + R.claimWindowSize, do nothing
+if R is claimed and currentBlockNumber > R.windowStart + R.claimWindowSize, send the R.execute() transaction and evict R from X
+if R.windowStart >= currentBlockNumber, send the R.execute() transaction and evict R from X
+Additional optional execution logic
+
+The following things should not be implemented in the initial implementation, but it is worth being aware of them.
+
+Claiming logic to conditionally claim transaction requests if doing so is likely to be profitable.
+Using gas pricing logic to project whether the R.execute() transaction is expected to be mined prior to the closing of the execution window.
+Submitting transactions from a set of pre-funded accounts so that we can execute multiple simultaneous requests without having the execution transactions be dependent on each other since transactions from a single account must be processed in nonce order.

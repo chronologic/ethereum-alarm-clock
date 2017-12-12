@@ -84,7 +84,7 @@ contract('Block scheduling', function(accounts) {
                 gasPrice
 
             ],
-            {from: accounts[0], value: config.web3.utils.toWei('20')}
+            {from: accounts[0], value: config.web3.utils.toWei('2')}
         )
 
         expect(scheduleTx.receipt)

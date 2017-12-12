@@ -3096,6 +3096,12 @@ nan@^2.0.5, nan@^2.0.8, nan@^2.0.9, nan@^2.2.1, nan@^2.3.0, nan@^2.3.3:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.8.0.tgz#ed715f3fe9de02b57a5e6252d90a96675e1f085a"
 
+nano-cache@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/nano-cache/-/nano-cache-1.1.1.tgz#5106d95f392cb44359654e21cc015ae218e75466"
+  dependencies:
+    extend "~3.0.0"
+
 nano-json-stream-parser@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/nano-json-stream-parser/-/nano-json-stream-parser-0.1.2.tgz#0cc8f6d0e2b622b479c40d499c46d64b755c6f5f"

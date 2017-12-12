@@ -72,30 +72,6 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS...\n`)
         return deployer.deploy(SchedulerLib)
     })
     .then(() => {
-        deployer.link(RequestScheduleLib, BaseScheduler)
-        deployer.link(SchedulerLib, BaseScheduler)
-        deployer.link(RequestLib, BaseScheduler)
-        deployer.link(MathLib, BaseScheduler)
-
-        return deployer.deploy(BaseScheduler)
-    })
-    .then(() => {
-        deployer.link(SchedulerLib, BlockScheduler)
-        deployer.link(RequestScheduleLib, BlockScheduler)
-        deployer.link(RequestLib, BlockScheduler)
-        deployer.link(MathLib, BlockScheduler)
-        
-        return deployer.deploy(BlockScheduler)
-    })
-    .then(() => {
-        deployer.link(SchedulerLib, TimestampScheduler)
-        deployer.link(RequestScheduleLib, TimestampScheduler)
-        deployer.link(RequestLib, TimestampScheduler)
-        deployer.link(MathLib, TimestampScheduler)
-
-        return deployer.deploy(TimestampScheduler)
-    })
-    .then(() => {
         deployer.link(GroveLib, RequestTracker)
         deployer.link(MathLib, RequestTracker)
         
@@ -126,12 +102,36 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS...\n`)
         return deployer.deploy(RequestFactory, RequestTracker.address)
     })
     .then(() => {
+        deployer.link(RequestScheduleLib, BaseScheduler)
+        deployer.link(SchedulerLib, BaseScheduler)
+        deployer.link(RequestLib, BaseScheduler)
+        deployer.link(MathLib, BaseScheduler)
+
+        return deployer.deploy(BaseScheduler)
+    })
+    .then(() => {
+        deployer.link(SchedulerLib, BlockScheduler)
+        deployer.link(RequestScheduleLib, BlockScheduler)
+        deployer.link(RequestLib, BlockScheduler)
+        deployer.link(MathLib, BlockScheduler)
+
+        return deployer.deploy(BlockScheduler, RequestFactory.address)
+    })
+    .then(() => {
+        deployer.link(SchedulerLib, TimestampScheduler)
+        deployer.link(RequestScheduleLib, TimestampScheduler)
+        deployer.link(RequestLib, TimestampScheduler)
+        deployer.link(MathLib, TimestampScheduler)
+
+        return deployer.deploy(TimestampScheduler, RequestFactory.address)
+    })
+    .then(() => {
         return deployer.deploy(TransactionRecorder)
     })
     .then(() => {
         const contracts = {
             baseScheduler: BaseScheduler.address,
-            blockSceduler: BlockScheduler.address,
+            blockScheduler: BlockScheduler.address,
             claimLib: ClaimLib.address,
             executionLib: ExecutionLib.address,
             groveLib: GroveLib.address,
