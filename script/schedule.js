@@ -20,6 +20,7 @@ const main = async (v) => {
     const windowStart = await web3.eth.getBlockNumber() + 10
     const gasPrice = web3.utils.toWei('100', 'gwei')
 
+    // console.log(BlockSchedulerABI)
     const blockScheduler = new web3.eth.Contract(
         BlockSchedulerABI, 
         RopstenAddresses.blockScheduler

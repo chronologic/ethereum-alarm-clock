@@ -31,6 +31,7 @@ commander
 
 if (commander.test) {
     testScheduler(true)
+    .catch(err => log.error(err))
 } else {
     if (commander.client) {
         alarmClient(commander.milliseconds)
