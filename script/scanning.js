@@ -22,7 +22,7 @@ const scanToStore = async conf => {
 
     log.debug(`Scanning tracker @ ${tracker.options.address}`)
     log.debug(`Validating tracker results with factory @ ${factory.options.address}`)
-    // log.debug(`Scanning from ${left} to ${right}`)
+    log.debug(`Scanning from ${left} to ${right}`)
 
     let nextRequestAddr = await tracker.methods.query(
         factory.options.address,

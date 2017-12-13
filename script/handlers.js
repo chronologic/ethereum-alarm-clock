@@ -42,7 +42,7 @@ const executeTxRequest = async (conf, txRequest) => {
     })
 
     executeTx.then((res) => {
-        conf.cache.delete(txRequest)
+        conf.cache.delete(txRequest.address)
         log.info(`success. tx hash: ${res}`)
     })
 }
