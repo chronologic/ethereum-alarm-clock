@@ -29,9 +29,14 @@ const scanToStore = async conf => {
         left,
     ).call()
 
+    if (nextRequestAddr === NULL_ADDRESS) {
+        log.info('No new requests')
+        return
+    }
+
     log.debug(`Initial tracker result: ${nextRequestAddr}`)
 
-    while (nextRequestAddr != NULL_ADDRESS) {
+    while (nextRequestAddr !== NULL_ADDRESS) {
         log.debug(`Found request @ ${nextRequestAddr}`)
         if (!await factory.methods.isKnownRequest(nextRequestAddr).call()) {
             log.error(`Encountered unknown request: factory: ${factory.options.address} | query: ">=" | value ${left} | address: ${nextRequestAddr}`)
