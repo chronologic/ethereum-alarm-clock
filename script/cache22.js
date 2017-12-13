@@ -14,12 +14,12 @@ class Cache22 {
     set (k, v) {
         this.mem.push(k)
         this.cache.put(k, v)
-        console.log(`stored ${k}`)
+        this.talk(`stored ${k}`)
     }
 
     get (k) {
         if (this.cache.get(k) === null) throw new Error('attempted to access key entry that does not exist')
-        console.log(`accessed ${k}`)
+        this.talk(`accessed ${k}`)
         return this.cache.get(k)
     }
 
@@ -35,7 +35,7 @@ class Cache22 {
             addr === k
         })
         this.cache.del(k)
-        console.log(`deleted ${k}`)
+        this.talk(`deleted ${k}`)
     }
 
     len () {
@@ -44,6 +44,10 @@ class Cache22 {
 
     stored () {
         return this.mem 
+    }
+
+    talk (msg) {
+        if (this.verbose) console.log(msg)
     }
 }
 

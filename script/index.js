@@ -10,21 +10,27 @@ const RequestTrackerABI = require('../build/contracts/RequestTracker.json').abi
 const TransactionRequestABI = require('../build/contracts/TransactionRequest.json').abi
 
 const { RequestData } = require('./requestData.js')
-const { executeTxRequest } = require('./handlers.js')
 
 const { Cache22 } = require('./cache22.js')
 const cache = new Cache22(true)
 
-// const { Cache } = require('./cache.js')
-// const cache = new Cache(true)
-// cache.cache.clear()
-
-const { Conf, scanToStore } = require('./scanning.js')
+const { Config } = require('./config.js')
+const { scanToExecute, scanToStore } = require('./scanning.js')
 const { TxRequest } = require('./txRequest.js')
 
 const verbose = true 
 const log = (msg) => {
     if (verbose) console.log(msg)
+}
+
+const startScanning = (ms, conf) => {
+    setInterval(async () => {
+        await scanToStore(conf)
+    }, ms)
+
+    setInterval(async () => {
+        await scanToExecute(conf)
+    }, ms + 1000)
 }
 
 async function main () {
@@ -35,26 +41,18 @@ async function main () {
     const requestFactory = new web3.eth.Contract(RequestFactoryABI, rfAddr)
     const requestTracker = new web3.eth.Contract(RequestTrackerABI, RopstenAddresses.requestTracker)
 
-    const conf = new Conf(
+    const conf = new Config(
         cache,
         requestFactory,
         requestTracker,
         web3
     )
 
-    setInterval(async () => {
-        await scanToStore(conf)
-    }, 4000)
+    startScanning(4000, conf)
 
-    // const found = conf.cache.stored()
-
-    // found.filter(async (txRequestAddr) => {
-    //     const txR = new TxRequest(txRequestAddr, conf.web3)
-    //     await txR.fillData()
-    //     if (await conf.web3.eth.getBlockNumber() <= txR.getWindowStart()) {
-    //         await executeTxRequest(conf, txR)
-    //     }
-    // })
+    // setInterval(() => {
+    //     console.log('yo')
+    // }, 6000)
 }
 
 main()

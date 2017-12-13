@@ -1,9 +1,7 @@
-const { Logger } = require('./logger.js')
-
 const executeTxRequest = async (conf, txRequest) => {
     const web3 = conf.web3 
     const requestLib = conf.requestLib 
-    const log = new Logger()
+    const log = conf.logger
 
     if (txRequest.wasCalled()) {
         log.debug('already called')

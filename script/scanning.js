@@ -1,8 +1,7 @@
 const { GTE_HEX, NULL_ADDRESS} = require('./constants.js')
-const { Logger } = require('./logger.js')
 const { TxRequest } = require('./txRequest.js')
 
-/// Wrapper over the nano-cache
+/// Utility function to store txRequest addresses in cache.
 const store = (cache, txRequest) => {
     if (cache.has(txRequest.address)) {
         console.log(`already has ${txRequest.address}`)
@@ -11,9 +10,9 @@ const store = (cache, txRequest) => {
     cache.set(txRequest.address, txRequest.getWindowStart())
 }
 
-/// Periodically scans for new requests.
+/// Scans for new requests and stores them.
 const scanToStore = async conf => {
-    const log = new Logger()
+    const log = conf.logger
     const left = await conf.web3.eth.getBlockNumber()
     const right = left + 300
 
@@ -65,21 +64,22 @@ const scanToStore = async conf => {
     return true
 }
 
-class Conf {
+const { executeTxRequest } = require('./handlers.js')
 
-    constructor(
-        cache,
-        factory,
-        tracker,
-        web3
-    ) {
-        this.cache = cache
-        this.factory = factory 
-        this.tracker = tracker
-        this.web3 = web3
-    }
-
+/// Scans the cache and executes any ripe transaction requests.
+const scanToExecute = async conf => {
+    conf.cache.stored() //Gets all the txRequestAddrs stored in cache
+    .map((txRequestAddr) => {
+        return new TxRequest(txRequestAddr, conf.web3)
+    })
+    .filter(async (txRequest) => {
+        txRequest.fillData()
+        return await conf.web3.eth.getBlockNumber() >= txRequest.getWindowStart()
+    })
+    .map(async (txRequest) => {
+        await executeTxRequest(conf, txRequest)
+    })
 }
 
-module.exports.Conf = Conf 
+module.exports.scanToExecute = scanToExecute
 module.exports.scanToStore = scanToStore
