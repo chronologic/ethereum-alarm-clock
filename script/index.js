@@ -33,7 +33,7 @@ const startScanning = (ms, conf) => {
     }, ms + 1000)
 }
 
-async function main () {
+const main = async (ms) => {
     const me = (await web3.eth.getAccounts())[0]
     web3.eth.defaultAccount = me 
 
@@ -48,12 +48,13 @@ async function main () {
         web3
     )
 
-    startScanning(4000, conf)
+    startScanning(ms, conf)
 
     // setInterval(() => {
     //     console.log('yo')
     // }, 6000)
 }
 
-main()
-.catch((err) => log(err))
+// main()
+// .catch((err) => log(err))
+module.exports = main 

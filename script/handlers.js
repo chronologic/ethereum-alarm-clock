@@ -35,7 +35,7 @@ const executeTxRequest = async (conf, txRequest) => {
     log.info(`Attempting execution...`)
     const executeTx = txRequest.instance.methods.execute().send({
         from: web3.eth.defaultAccount,
-        gas: gasLimit,
+        gas: gasLimit - 12000,
         gasPrice: gasPrice
     })
 

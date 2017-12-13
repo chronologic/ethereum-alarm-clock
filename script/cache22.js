@@ -1,5 +1,5 @@
 const mem_cache = require('memory-cache')
-const chalk = require('chalk')
+// const chalk = require('chalk')
 const _ = require('lodash')
 
 //// wrapper over memory-cache

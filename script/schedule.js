@@ -1,20 +1,20 @@
 const Web3 = require('web3')
 
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
-const web3 = new Web3(Web3.giveProvider || provider)
+const web3 = new Web3(Web3.givenProvider || provider)
 
 const RopstenAddresses = require('../deployed.json')
 
 const { getABI } = require('./util.js')
 const BlockSchedulerABI = getABI('BlockScheduler')
 
-const verbose = false 
-const log = (msg) => {
-    if (verbose) console.log(msg)
-}
-
 /// Schedules a test transaction.
-async function main () {
+const main = async (v) => {
+    const verbose = v 
+    const log = (msg) => {
+        if (verbose) console.log(msg)
+    }
+
     const me = (await web3.eth.getAccounts())[0]
 
     const windowStart = await web3.eth.getBlockNumber() + 200
@@ -45,7 +45,9 @@ async function main () {
     .catch(err => console.error(err))
 }
 
-setInterval(() => {
-    main()
-    .catch(err => log(err))
-}, 30000)
+module.exports = main
+
+// setInterval(() => {
+//     main()
+//     .catch(err => log(err))
+// }, 30000)
