@@ -2,15 +2,14 @@ const commander = require('commander')
 const chalk = require('chalk')
 
 const alarmClient = require('../index.js')
-const scheduler = require('../schedule.js')
+const Scheduler = require('../scheduler.js')
+const testScheduler = require('../schedule.js')
 
 const Web3 = require('web3')
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 const web3 = new Web3(Web3.givenProvider || provider)
 
 const ethUtil = require('ethereumjs-util')
-
-const Promise = require('bluebird')
 
 const readlineSync = require('readline-sync');
 
@@ -31,7 +30,7 @@ commander
     .parse(process.argv)
 
 if (commander.test) {
-    scheduler(true)
+    testScheduler(true)
 } else {
     if (commander.client) {
         alarmClient(commander.milliseconds)
@@ -65,6 +64,8 @@ if (commander.test) {
 
         callGas = readlineSync.question('Enter call gas: ')
 
+        callValue = readlineSync.question('Enter call value: ')
+
         windowSize = readlineSync.question('Enter window size: ')
 
         windowStart = readlineSync.question('Enter window start: ')
@@ -86,6 +87,18 @@ gasPrice  - ${gasPrice}
 donation - ${donation}
 payment - ${payment}
 `)
+
+        Scheduler(
+            toAddress,
+            callData,
+            callGas,
+            callValue,
+            windowSize,
+            windowStart,
+            gasPrice,
+            donation,
+            payment
+        )
         // var MAX = 60, MIN = 0, value = 30, key;
         // console.log('\n\n' + (new Array(20)).join(' ') +
         //   '[Z] <- -> [X]  FIX: [SPACE]\n');
@@ -100,6 +113,8 @@ payment - ${payment}
         //   else { break; }
         // }        
           
+    } else {
+        process.exit(1)
     }
 }
 
