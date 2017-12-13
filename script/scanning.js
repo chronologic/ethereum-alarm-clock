@@ -4,7 +4,7 @@ const { TxRequest } = require('./txRequest.js')
 /// Utility function to store txRequest addresses in cache.
 const store = (cache, txRequest) => {
     if (cache.has(txRequest.address)) {
-        console.log(`already has ${txRequest.address}`)
+        console.log(`[cache] already has ${txRequest.address}`)
         return
     }
     cache.set(txRequest.address, txRequest.getWindowStart())
@@ -70,19 +70,31 @@ const scanToStore = async conf => {
 }
 
 const { executeTxRequest } = require('./handlers.js')
+const filter = require('async').filter
 
 /// Scans the cache and executes any ripe transaction requests.
 const scanToExecute = async conf => {
-    conf.cache.stored() //Gets all the txRequestAddrs stored in cache
+
+    if (conf.cache.len() === 0) {
+        return 
+    }
+
+    //Gets all the txRequestAddrs stored in cache
+    const one = conf.cache.stored()
     .map((txRequestAddr) => {
         return new TxRequest(txRequestAddr, conf.web3)
     })
-    .filter(async (txRequest) => {
-        txRequest.fillData()
-        return await conf.web3.eth.getBlockNumber() >= txRequest.getWindowStart()
-    })
-    .map(async (txRequest) => {
-        await executeTxRequest(conf, txRequest)
+
+    filter(one, async (txRequest) => {
+        await txRequest.fillData()
+        return await txRequest.inExecutionWindow()
+    }, (err, res) => {
+        if (err) throw new Error(err)
+        res.map((txRequest) => {
+            if (conf.cache.get(txRequest.address) > 0) {
+                executeTxRequest(conf, txRequest)
+            }
+        })
     })
 }
 

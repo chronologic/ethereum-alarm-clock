@@ -34,6 +34,7 @@ if (commander.test) {
 } else {
     if (commander.client) {
         alarmClient(commander.milliseconds)
+        .catch(err => log.error(err))
     } else if (commander.schedule) {
         log.info('Schedule a transcation with the EAC')
 

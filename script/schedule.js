@@ -17,7 +17,7 @@ const main = async (v) => {
 
     const me = (await web3.eth.getAccounts())[0]
 
-    const windowStart = await web3.eth.getBlockNumber() + 200
+    const windowStart = await web3.eth.getBlockNumber() + 10
     const gasPrice = web3.utils.toWei('100', 'gwei')
 
     const blockScheduler = new web3.eth.Contract(

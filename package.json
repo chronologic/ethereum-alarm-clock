@@ -23,7 +23,7 @@
     "homepage": "https://github.com/chronologic/ethereum-alarm-clock#readme",
     "dependencies": {
         "@types/chalk": "^2.2.0",
-        "async": "^2.5.0",
+        "async": "^2.6.0",
         "bluebird": "^3.5.1",
         "chalk": "^2.3.0",
         "clear": "^0.0.1",

@@ -1,5 +1,4 @@
 const mem_cache = require('memory-cache')
-// const chalk = require('chalk')
 const _ = require('lodash')
 
 //// wrapper over memory-cache
@@ -12,9 +11,11 @@ class Cache22 {
     }
 
     set (k, v) {
-        this.mem.push(k)
+        if (_.indexOf(this.mem, k) === -1) {
+            this.mem.push(k)
+        }
         this.cache.put(k, v)
-        this.talk(`stored ${k}`)
+        this.talk(`stored ${k} with value ${v}`)
     }
 
     get (k) {
@@ -47,7 +48,7 @@ class Cache22 {
     }
 
     talk (msg) {
-        if (this.verbose) console.log(msg)
+        if (this.verbose) console.log(`[cache] ${msg}`)
     }
 }
 

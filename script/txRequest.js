@@ -55,12 +55,10 @@ class TxRequest {
     }
 
     reservedExecutionWindowEnd() {
-        console.log(this.windowStart() + this.data.schedule.reservedWindowSize)
         return this.windowStart() + this.data.schedule.reservedWindowSize
     }
 
     async inReservedWindow() {
-        // return false
         return this.windowStart() <= await this.now() && this.now() < this.reservedExecutionWindowEnd()
     }
 
@@ -74,7 +72,10 @@ class TxRequest {
     }
 
     async refreshData() {
-        await this.data.refresh()
+        if (!this.data) {
+            return await this.fillData()
+        } 
+        return await this.data.refresh()
     }
 
     // address () {
