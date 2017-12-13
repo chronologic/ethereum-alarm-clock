@@ -32,6 +32,13 @@ class Cache {
         return this.cache.get(key)
     }
 
+    has(key) {
+        if (this.get(key) !== null) {
+            return true
+        }
+        return false
+    }
+
     delete(key) {
         this.mem = _.remove(this.mem, (addr) => {
             addr === key

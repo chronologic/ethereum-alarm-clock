@@ -1,12 +1,18 @@
 const { GTE_HEX, NULL_ADDRESS} = require('./constants.js')
+const { Logger } = require('./logger.js')
+const { TxRequest } = require('./txRequest.js')
 
 /// Wrapper over the nano-cache
 const store = (cache, txRequest) => {
+    if (cache.has(txRequest.address)) {
+        console.log(`already has ${txRequest.address}`)
+        return
+    }
     cache.set(txRequest.address, txRequest.getWindowStart())
 }
 
 /// Periodically scans for new requests.
-const scan = async conf => {
+const scanToStore = async conf => {
     const log = new Logger()
     const left = await conf.web3.eth.getBlockNumber()
     const right = left + 300
@@ -15,7 +21,7 @@ const scan = async conf => {
     const factory = conf.factory 
 
     log.debug(`Scanning tracker @ ${tracker.options.address}`)
-    log.debug(`Validating tracker results with factory @ ${factory.address}`)
+    log.debug(`Validating tracker results with factory @ ${factory.options.address}`)
     // log.debug(`Scanning from ${left} to ${right}`)
 
     let nextRequestAddr = await tracker.methods.query(
@@ -44,6 +50,7 @@ const scan = async conf => {
         }
         if (txRequest.getWindowStart() <= right) {
             log.debug(`Found request @ ${txRequest.address} - window start: ${txRequest.getWindowStart()} `)
+            
             store(conf.cache, txRequest)
         } else {
             log.debug(`Scan exit condition: window start ${txRequest.getWindowStart()} > right boundary: ${right}`)
@@ -55,34 +62,7 @@ const scan = async conf => {
             txRequest.address
         ).call()
     }
-}
-
-const { getABI } = require('./util.js')
-
-class TxRequest {
-
-    constructor(address, web3) {
-        this.address = address 
-        this.web3 = web3
-        this.instance = new this.web3.eth.Contract(
-            getABI('TransactionRequest'),
-            this.address
-        )
-    }
-
-    getWindowStart () {
-        return this.windowStart
-    }
-
-    async fillData () {
-        const res  = await this.instance.methods.requestData().call()
-        this.windowStart = res['2'][11] 
-    }
-
-    // address () {
-    //     return this.instance.options.address
-    // }
-
+    return true
 }
 
 class Conf {
@@ -101,20 +81,5 @@ class Conf {
 
 }
 
-class Logger {
-
-    debug (msg) {
-        console.log(`[debug] ${msg}`)
-    }
-
-    error (msg) {
-        console.log(`[error] ${msg}`)
-    }
-
-    info (msg) {
-        console.log(`[info] ${msg}`)
-    }
-}
-
 module.exports.Conf = Conf 
-module.exports.scan = scan
+module.exports.scanToStore = scanToStore

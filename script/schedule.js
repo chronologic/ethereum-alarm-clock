@@ -45,5 +45,7 @@ async function main () {
     .catch(err => console.error(err))
 }
 
-main()
-.catch(err => log(err))
+setInterval(() => {
+    main()
+    .catch(err => log(err))
+}, 30000)
