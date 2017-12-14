@@ -4,7 +4,7 @@ const { TxRequest } = require('./txRequest.js')
 /// Utility function to store txRequest addresses in cache.
 const store = (cache, txRequest) => {
     if (cache.has(txRequest.address)) {
-        console.log(`[cache] already has ${txRequest.address}`)
+        cache.log.cache(`already has ${txRequest.address}`)
         return
     }
     cache.set(txRequest.address, txRequest.getWindowStart())

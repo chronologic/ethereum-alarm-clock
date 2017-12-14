@@ -11,9 +11,6 @@ const TransactionRequestABI = require('../build/contracts/TransactionRequest.jso
 
 // const { RequestData } = require('./requestData.js')
 
-const { Cache22 } = require('./cache22.js')
-const cache = new Cache22(true)
-
 const { Config } = require('./config.js')
 const { scanToExecute, scanToStore } = require('./scanning.js')
 // const { TxRequest } = require('./txRequest.js')
@@ -43,11 +40,13 @@ const main = async (ms) => {
     const requestFactory = new web3.eth.Contract(RequestFactoryABI, rfAddr)
     const requestTracker = new web3.eth.Contract(RequestTrackerABI, RopstenAddresses.requestTracker)
 
+    const logfile = 'info.log'
+
     const conf = new Config(
-        cache,
-        requestFactory,
-        requestTracker,
-        web3
+        logfile,            //conf.logfile
+        requestFactory,     //conf.factory
+        requestTracker,     //conf.tracker
+        web3,               //conf.web3
     )
 
     startScanning(ms, conf)

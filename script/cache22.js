@@ -3,8 +3,8 @@ const _ = require('lodash')
 
 //// wrapper over memory-cache
 class Cache22 {
-    constructor (talkative) {
-        this.verbose = talkative
+    constructor (logger) {
+        this.log = logger
         // this.timeout = timeout // time that cache entires last
         this.cache = new mem_cache.Cache() 
         this.mem = []
@@ -15,12 +15,12 @@ class Cache22 {
             this.mem.push(k)
         }
         this.cache.put(k, v)
-        this.talk(`stored ${k} with value ${v}`)
+        this.log.cache(`stored ${k} with value ${v}`)
     }
 
     get (k) {
         if (this.cache.get(k) === null) throw new Error('attempted to access key entry that does not exist')
-        this.talk(`accessed ${k}`)
+        this.log.cache(`accessed ${k}`)
         return this.cache.get(k)
     }
 
@@ -36,7 +36,7 @@ class Cache22 {
             addr === k
         })
         this.cache.del(k)
-        this.talk(`deleted ${k}`)
+        this.log.cache(`deleted ${k}`)
     }
 
     len () {
@@ -45,10 +45,6 @@ class Cache22 {
 
     stored () {
         return this.mem 
-    }
-
-    talk (msg) {
-        if (this.verbose) console.log(`[cache] ${msg}`)
     }
 }
 
