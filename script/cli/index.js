@@ -18,9 +18,9 @@ const readlineSync = require('readline-sync');
 const log = {
     debug: msg => console.log(chalk.green(msg)),
     info: msg => console.log(chalk.blue(msg)),
-    warning:  msg => conosle.log(chalk.yellow(msg)),
+    warning:  msg => console.log(chalk.yellow(msg)),
     error: msg => console.log(chalk.red(msg)),
-    fatal: msg => consol.log(`[FATAL] ${msg}`)
+    fatal: msg => console.log(`[FATAL] ${msg}`)
 }
 
 commander 
@@ -57,7 +57,7 @@ if (commander.test) {
         toAddress = ethUtil.addHexPrefix(toAddress)
         if (!ethUtil.isValidAddress(toAddress)) {
             log.error('Not a valid address')
-            console.log('exiting...')
+            log.fatal('exiting...')
             process.exit(1)
         }
 

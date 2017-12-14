@@ -12,18 +12,17 @@ const store = (cache, txRequest) => {
 
 const clear = (cache, nextRequestAddr, left) => {
     /// this line prevents accessing too early
-    if (!cache.has(nextRequestAddr)) return 
-    /// Expired or successfully executed
+    if (cache.mem.indexOf(nextRequestAddr) == -1) return 
+    /// Expired or successfully executed - FIXME - hardcoded at `left - 10`
     if (cache.get(nextRequestAddr) > 0 && cache.get(nextRequestAddr) < left -10) {
         cache.del(nextRequestAddr)
     }
-    
 }
 
 /// Scans for new requests and stores them.
 const scanToStore = async conf => {
     const log = conf.logger
-    const left = await conf.web3.eth.getBlockNumber() - 100
+    const left = await conf.web3.eth.getBlockNumber() - 10
     const right = left + 300
 
     const tracker = conf.tracker 
@@ -58,7 +57,8 @@ const scanToStore = async conf => {
             factory.options.address,
             nextRequestAddr,
         ).call() 
-        let txRequest = new TxRequest(nextRequestAddr, conf.web3)
+
+        const txRequest = new TxRequest(nextRequestAddr, conf.web3)
         await txRequest.fillData()
 
         if (txRequest.getWindowStart() !== parseInt(trackerWindowStart)) {
@@ -67,6 +67,7 @@ const scanToStore = async conf => {
         if (txRequest.getWindowStart() <= right) {
             log.debug(`Found request @ ${txRequest.address} - window start: ${txRequest.getWindowStart()} `)
             
+            /// Stores the txRequest
             store(conf.cache, txRequest)
         } else {
             log.debug(`Scan exit condition: window start ${txRequest.getWindowStart()} > right boundary: ${right}`)
