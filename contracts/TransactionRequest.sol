@@ -28,7 +28,7 @@ contract TransactionRequest is TransactionRequestInterface {
     function TransactionRequest(
         address[4]  addressArgs,
         uint[11]    uintArgs,
-        bytes32     callData
+        bytes     callData
     )
         public payable
     {
@@ -77,10 +77,13 @@ contract TransactionRequest is TransactionRequestInterface {
     }
 
     function callData() 
-        public view returns (bytes32)
+        public view returns (bytes data)
     {
-        return txnRequest.txnData.callData;
+        data = txnRequest.txnData.callData;
+        // success = true;
     }
+
+    event CallData(bytes _callData);
 
     /*
      *  Pull based payment functions.

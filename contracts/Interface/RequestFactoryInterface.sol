@@ -6,17 +6,17 @@ contract RequestFactoryInterface {
 
     function createRequest(address[3] addressArgs,
                            uint[11] uintArgs,
-                           bytes32 callData)
+                           bytes callData)
         public payable returns (address);
 
     function createValidatedRequest(address[3] addressArgs,
                                     uint[11] uintArgs,
-                                    bytes32 callData) 
+                                    bytes callData) 
         public payable returns (address);
 
     function validateRequestParams(address[3] addressArgs,
                                    uint[11] uintArgs,
-                                   bytes32 callData,
+                                   bytes callData,
                                    uint endowment) 
         internal returns (bool[6]);
 

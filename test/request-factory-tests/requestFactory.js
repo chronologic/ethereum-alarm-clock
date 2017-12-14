@@ -171,12 +171,7 @@ contract('Request factory', async function(accounts) {
 
         expect(await txRequest.callData())
         .to.equal(ethUtil.bufferToHex(
-            Buffer.from(
-                ethUtil.setLengthRight(
-                    Buffer.from(testCallData),
-                    32
-                )
-            )
+            Buffer.from(testCallData)
         ))
 
         expect(requestData.txData.callValue)

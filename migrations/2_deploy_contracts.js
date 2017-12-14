@@ -87,7 +87,9 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS...\n`)
         deployer.link(RequestScheduleLib, TransactionRequest)
         deployer.link(SafeMath, TransactionRequest)
 
-        return deployer.deploy(TransactionRequest)
+    /// Because the constructor includes a `bytes` parameter we cannot deploy this contract directly.
+    //     return deployer.deploy(TransactionRequest)
+    return Promise.resolve('haha')
     })
     .then(() => {
         deployer.link(ClaimLib, RequestFactory)
@@ -97,7 +99,7 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS...\n`)
         deployer.link(PaymentLib, RequestFactory)
         deployer.link(RequestLib, RequestFactory)
         deployer.link(RequestTracker, RequestFactory)
-        deployer.link(TransactionRequest, RequestFactory)
+        // deployer.link(TransactionRequest, RequestFactory)
         deployer.link(SafeMath, RequestFactory)
         return deployer.deploy(RequestFactory, RequestTracker.address)
     })
@@ -146,7 +148,7 @@ NOW DEPLOYING THE ETHEREUM ALARM CLOCK CONTRACTS...\n`)
             safeMath: SafeMath.address,
             schedulerLib: SchedulerLib.address,
             timestampScheduler: TimestampScheduler.address,
-            transactionRequest: TransactionRequest.address,
+            // transactionRequest: TransactionRequest.address,
             transactionRecorder: TransactionRecorder.address
         }
         Object.keys(contracts).forEach((key) => {

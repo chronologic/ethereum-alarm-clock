@@ -16,7 +16,7 @@ library SchedulerLib {
 
     struct FutureTransaction {
         address toAddress;          // Destination of the transaction.
-        bytes32 callData;           // Bytecode to be included with the transaction.
+        bytes callData;           // Bytecode to be included with the transaction.
         
         uint callGas;               // Amount of gas to be used with the transaction.
         uint callValue;             // Amount of ether to send with the transaction.

@@ -8,7 +8,7 @@ library ExecutionLib {
 
     struct ExecutionData {
         address toAddress;                  /// The destination of the transaction.
-        bytes32 callData;                   /// The bytecode that will be sent with the transaction.
+        bytes callData;                     /// The bytecode that will be sent with the transaction.
         uint callValue;                     /// The wei value that will be sent with the transaction.
         uint callGas;                       /// The amount of gas to be sent with the transaction.
         uint gasPrice;                      /// The gasPrice that should be set for the transaction.

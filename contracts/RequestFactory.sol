@@ -44,7 +44,7 @@ contract RequestFactory is RequestFactoryInterface {
     function createRequest(
         address[3] _addressArgs,
         uint[11]   _uintArgs,
-        bytes32    _callData
+        bytes    _callData
     )
         public payable returns (address)
     {
@@ -80,7 +80,7 @@ contract RequestFactory is RequestFactoryInterface {
     function createValidatedRequest(
         address[3] addressArgs,
         uint[11] uintArgs,
-        bytes32 callData
+        bytes callData
     ) 
         public payable returns (address)
     {
@@ -144,7 +144,7 @@ contract RequestFactory is RequestFactoryInterface {
     function validateRequestParams(
         address[3] addressArgs,
         uint[11] uintArgs,
-        bytes32 callData,
+        bytes callData,
         uint endowment
     ) 
         internal returns (bool[6])

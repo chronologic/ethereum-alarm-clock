@@ -16,7 +16,7 @@ contract TransactionRequestInterface {
                                                 uint[15],
                                                 uint8[1]);
 
-    function callData() public view returns (bytes32);
+    function callData() public view returns (bytes);
 
     /*
      * @dev Pull mechanisms for payments.

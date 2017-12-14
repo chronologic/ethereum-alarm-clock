@@ -60,7 +60,7 @@ library RequestLib {
     function validate(
         address[4] addressArgs,
         uint[11] uintArgs,
-        bytes32 callData,
+        bytes callData,
         uint endowment
     ) 
         public view returns (bool[6] isValid)
@@ -139,7 +139,7 @@ library RequestLib {
         Request storage self,
         address[4] addressArgs,
         uint[11] uintArgs,
-        bytes32 callData
+        bytes callData
     ) 
         public returns (bool initialized)
     {
@@ -243,7 +243,7 @@ library RequestLib {
         bool[3] boolValues,
         uint[15] uintValues,
         uint8[1] uint8Values,
-        bytes32 callData
+        bytes callData
     )
         internal returns (bool deserialized)
     {

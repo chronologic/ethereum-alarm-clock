@@ -35,13 +35,13 @@ contract SchedulerInterface {
     }
 
     function scheduleTxSimple(address _toAddress,
-                              bytes32 _callData,
+                              bytes _callData,
                               uint[5] _uintArgs)
         doReset
         public payable returns (address);
     
     function scheduleTxFull(address _toAddress,
-                            bytes32 _callData,
+                            bytes _callData,
                             uint[7] _uintArgs)
         doReset
         public payable returns (address);
@@ -54,7 +54,7 @@ contract SchedulerInterface {
      *  uintArgs[1] callValue
      *  uintArgs[2] windowSize
      *  uintArgs[3] windowStart
-     *  bytes32 callData;
+     *  bytes callData;
      *  address toAddress;
      */
     // function scheduleTransaction(address toAddress,

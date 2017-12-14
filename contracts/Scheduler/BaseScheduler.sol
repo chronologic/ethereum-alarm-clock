@@ -34,7 +34,7 @@ contract BaseScheduler is SchedulerInterface {
      */
     function scheduleTxSimple(
         address _toAddress,
-        bytes32 _callData,
+        bytes _callData,
         uint[5] _uintArgs
     )
         // doReset
@@ -71,7 +71,7 @@ contract BaseScheduler is SchedulerInterface {
      * @return The address of the new TransactionRequest.   
      */
     function scheduleTxFull(address _toAddress,
-                            bytes32 _callData,
+                            bytes _callData,
                             uint[7] _uintArgs)
         doReset
         public payable returns (address newRequest)
