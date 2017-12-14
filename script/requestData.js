@@ -8,8 +8,8 @@ class RequestData {
         this.txRequest = txRequest
         this.claimData = {
             "claimedBy": data[0][0],
-            "claimDeposit": data[2][0],
-            "paymentModifier": data[3][0],
+            "claimDeposit": parseInt(data[2][0]),
+            "paymentModifier": parseInt(data[3][0]),
         }
 
         this.meta = {
@@ -23,26 +23,26 @@ class RequestData {
         this.paymentData = {
             "donationBenefactor": data[0][3],
             "paymentBenefactor": data[0][4],
-            "gasPrice": data[2][1],
-            "donation": data[2][2],
-            "donationOwed": data[2][3],
-            "payment": data[2][4],
-            "paymentOwed": data[2][5],
+            "gasPrice": parseInt(data[2][1]),
+            "donation": parseInt(data[2][2]),
+            "donationOwed": parseInt(data[2][3]),
+            "payment": parseInt(data[2][4]),
+            "paymentOwed": parseInt(data[2][5]),
         }
 
         this.schedule = {
-            "claimWindowSize": data[2][6],
-            "freezePeriod": data[2][7],
-            "reservedWindowSize": data[2][8],
-            "temporalUnit": data[2][9],
-            "windowSize": data[2][10],
-            "windowStart": data[2][11],
+            "claimWindowSize": parseInt(data[2][6]),
+            "freezePeriod": parseInt(data[2][7]),
+            "reservedWindowSize": parseInt(data[2][8]),
+            "temporalUnit": parseInt(data[2][9]),
+            "windowSize": parseInt(data[2][10]),
+            "windowStart": parseInt(data[2][11]),
         }
 
         this.txData = {
-            "callGas": data[2][12],
-            "callValue": data[2][13],
-            "gasPrice": data[2][14],
+            "callGas": parseInt(data[2][12]),
+            "callValue": parseInt(data[2][13]),
+            "gasPrice": parseInt(data[2][14]),
             "toAddress": data[0][5],
         }
     }

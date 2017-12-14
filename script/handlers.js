@@ -8,21 +8,21 @@ const executeTxRequest = async (conf, txRequest) => {
     await txRequest.fillData()
     if (txRequest.wasCalled()) {
         log.debug('already called')
+        conf.cache.set(txRequest.address, -1)
         return
     }
     if (txRequest.isCancelled()) {
         log.debug('cancelled')
         return 
     }
-    if (!txRequest.inExecutionWindow()) {
+    if (!await txRequest.inExecutionWindow()) {
         log.debug('outside execution window')
         return 
     }
-    // con
-    // if (txRequest.inReservedWindow() && !txRequest.isClaimedBy(web3.eth.defaultAccount)) {
-    //     log.debug(`In reserved window and claimed by ${txRequest.claimedBy()}`)
-    //     return 
-    // }
+    if (await txRequest.inReservedWindow() && !txRequest.isClaimedBy(web3.eth.defaultAccount)) {
+        log.debug(`In reserved window and claimed by ${txRequest.claimedBy()}`)
+        return 
+    }
 
     const executeGas = txRequest.callGas() //+ await requestLib.EXECUTION_GAS_OVERHEAD().call()
     const gasLimit = (await web3.eth.getBlock('latest')).gasLimit
@@ -44,21 +44,16 @@ const executeTxRequest = async (conf, txRequest) => {
     })
 
     executeTx.then((res) => {
-        // const fs = require('fs')
-        // fs.appendFileSync('info.txt', JSON.stringify(res) + '\n')
-        // fs.appendFileSync('info2', res.events[0].raw.topics + res.events[0].raw.data + '\n')
         if (res.events[0].raw.topics[0] == ABORTEDLOG) {
-            fs.appendFileSync('info3', 'aborted\n')
-            console.log('aborted')
+            // console.log('aborted')
             conf.cache.del(txRequest.address)
         }
 
         if (res.events[0].raw.topics[0] == EXECUTEDLOG) {
-            // fs.appendFileSync('info3', 'executed\n')
-            console.log('executed')
-            conf.cache.del(txRequest.address)
+            // console.log('executed')
+            conf.cache.set(txRequest.address, 100)
         }
-        log.info(`success. tx hash: ${res}`)
+        log.info(`success. tx hash: ${res.transactionHash}`)
     })
 }
 

@@ -59,7 +59,11 @@ class TxRequest {
     }
 
     async inReservedWindow() {
-        return this.windowStart() <= await this.now() && this.now() < this.reservedExecutionWindowEnd()
+        // console.log(await this.now())
+        // console.log(this.executionWindowEnd())
+        // console.log(this.reservedExecutionWindowEnd())
+        // console.log(this.windowStart() <= await this.now() && await this.now() < this.reservedExecutionWindowEnd())
+        return this.windowStart() <= await this.now() && await this.now() < this.reservedExecutionWindowEnd()
     }
 
     callGas () {

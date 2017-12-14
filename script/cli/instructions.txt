@@ -4,16 +4,16 @@ Javascript Commandline Tool
 The EAC javascript cli is a simple tool to ease the use of the Alarm Clock
 smart contracts. Right now, we use it as a tool for development. Here's how:
 
-`node index.js -t` 
+`node index -t` 
     sends a test transaction with an execution window that will begin
     in 10 blocks. Use this command to populate the test contracts with 
     upcoming requests for the client.
 
-`node index.js -c`
+`node index -c`
     starts the client and logs info to the console. The client will scan
     the contracts for new transactionRequests every 4 seconds and attempt to 
     execute them every 5 seconds.
     (pass the `-m <ms>` option to change the number of milliseconds between scans)
 
-`node index.js -s`
+`node index -s`
     WIP - provides an interface to schedule a new transaction.

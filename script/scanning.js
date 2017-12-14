@@ -10,10 +10,20 @@ const store = (cache, txRequest) => {
     cache.set(txRequest.address, txRequest.getWindowStart())
 }
 
+const clear = (cache, nextRequestAddr, left) => {
+    /// this line prevents accessing too early
+    if (!cache.has(nextRequestAddr)) return 
+    /// Expired or successfully executed
+    if (cache.get(nextRequestAddr) > 0 && cache.get(nextRequestAddr) < left -10) {
+        cache.del(nextRequestAddr)
+    }
+    
+}
+
 /// Scans for new requests and stores them.
 const scanToStore = async conf => {
     const log = conf.logger
-    const left = await conf.web3.eth.getBlockNumber()
+    const left = await conf.web3.eth.getBlockNumber() - 100
     const right = left + 300
 
     const tracker = conf.tracker 
@@ -37,6 +47,8 @@ const scanToStore = async conf => {
     log.debug(`Initial tracker result: ${nextRequestAddr}`)
 
     while (nextRequestAddr !== NULL_ADDRESS) {
+        clear(conf.cache, nextRequestAddr, left)
+
         log.debug(`Found request @ ${nextRequestAddr}`)
         if (!await factory.methods.isKnownRequest(nextRequestAddr).call()) {
             log.error(`Encountered unknown request: factory: ${factory.options.address} | query: ">=" | value ${left} | address: ${nextRequestAddr}`)
@@ -49,8 +61,8 @@ const scanToStore = async conf => {
         let txRequest = new TxRequest(nextRequestAddr, conf.web3)
         await txRequest.fillData()
 
-        if (txRequest.getWindowStart() !== trackerWindowStart) {
-            log.error(`error`)
+        if (txRequest.getWindowStart() !== parseInt(trackerWindowStart)) {
+            log.error(`window starts do not match: got ${txRequest.getWindowStart()} from txRequest and ${parseInt(trackerWindowStart)} from tracker`)
         }
         if (txRequest.getWindowStart() <= right) {
             log.debug(`Found request @ ${txRequest.address} - window start: ${txRequest.getWindowStart()} `)
@@ -91,8 +103,11 @@ const scanToExecute = async conf => {
     }, (err, res) => {
         if (err) throw new Error(err)
         res.map((txRequest) => {
-            if (conf.cache.get(txRequest.address) > 0) {
+            if (conf.cache.get(txRequest.address) > 101) {
                 executeTxRequest(conf, txRequest)
+                .catch((err) => {
+                    conf.logger.error(err)
+                })
             }
         })
     })

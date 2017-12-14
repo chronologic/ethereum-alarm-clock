@@ -9,19 +9,14 @@ const RequestFactoryABI = require('../build/contracts/RequestFactory.json').abi
 const RequestTrackerABI = require('../build/contracts/RequestTracker.json').abi
 const TransactionRequestABI = require('../build/contracts/TransactionRequest.json').abi
 
-const { RequestData } = require('./requestData.js')
+// const { RequestData } = require('./requestData.js')
 
 const { Cache22 } = require('./cache22.js')
 const cache = new Cache22(true)
 
 const { Config } = require('./config.js')
 const { scanToExecute, scanToStore } = require('./scanning.js')
-const { TxRequest } = require('./txRequest.js')
-
-const verbose = true 
-const log = (msg) => {
-    if (verbose) console.log(msg)
-}
+// const { TxRequest } = require('./txRequest.js')
 
 const startScanning = (ms, conf) => {
     setInterval(async () => {
@@ -31,6 +26,13 @@ const startScanning = (ms, conf) => {
     setInterval(async () => {
         await scanToExecute(conf)
     }, ms + 1000)
+}
+
+/// This function is necessary to clear old txRequests from the cache.
+const clearCache = (ms, conf) => {
+    setInterval(() => {
+        conf.cache.cache.clear()
+    }, ms)
 }
 
 const main = async (ms) => {
@@ -50,11 +52,9 @@ const main = async (ms) => {
 
     startScanning(ms, conf)
 
-    // setInterval(() => {
-    //     console.log('yo')
-    // }, 6000)
+    // const MINUTE = 60 * 1000//ms
+    // clearCache(MINUTE, conf)
+    /// TODO clear out the cache occasionally
 }
 
-// main()
-// .catch((err) => log(err))
 module.exports = main 
