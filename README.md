@@ -40,6 +40,10 @@ Currently there exists the original documentation in the docs/ directory, but I 
 
 We _will soon_ host developer documentation via Doxitiy on github pages.
 
+## Using the CLI
+
+If you would like to try using the CLI please make sure to build the contracts by running the truffle tests above. See `instructions.txt` in script/cli/ and play around with the source code. NOTE - only works on ROPSTEN for the moment by using the contracts provided below.
+
 ## Deployment
 
 The EAC contracts are deployed on Ropsten at the addresses below.

@@ -17,3 +17,4 @@ smart contracts. Right now, we use it as a tool for development. Here's how:
 
 `node index -s`
     WIP - provides an interface to schedule a new transaction.
+    

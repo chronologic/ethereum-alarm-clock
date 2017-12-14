@@ -1,7 +1,6 @@
 const Web3 = require('web3')
-
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
-const web3 = new Web3(Web3.giveProvider || provider)
+const web3 = new Web3(Web3.givenProvider || provider)
 
 const GT_HEX  = web3.utils.utf8ToHex(">")
 const LT_HEX  = web3.utils.utf8ToHex("<")
