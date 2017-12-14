@@ -45,7 +45,8 @@ library RequestLib {
         BeforeCallWindow,   //2
         AfterCallWindow,    //3
         ReservedForClaimer, //4
-        InsufficientGas     //5
+        InsufficientGas,    //5
+        MismatchGasPrice    //6
     }
 
     event Cancelled(uint rewardPayment, uint measuredGasConsumption);
@@ -356,6 +357,9 @@ library RequestLib {
                    msg.sender != self.claimData.claimedBy &&
                    self.schedule.inReservedWindow()) {
             Aborted(uint8(AbortReason.ReservedForClaimer));
+            return false;
+        } else if (self.txnData.gasPrice != tx.gasprice) {
+            Aborted(uint8(AbortReason.MismatchGasPrice));
             return false;
         }
 

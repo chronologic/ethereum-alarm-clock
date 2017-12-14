@@ -21,7 +21,7 @@ const { waitUntilBlock } = require('@digix/tempo')(web3)
 
 contract('Schedule to execution flow', function(accounts) {
 
-    const gasPrice = 20000
+    const gasPrice = config.web3.utils.toWei('33', 'gwei')
     const testData = ethUtil.bufferToHex(
         Buffer.from('I am the test data'.padEnd(32, 'X123'))
     )
@@ -112,7 +112,7 @@ contract('Schedule to execution flow', function(accounts) {
         .to.equal(windowStart)
 
         expect(requestData.txData.gasPrice)
-        .to.equal(gasPrice)
+        .to.equal(parseInt(gasPrice))
 
         expect(requestData.paymentData.donation)
         .to.equal(98765)

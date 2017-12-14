@@ -17,6 +17,7 @@ alarmClient/*
 coverage
 coverage/*
 
+alarm_client/*
 deployed.info
 deployed.json
 gas.txt

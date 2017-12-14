@@ -19,6 +19,8 @@ contract('Block claiming', async function(accounts) {
     const Owner = accounts[0]
     const Benefactor = accounts[1]
 
+    const gasPrice = config.web3.utils.toWei('45', 'gwei')
+
     let txRequest
     let txRecorder
 
@@ -50,7 +52,8 @@ contract('Block claiming', async function(accounts) {
                 10,                     //window size
                 curBlock + 38,          //windowStart
                 100000,                 //callGas
-                0                       //callValue
+                0,                      //callValue
+                gasPrice
             ],
             'this-is-the-call-data',
             {value: config.web3.utils.toWei('1')}
@@ -180,7 +183,8 @@ contract('Block claiming', async function(accounts) {
 
         const executeTx = await txRequest.execute({
             from: accounts[1],
-            gas: 3000000
+            gas: 3000000,
+            gasPrice: gasPrice
         })
         expect(executeTx.receipt)
         .to.exist 
@@ -216,7 +220,8 @@ contract('Block claiming', async function(accounts) {
         await waitUntilBlock(0, requestData.schedule.windowStart + requestData.schedule.reservedWindowSize)
 
         const executeTx = await txRequest.execute({
-            gas: 3000000
+            gas: 3000000,
+            gasPrice: gasPrice
         })
         expect(executeTx.receipt)
         .to.exist 

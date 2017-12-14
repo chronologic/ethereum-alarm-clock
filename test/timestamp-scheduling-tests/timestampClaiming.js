@@ -27,6 +27,8 @@ contract('Timestamp claiming', async function(accounts) {
 
     let timestamp
 
+    const gasPrice = config.web3.utils.toWei('45', 'gwei')    
+
     /// Constant variables we need in each test
     const claimWindowSize = 5*MINUTE 
     const freezePeriod = 2*MINUTE
@@ -50,16 +52,17 @@ contract('Timestamp claiming', async function(accounts) {
                 accounts[1], // donationBenefactor
                 txRecorder.address  // toAddress
             ], [
-                0, //donation
-                0, //payment
+                0,          //donation
+                0,          //payment
                 claimWindowSize,
                 freezePeriod,
                 reservedWindowSize,
-                2, // temporal unit
+                2,          // temporal unit
                 executionWindow,
                 windowStart,
-                1200000, //callGas
-                0   //callValue
+                1200000,    //callGas
+                0,          //callValue
+                gasPrice
             ],
             'just-some-call-data',
             {value: config.web3.utils.toWei('1')}
@@ -198,7 +201,8 @@ contract('Timestamp claiming', async function(accounts) {
 
         const executeTx = await txRequest.execute({
             from: accounts[1],
-            gas: 3000000
+            gas: 3000000,
+            gasPrice: gasPrice
         })
 
         await requestData.refresh()
@@ -239,7 +243,8 @@ contract('Timestamp claiming', async function(accounts) {
 
         const executeTx = await txRequest.execute({
             from: accounts[1],
-            gas: 3000000
+            gas: 3000000,
+            gasPrice: gasPrice
         })
 
         await requestData.refresh() 

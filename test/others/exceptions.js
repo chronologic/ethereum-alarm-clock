@@ -19,6 +19,8 @@ contract('Exceptions', async function(accounts) {
 
     let transactionRequest 
 
+    const gasPrice = config.web3.utils.toWei('66', 'gwei')    
+
     /// TransactionRequest constants
     const claimWindowSize = 25 //blocks
     const freezePeriod = 5 //blocks
@@ -44,10 +46,12 @@ contract('Exceptions', async function(accounts) {
                 1, //temporalUnit = 1, aka blocks
                 executionWindow,
                 windowStart,
-                43324, //callGas
-                0 //callValue
+                43324,  //callGas
+                0,      //callValue
+                gasPrice
             ],
-            'some-call-data-could-be-anything'
+            'some-call-data-could-be-anything',
+            {value: config.web3.utils.toWei('100', 'finney')}
         )
     })
 
@@ -57,10 +61,12 @@ contract('Exceptions', async function(accounts) {
         const requestData = await parseRequestData(transactionRequest)
         await waitUntilBlock(0, requestData.schedule.windowStart)
 
+        console.log(requestData.txData.gasPrice)
+        console.log(gasPrice)
         const executeTx = await transactionRequest.execute({
-            from: accounts[1],
+            from: accounts[6],
             gas: 3000000,
-            gasPrice: requestData.paymentData.gasPrice
+            gasPrice: gasPrice
         })
 
         expect(executeTx.receipt)

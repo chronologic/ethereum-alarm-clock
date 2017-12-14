@@ -23,6 +23,8 @@ contract('Timestamp execution', async function(accounts) {
     let txRecorder 
     let txRequest
     
+    const gasPrice = config.web3.utils.toWei('37', 'gwei')
+
     /// Constant variables we need in each test
     const claimWindowSize = 5*MINUTE 
     const freezePeriod = 2*MINUTE
@@ -56,7 +58,8 @@ contract('Timestamp execution', async function(accounts) {
                 executionWindow,
                 windowStart,
                 2000000, //callGas
-                0  //callValue
+                0,  //callValue
+                gasPrice
             ],
             'some-call-data-goes-here',
             {value: config.web3.utils.toWei('1')}
@@ -154,7 +157,11 @@ contract('Timestamp execution', async function(accounts) {
         const secsToWait = startExecutionWindow - (await config.web3.eth.getBlock('latest')).timestamp 
         await waitUntilBlock(secsToWait, 1)
 
-        const executeTx = await txRequest.execute({from: accounts[1], gas: 3000000})
+        const executeTx = await txRequest.execute({
+            from: accounts[1], 
+            gas: 3000000,
+            gasPrice: gasPrice
+        })
 
         const requestDataRefresh = await parseRequestData(txRequest)
 
@@ -178,7 +185,11 @@ contract('Timestamp execution', async function(accounts) {
         const secsToWait = endExecutionWindow - (await config.web3.eth.getBlock('latest')).timestamp 
         await waitUntilBlock(secsToWait - 1, 1)
 
-        const executeTx = await txRequest.execute({from: accounts[1], gas: 3000000})
+        const executeTx = await txRequest.execute({
+            from: accounts[1], 
+            gas: 3000000,
+            gasPrice: gasPrice 
+        })
         expect(executeTx.receipt)
         .to.exist 
 

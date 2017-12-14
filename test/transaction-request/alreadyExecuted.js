@@ -24,6 +24,8 @@ contract('Test already executed', async function(accounts) {
         const HOUR  = 60*MINUTE
         const DAY = 24*HOUR
 
+        const gasPrice = config.web3.utils.toWei('44', 'gwei')
+
         const claimWindowSize = 5*MINUTE 
         const freezePeriod = 2*MINUTE
         const reservedWindowSize = 1*MINUTE
@@ -50,8 +52,9 @@ contract('Test already executed', async function(accounts) {
                 2, // temporalUnit
                 executionWindow,
                 windowStart,
-                2000000, //callGas
-                0  //callValue
+                2000000,        //callGas
+                0,              //callValue
+                gasPrice
             ],
             'some-call-data-goes-here',
             {value: config.web3.utils.toWei('1')}
@@ -69,7 +72,11 @@ contract('Test already executed', async function(accounts) {
         const secsToWait = requestData.schedule.windowStart - timestamp
         await waitUntilBlock(secsToWait, 0)
 
-        const executeTx = await txRequest.execute({from: accounts[1], gas: 3000000})
+        const executeTx = await txRequest.execute({
+            from: accounts[1],
+            gas: 3000000,
+            gasPrice: gasPrice 
+        })
         // console.log(executeTx)
         const execute = executeTx.logs.find(e => e.event === 'Executed')
         expect(execute, 'should have fired off the execute log').to.exist
@@ -83,7 +90,11 @@ contract('Test already executed', async function(accounts) {
         .to.be.true
 
         /// Now try to duplicate the call
-        const executeTx2 = await txRequest.execute({from: accounts[1], gas: 3000000})
+        const executeTx2 = await txRequest.execute({
+            from: accounts[1], 
+            gas: 3000000,
+            gasPrice: gasPrice
+        })
 
         expect(wasAborted(executeTx2))
         .to.be.true 

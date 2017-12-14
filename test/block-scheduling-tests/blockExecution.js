@@ -21,6 +21,8 @@ contract('Block execution', async function(accounts) {
     let txRequest
     let txRecorder
 
+    const gasPrice = config.web3.utils.toWei('45', 'gwei')    
+
     const executionWindow = 10
     const testData32 = ethUtil.bufferToHex(
         Buffer.from('A1B2'.padEnd(32, 'FF'))
@@ -51,7 +53,7 @@ contract('Block execution', async function(accounts) {
                 windowStart,        //windowStart
                 200000,             //callGas
                 0,                  //callValue
-                0                   //gasPrice
+                gasPrice           
             ],
             testData32,              //callData
             {value: config.web3.utils.toWei('1')}
@@ -146,7 +148,12 @@ contract('Block execution', async function(accounts) {
         const startExecutionWindow = requestData.schedule.windowStart
         await waitUntilBlock(0, startExecutionWindow)
 
-        const executeTx = await txRequest.execute({gas: 3000000})
+        const executeTx = await txRequest.execute(
+            {
+                gas: 3000000,
+                gasPrice: gasPrice 
+            }
+        )
 
         const requestDataTwo = await parseRequestData(txRequest)
 
@@ -172,7 +179,12 @@ contract('Block execution', async function(accounts) {
         /// because the next transaction will be mined in the next
         /// block, aka the exact block for `endExecutionWindow`
 
-        const executeTx = await txRequest.execute({gas: 3000000})
+        const executeTx = await txRequest.execute(
+            {
+                gas: 3000000,
+                gasPrice: gasPrice,
+            }
+        )
 
         const requestDataTwo = await parseRequestData(txRequest) 
 

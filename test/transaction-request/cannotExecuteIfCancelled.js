@@ -19,6 +19,8 @@ contract('tests execution rejected if cancelled', async function(accounts) {
     it('will reject the execution if it was cancelled', async function() {
         const Owner = accounts[0]
 
+        const gasPrice = config.web3.utils.toWei('66', 'gwei')        
+
         /// TransactionRequest constants
         const claimWindowSize = 25 //blocks
         const freezePeriod = 5 //blocks
@@ -46,7 +48,8 @@ contract('tests execution rejected if cancelled', async function(accounts) {
                 executionWindow,
                 windowStart,
                 2000000, //callGas
-                0 //callValue
+                0, //callValue
+                gasPrice
             ],
             'some-call-data-could-be-anything',
             {value: config.web3.utils.toWei('1')}
@@ -72,7 +75,10 @@ contract('tests execution rejected if cancelled', async function(accounts) {
 
         await waitUntilBlock(0, windowStart)
 
-        const executeTx = await txRequest.execute({gas: 3000000})
+        const executeTx = await txRequest.execute({
+            gas: 3000000,
+            gasPrice: gasPrice 
+        })
 
         const requestDataRefreshTwo = await parseRequestData(txRequest)
         

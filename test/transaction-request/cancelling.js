@@ -16,6 +16,8 @@ const toBN = config.web3.utils.toBN
 contract('Cancelling', async function(accounts) {
     const Owner = accounts[0]
 
+    const gasPrice = config.web3.utils.toWei('66', 'gwei')
+
     let txRequest 
 
     /// TransactionRequest constants
@@ -46,7 +48,8 @@ contract('Cancelling', async function(accounts) {
                 executionWindow,
                 windowStart,
                 43324, //callGas
-                12345 //callValue
+                12345, //callValue
+                gasPrice
             ],
             'some-call-data-could-be-anything',
             {value: config.web3.utils.toWei('1')}
@@ -223,7 +226,8 @@ contract('Cancelling', async function(accounts) {
         await waitUntilBlock(0, executeAt)
 
         const executeTx = await txRequest.execute({
-            gas: 3000000
+            gas: 3000000,
+            gasPrice: gasPrice
         })
         expect(executeTx.receipt)
         .to.exist 

@@ -15,6 +15,8 @@ const toBN = config.web3.utils.toBN
 
 contract('Execution', async function(accounts) {
 
+    const gasPrice = config.web3.utils.toWei('66', 'gwei')
+    
     it('tests transaction sent as specified', async function() {
 
         /// Deploy the transactionRecorder
@@ -46,7 +48,8 @@ contract('Execution', async function(accounts) {
                 executionWindow,
                 windowStart,
                 2000000, //callGas
-                0 //callValue
+                0, //callValue
+                gasPrice
             ],
             'some-call-data-could-be-anything',
             {value: config.web3.utils.toWei('1')}
@@ -54,7 +57,10 @@ contract('Execution', async function(accounts) {
 
         await waitUntilBlock(0, windowStart)
 
-        const executeTx = await transactionRequest.execute({gas: 3000000})
+        const executeTx = await transactionRequest.execute({
+            gas: 3000000,
+            gasPrice: gasPrice 
+        })
         expect(executeTx.receipt).to.exist 
 
         assert(await transactionRecorder.wasCalled() === true)

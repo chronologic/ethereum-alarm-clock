@@ -32,6 +32,8 @@ contract('Test accounting', async function(accounts) {
 
     const donationBenefactor = accounts[3]
 
+    const gasPrice = config.web3.utils.toWei('33', 'gwei')
+
     const donation = 12345
     const payment = 232323
 
@@ -69,7 +71,8 @@ contract('Test accounting', async function(accounts) {
                 executionWindow,
                 windowStart,
                 2000000, //callGas
-                0  //callValue
+                0,  //callValue
+                gasPrice
             ],
             'some-call-data-goes-here',
             {value: config.web3.utils.toWei('1')}
@@ -89,8 +92,6 @@ contract('Test accounting', async function(accounts) {
             requestData.schedule.windowStart - (await config.web3.eth.getBlock('latest')).timestamp,
             1
         )
-
-        const gasPrice = 10
 
         const executeTx = await txRequest.execute({
             from: accounts[1],
@@ -152,7 +153,8 @@ contract('Test accounting', async function(accounts) {
                 executionWindow,
                 windowStart,
                 2000000, //callGas
-                0  //callValue
+                0,      //callValue
+                gasPrice  
             ],
             'some-call-data-goes-here',
             {value: config.web3.utils.toWei('1')}
@@ -181,8 +183,6 @@ contract('Test accounting', async function(accounts) {
 
         expect(parseInt(claimDeposit))
         .to.be.above(0)
-
-        const gasPrice = 1000
 
         const claimTx = await txRequest.claim({
             value: claimDeposit,
@@ -272,7 +272,8 @@ contract('Test accounting', async function(accounts) {
                 executionWindow,
                 windowStart,
                 2000000, //callGas
-                0  //callValue
+                0,  //callValue
+                gasPrice
             ],
             'some-call-data-goes-here',
             {value: config.web3.utils.toWei('1')}
@@ -335,7 +336,8 @@ contract('Test accounting', async function(accounts) {
                 executionWindow,
                 windowStart,
                 2000000, //callGas
-                0  //callValue
+                0,  //callValue
+                gasPrice
             ],
             'some-call-data-goes-here',
             {value: config.web3.utils.toWei('1')}
