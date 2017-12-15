@@ -79,7 +79,7 @@ library PaymentLib {
         if (donationAmount > 0) {
             // re-entrance protection.
             self.donationOwed = 0;
-            self.donationBenefactor.transfer(donationAmount);
+            return self.donationBenefactor.send(donationAmount);
         }
         return true;
     }
@@ -94,7 +94,7 @@ library PaymentLib {
         if (paymentAmount > 0) {
             // re-entrance protection.
             self.paymentOwed = 0;
-            self.paymentBenefactor.transfer(paymentAmount);
+            return self.paymentBenefactor.send(paymentAmount);
         }
         return true;
     }

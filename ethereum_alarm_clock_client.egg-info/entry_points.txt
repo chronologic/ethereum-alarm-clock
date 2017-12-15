@@ -1,3 +1,0 @@
-[console_scripts]
-eth_alarm = alarm_client.cli:main
-

@@ -1,17 +1,20 @@
 pragma solidity ^0.4.17;
 
 import "contracts/Library/RequestLib.sol";
+import "contracts/Library/RequestScheduleLib.sol";
 import "contracts/Interface/TransactionRequestInterface.sol";
 
 contract TransactionRequest is TransactionRequestInterface {
     using RequestLib for RequestLib.Request;
+    using RequestScheduleLib for RequestScheduleLib.ExecutionWindow;
 
     RequestLib.Request txnRequest;
 
     /*
-     *  addressArgs[0] - meta.owner
-     *  addressArgs[1] - paymentData.donationBenefactor
-     *  addressArgs[2] - txnData.toAddress
+     *  addressArgs[0] - meta.createdBy
+     *  addressArgs[1] - meta.owner
+     *  addressArgs[2] - paymentData.donationBenefactor
+     *  addressArgs[3] - txnData.toAddress
      *
      *  uintArgs[0]  - paymentData.donation
      *  uintArgs[1]  - paymentData.payment
@@ -28,7 +31,7 @@ contract TransactionRequest is TransactionRequestInterface {
     function TransactionRequest(
         address[4]  addressArgs,
         uint[11]    uintArgs,
-        bytes     callData
+        bytes       callData
     )
         public payable
     {
@@ -80,10 +83,24 @@ contract TransactionRequest is TransactionRequestInterface {
         public view returns (bytes data)
     {
         data = txnRequest.txnData.callData;
-        // success = true;
     }
 
-    event CallData(bytes _callData);
+    /**
+     * @dev Proxy a call from this contract to another contract.
+     * This function is only callable by the scheduler and can only
+     * be called after the execution window ends. It's purpose is to
+     * provide a way to transfer assets held by this contract somewhere else.
+     * For example, if this request was used to buy tokens during an ICO,
+     * it would become the owner of the tokens and this function would need
+     * to be called with the encoded data to the token contract to transfer
+     * the assets somewhere else. */
+    function proxy(address _to, bytes _data)
+        public payable returns (bool success)
+    {
+        require(txnRequest.meta.owner == msg.sender
+                && txnRequest.schedule.isAfterWindow());
+        return _to.call.value(msg.value)(_data);
+    }
 
     /*
      *  Pull based payment functions.

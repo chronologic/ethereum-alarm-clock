@@ -370,12 +370,12 @@ library RequestLib {
         // | Begin: Execution |
         // +------------------+
 
-        // Mark as being called before sending transaction to prevent re-entrance.
+        /// Mark as being called before sending transaction to prevent re-entrance.
         self.meta.wasCalled = true;
 
-        // Send the transaction
+        /// Send the transaction...
+        /// The transaction is allowed to fail and the caller will still get paid.
         self.meta.wasSuccessful = self.txnData.sendTransaction();
-        require( self.meta.wasSuccessful );
 
         // +----------------+
         // | End: Execution |
@@ -648,6 +648,7 @@ library RequestLib {
     function sendPayment(Request storage self) 
         public returns (bool)
     {
+        /// check wasCalled
         if (self.schedule.isAfterWindow()) {
             return self.paymentData.sendPayment();
         }

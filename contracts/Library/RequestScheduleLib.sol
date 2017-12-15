@@ -65,8 +65,6 @@ library RequestScheduleLib {
         revert();
     }
 
-
-
     /*
      * @dev The modifier that will be applied to the payment value for a claimed call.
      */

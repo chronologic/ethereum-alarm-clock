@@ -5,19 +5,17 @@
 
 Source code for the [Ethereum Alarm Clock service](http://www.ethereum-alarm-clock.com/)
 
-WIP - development in progress to get the EAC working. Please join the Gitter chat for active updates.
-
 ## What is the EAC (Ethereum Alarm Clock)
 
-The Ethereum Alarm Clock is a smart contract protocol for scheduling Ethereum transactions to be executed in the future. It allows any address to set the gas, value and bytecode parameters of a custom transaction and gives _pretty_ good guarantees that the transaction will be executed during a desired window. The EAC is agnostic to callers so can be used by both users and other smart contracts.
+The Ethereum Alarm Clock is a smart contract protocol for scheduling Ethereum transactions to be executed in the future. It allows any address to set the parameters of a transaction and allow clients to call these transactions during the desired window. The EAC is agnostic to callers so can be used by both human users and other smart contracts. Since all of the scheduling logic is contained in smart contracts, transactions can be scheduled from solidity.
 
-Additionally the EAC faciliates the execution of this pool of scheduled transactions through a command-line client. The EAC daemon continuously runs and searches for transactions which are scheduled to be executed soon then claims and executes them. Part of the design goal is to design incentives for people to run the EAC daemon for some sort of profit. 
+Additionally the EAC faciliates the execution of this pool of scheduled transactions through a client. The EAC client continuously runs and searches for transactions which are scheduled to be executed soon then claims and executes them. The clients run off chain and can be written in any programming language, so far we have a Python implemention (alarm_client/) and are working on a Javascript implementation (script/). The functioning of the EAC depends on people running exeuction clients so there are ways in which these executors can be rewarded for running a client. For more information please look in the docs/ folder.
 
 ## Running the tests
 
-_Tests have been ported to JavaScript and can now be run using the Truffle Suite_
+_Tests have been ported to Javascript and can now be run using the Truffle Suite_
 
-Originally the test suite was written in Python using the Populus framework, these still exist for reference under the tests/ directory. However, we have ported over the suite to use the Truffle framework since this may be more familiar to developers who know the JavaScript Ethereum tooling. These tests can be found in the test/ directory but be warned - this repo is in active development and many of the tests are likely to start breaking. If you would like to fix or contribute a test please open an issue or contribute a pull request. 
+Originally the test suite was written in Python using the Populus framework, these still exist for reference under the tests/ directory. However, we have ported over the suite to use the Truffle framework since this may be more familiar to developers who know the Ethereum tooling in Javascript. These tests can be found in the test/ directory.
 
 If you would like to run the test please set up your environment to use node v8.0.0, truffle v4.0.1 and the latest ganache-cli.
 
@@ -30,19 +28,19 @@ npm i -g ganache-cli
 
 Start ganache-cli in a terminal screen by running `ganache-cli`.
 
-In another terminal screen run `npm test` at the root of the directory. This will run the npm test script that splits up the tests into different runtimes. We did this because the EAC is a moderately sized project and running all the tests with one command has a tendency to break down the ganache tester chain.
+In another terminal screen run `npm test` at the root of the directory. This will run the npm test script that splits up the tests into different runtimes. The tests are split because the EAC is a moderately sized project and running all the tests with one command has a tendency to break down the ganache tester chain.
 
 Each time you run the tests it is advised to rebuild your build/ folder, as this may lead to bugs if not done. You can do this by running the command `rm -rf build/`.
 
 ## Documentation
 
-Currently there exists the original documentation in the docs/ directory, but I make no guarantees that anything in there is up-to-date. Part of the work of the revitalization effort is to produce more in-line documentation in the code. To be safe, always refer to the documentation in the code as the final say as changes are migrating from the codebase back out into the docs currently. 
+Some of the documentation in the docs/ repository may be out of date.
 
 We _will soon_ host developer documentation via Doxitiy on github pages.
 
 ## Using the CLI
 
-If you would like to try using the CLI please make sure to build the contracts by running the truffle tests above. See `instructions.txt` in script/cli/ and play around with the source code. NOTE - only works on ROPSTEN for the moment by using the contracts provided below.
+If you would like to try using the Javascript CLI please make sure to build the contracts by running the truffle tests above. See `instructions.txt` in script/cli/ and play around with the source code. NOTE - only works on ROPSTEN for the moment by using the contracts provided below.
 
 ## Deployment
 
