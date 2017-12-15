@@ -10,8 +10,11 @@ import "contracts/Library/SchedulerLib.sol";
 contract SchedulerInterface {
     using SchedulerLib for SchedulerLib.FutureTransaction;
 
-    address public factoryAddress;              // The RequestFactory address which produces requests for this scheduler.
-    RequestScheduleLib.TemporalUnit public temporalUnit;           // The TemporalUnit of this scheduler.
+    // The RequestFactory address which produces requests for this scheduler.
+    address public factoryAddress;
+    
+    // The TemporalUnit of this scheduler.
+    RequestScheduleLib.TemporalUnit public temporalUnit;
 
     /*
      * Local storage variable used to house the data for transaction
@@ -33,49 +36,11 @@ contract SchedulerInterface {
         }
         _;
     }
-
-    function scheduleTxSimple(address _toAddress,
-                              bytes _callData,
-                              uint[5] _uintArgs)
-        doReset
-        public payable returns (address);
-    
-    function scheduleTxFull(address _toAddress,
-                            bytes _callData,
-                            uint[7] _uintArgs)
+        
+    function schedule(address   _toAddress,
+                      bytes     _callData,
+                      uint[7]   _uintArgs)
         doReset
         public payable returns (address);
 
-
-    /*
-     *  Full scheduling API exposing all fields.
-     * 
-     *  uintArgs[0] callGas
-     *  uintArgs[1] callValue
-     *  uintArgs[2] windowSize
-     *  uintArgs[3] windowStart
-     *  bytes callData;
-     *  address toAddress;
-     */
-    // function scheduleTransaction(address toAddress,
-    //                              bytes32 callData,
-    //                              uint[5] uintArgs) 
-    //                              doReset public payable returns (address);
-
-    /*
-     *  Full scheduling API exposing all fields.
-     * 
-     *  uintArgs[0] callGas
-     *  uintArgs[1] callValue
-     *  uintArgs[2] donation
-     *  uintArgs[3] payment
-     *  uintArgs[4] windowSize
-     *  uintArgs[5] windowStart
-     *  bytes32 callData;
-     *  address toAddress;
-     */
-    // function scheduleTransaction(address toAddress,
-    //                              bytes32 callData,
-    //                              uint[7] uintArgs) 
-    //                              doReset public payable returns (address);
 }

@@ -65,7 +65,7 @@ contract('Block scheduling', function(accounts) {
         assert(balBefore < balAfter, 'It sent 1000 wei correctly.')
     })
 
-    it('should do block scheduling with `scheduleTxSimple`', async function() {
+    it('should do block scheduling with `schedule`', async function() {
         const curBlockNum = await config.web3.eth.getBlockNumber()
         const windowStart = curBlockNum + 20
         const testData32 = ethUtil.bufferToHex(
@@ -73,60 +73,7 @@ contract('Block scheduling', function(accounts) {
         )
 
         /// Now let's send it an actual transaction
-        const scheduleTx = await blockScheduler.scheduleTxSimple(
-            transactionRecorder.address,
-            testData32,         //callData
-            [
-                1212121,        //callGas
-                123454321,      //callValue
-                255,            //windowSize
-                windowStart,
-                gasPrice
-
-            ],
-            {from: accounts[0], value: config.web3.utils.toWei('2')}
-        )
-
-        expect(scheduleTx.receipt)
-        .to.exist
-
-        expect(scheduleTx.receipt.gasUsed)
-        .to.be.below(3000000)
-
-        // Let's get the logs so we can find the transaction request address.
-        const logNewRequest = scheduleTx.logs.find(e => e.event === 'NewRequest')
-
-        expect(logNewRequest.args.request, "Couldn't find the `NewRequest` log in receipt...")
-        .to.exist
-
-        const txRequest = await TransactionRequest.at(logNewRequest.args.request)
-        const requestData = await parseRequestData(txRequest)
-        
-        expect(requestData.txData.toAddress)
-        .to.equal(transactionRecorder.address)
-
-        expect(await txRequest.callData())
-        .to.equal(testData32)
-
-        expect(requestData.schedule.windowSize)
-        .to.equal(255)
-
-        expect(requestData.txData.callGas)
-        .to.equal(1212121)
-
-        expect(requestData.schedule.windowStart)
-        .to.equal(windowStart)
-    })
-
-    it('should do block scheduling with `scheduleTxFull`', async function() {
-        const curBlockNum = await config.web3.eth.getBlockNumber()
-        const windowStart = curBlockNum + 20
-        const testData32 = ethUtil.bufferToHex(
-            Buffer.from('A1B2'.padEnd(32, 'FF'))
-        )
-
-        /// Now let's send it an actual transaction
-        const scheduleTx = await blockScheduler.scheduleTxFull(
+        const scheduleTx = await blockScheduler.schedule(
             transactionRecorder.address,
             testData32,     //callData
             [
@@ -183,14 +130,16 @@ contract('Block scheduling', function(accounts) {
         const curBlockNum = await config.web3.eth.getBlockNumber()
         const windowStart = curBlockNum + 20
 
-        await blockScheduler.scheduleTxSimple(
+        await blockScheduler.schedule(
             transactionRecorder.address,
             'this-is-the-call-data',
             [
                 4e20, //callGas set crazy high
                 123454321, //callValue
                 0, //windowSize
-                windowStart
+                windowStart,
+                0,
+                0
             ],
             {from: User2, value: config.web3.utils.toWei('10')}
         ).should.be.rejectedWith('VM Exception while processing transaction: revert')

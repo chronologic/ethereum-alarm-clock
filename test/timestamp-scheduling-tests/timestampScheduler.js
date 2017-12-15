@@ -52,63 +52,14 @@ contract('Timestamp scheduling', function(accounts) {
         expect(transactionRecorder.address).to.exist
     })
 
-    it('should do timestamp scheduling using `scheduleTxSimple`', async function() {
-        const curBlock = await config.web3.eth.getBlock('latest')
-        const timestamp = curBlock.timestamp 
-        const windowStart = timestamp + 6 * MINUTE
-
-        let scheduleTx = await timestampScheduler.scheduleTxSimple(
-            transactionRecorder.address,
-            testData32,         //callData
-            [
-                1212121,        //callGas
-                123454321,      //callValue
-                55 * MINUTE,    //windowSize
-                windowStart,
-                gasPrice
-            ],
-            {from: accounts[0], value: config.web3.utils.toWei('10')}
-        )
-
-        expect(scheduleTx.receipt)
-        .to.exist
-
-        expect(scheduleTx.receipt.gasUsed)
-        .to.be.below(3000000)
-
-        // Dig the logs out for proof
-        const logNewRequest = scheduleTx.logs.find(e => e.event === 'NewRequest')
-
-        expect(logNewRequest.args.request, "Couldn't find the `NewRequst` log in receipt...")
-        .to.exist 
-
-        const txRequest = await TransactionRequest.at(logNewRequest.args.request)
-        const requestData = await parseRequestData(txRequest)
-
-        expect(requestData.txData.toAddress)
-        .to.equal(transactionRecorder.address)
-
-        expect(await txRequest.callData())
-        .to.equal(testData32)
-
-        expect(requestData.schedule.windowSize)
-        .to.equal(55 * MINUTE)
-
-        expect(requestData.txData.callGas)
-        .to.equal(1212121)
-
-        expect(requestData.schedule.windowStart)
-        .to.equal(windowStart)
-    })
-
-    it('should do timestamp scheduling using `scheduleTxFull', async function() {
+    it('should do timestamp scheduling using `schedule', async function() {
         const curBlock = await config.web3.eth.getBlock('latest')
         const timestamp = curBlock.timestamp 
         const windowStart = timestamp + 10*MINUTE
         const donation = 98765
         const payment = 80008
 
-        const scheduleTx = await timestampScheduler.scheduleTxFull(
+        const scheduleTx = await timestampScheduler.schedule(
             transactionRecorder.address,
             testData32,     //callData
             [
@@ -166,7 +117,7 @@ contract('Timestamp scheduling', function(accounts) {
 
         const windowStart = timestamp + 10*MINUTE
 
-        const scheduleTx = await timestampScheduler.scheduleTxSimple(
+        const scheduleTx = await timestampScheduler.schedule(
             accounts[4],
             testData32,         //callData
             [
@@ -174,7 +125,9 @@ contract('Timestamp scheduling', function(accounts) {
                 123123,         //callValue
                 55 * MINUTE,    //windowSize
                 windowStart,
-                gasPrice
+                gasPrice,
+                0,
+                0
             ],
             {from: accounts[0]}
         ).should.be.rejectedWith('VM Exception while processing transaction: revert')

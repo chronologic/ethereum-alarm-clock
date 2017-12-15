@@ -60,7 +60,7 @@ contract('Schedule to execution flow', function(accounts) {
         const curBlockNum = await config.web3.eth.getBlockNumber()
         windowStart = curBlockNum + 20
 
-        const scheduleTx = await blockScheduler.scheduleTxFull(
+        const scheduleTx = await blockScheduler.schedule(
             txRecorder.address,     //toAddress
             testData,               //callData
             [

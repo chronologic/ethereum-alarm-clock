@@ -29,7 +29,7 @@ const schedule = async (
         RopstenAddresses.blockScheduler
     )
 
-    await blockScheduler.methods.scheduleTxFull(
+    await blockScheduler.methods.schedule(
         toAddress,
         callData,
         [

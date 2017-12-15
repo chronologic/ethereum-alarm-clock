@@ -12,19 +12,19 @@ const { scanToExecute, scanToStore } = require('./scanning.js')
 
 /// Begins scanning
 const startScanning = (ms, conf) => {
-    setInterval(() => {
+    setInterval(_ => {
         /// This is an async function
         scanToStore(conf)
     }, ms)
 
-    setInterval(() => {
+    setInterval(_ => {
         /// This is also an async function
         scanToExecute(conf)
     }, ms + 1000)
 }
 
 /// Main driver function
-const main = async (ms) => {
+const main = async (ms, logfile) => {
 
     /// Loads our account
     /// FIXME - allow user to input an account ?
@@ -35,8 +35,13 @@ const main = async (ms) => {
     const requestFactory = new web3.eth.Contract(RequestFactoryABI, RopstenAddresses.requestFactory)
     const requestTracker = new web3.eth.Contract(RequestTrackerABI, RopstenAddresses.requestTracker)
 
-    /// FIXME - allow user to input their own logfile ?
-    const logfile = 'undefined'
+    if (logfile === 'undefined') {
+        console.log('logging to console...')
+    }
+    if (logfile === 'default') {
+        console.log(require('os').homedir())
+        logfile = 'info.log'
+    }
 
     /// Loads the config
     const conf = new Config(

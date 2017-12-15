@@ -29,15 +29,18 @@ const main = async (v) => {
 
     log(await blockScheduler.methods.factoryAddress().call())
 
-    await blockScheduler.methods.scheduleTxSimple(
+    await blockScheduler.methods.schedule(
         '0x009f7EfeD908c05df5101DA1557b7CaaB38EE4Ce',
         web3.utils.utf8ToHex('some-testing-data'),
         [
-            1212121,
-            123454321,
-            255,
+            1212121,    //callGas
+            123454321,  //callValue
+            255,        //windowSize
             windowStart,
-            gasPrice
+            gasPrice,
+            111111,     //donation
+            222222      //payment
+
         ]
     ).send({from: me, gas: 3000000, value: web3.utils.toWei('500', 'finney')})
     .then((tx) => {
