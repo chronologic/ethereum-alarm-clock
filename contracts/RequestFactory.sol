@@ -55,7 +55,7 @@ contract RequestFactory is RequestFactoryInterface {
                 _addressArgs[1],  // paymentData.donationBenefactor
                 _addressArgs[2]   // txnData.toAddress
             ],
-            _uintArgs, //uint[11]
+            _uintArgs,  //uint[11]
             _callData
         );
 
@@ -115,6 +115,7 @@ contract RequestFactory is RequestFactoryInterface {
             // then revert() to force it to be returned.
             // msg.sender.transfer(msg.value);
             revert();
+            //assert(false); causes the tx to fail and retunr ether but waste gas
         }
 
         return createRequest(addressArgs, uintArgs, callData);

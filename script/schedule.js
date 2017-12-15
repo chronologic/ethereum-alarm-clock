@@ -17,7 +17,7 @@ const main = async (v) => {
 
     const me = (await web3.eth.getAccounts())[0]
 
-    const windowStart = await web3.eth.getBlockNumber() + 10
+    const windowStart = await web3.eth.getBlockNumber() + 20
     const gasPrice = web3.utils.toWei('100', 'gwei')
 
     // console.log(BlockSchedulerABI)
@@ -38,11 +38,16 @@ const main = async (v) => {
             255,        //windowSize
             windowStart,
             gasPrice,
-            111111,     //donation
-            222222      //payment
+            12,          //donation
+            24           //payment
 
         ]
-    ).send({from: me, gas: 3000000, value: web3.utils.toWei('500', 'finney')})
+    ).send({
+        from: me, 
+        gas: 3000000, 
+        value: web3.utils.toWei('500', 'finney'),
+        gasPrice: gasPrice,
+    })
     .then((tx) => {
         console.log(`Transaction mined! ${tx.transactionHash}`)
     })

@@ -47,40 +47,38 @@ If you would like to try using the Javascript CLI please make sure to build the 
 The EAC contracts are deployed on Ropsten at the addresses below.
 
 ```
-baseScheduler, 0x6516b2410547d55ea452c52e2adb2cd43dd9357c
+baseScheduler, 0x1b07192874e68857f559ca28405bd0c93b5769bc
 
-blockSceduler, 0xa22034024696e89c3dafcf6f49d795b05ce73007
+blockScheduler, 0x96363aea9265913afb8a833ba6185a62f089bcef
 
-claimLib, 0x349686ab5c36563da978c77ce027e2463e5b7d0d
+claimLib, 0x4c409431e8a5857b8c666d4af7f9d6b0e6f31864
 
-executionLib, 0xe40112a49e40a76a185945b5fe637e5c70fc53d0
+executionLib, 0xd8716622458f09bdcb57fc3f457a16e5ea2e3437
 
-groveLib, 0x6cb1e6ddbd2a85b3d13068d5eb3055f2917616dc
+groveLib, 0xf6c63cd310169032b7cfd61ca738ac952ad7ce61
 
-iterTools, 0x5ddf53f4861eda2747579f0f455451c077047df4
+iterTools, 0x55ca915cae662acd0ed7aa5902029eb2bbcdd291
 
-mathLib, 0x68024ad8bcc6689d51808b3cd30ecb64196d87e6
+mathLib, 0x8b8baef7a95dfe5910dc98e62ba39a06df2d4160
 
-paymentLib, 0x8ffe70cecf8cf7e610bd0d64e7e5a792fde39126
+paymentLib, 0x4bfd652bc769615b82c986be7c521a7b411e3ca8
 
-requestFactory, 0x58e4297d61838724cf1e59d7786db8e5bc08fad3
+requestFactory, 0x7a40754857b9ffc79bee5f42c35840cd4d08d5ab
 
-requestLib, 0x1bd0e34d014f5b4421978c21c5e66c5e19ef3edd
+requestLib, 0xa5e13bdf2dd1d5afa91aab98fb0fb21945c1fc40
 
-requestMetaLib, 0x821b64e210ec4485b0c4214e4dde3e06df11044c
+requestMetaLib, 0xeba51150443e9f42ba75763b502797017a9af769
 
-requestScheduleLib, 0x14bcc993fc016536cc2be425cbfbde13eb92b0ec
+requestScheduleLib, 0xb3a45035005894850213f606825ed1b4879a00e9
 
-requestTracker, 0x2e6f940869121a459dbfd847cc87679622a1dc0d
+requestTracker, 0x36670ebd7e97526f662e68614036b85a6c089308
 
-safeMath, 0x1157c432487114cf3c399fb315941a6a46498e7f
+safeMath, 0xb869162954153199ce826e0dd9ec50dfc2d4328a
 
-schedulerLib, 0x548e34c5303480e791167025ad875ce5851cc287
+schedulerLib, 0xf9dd9c78dfa5130f66133129bc9ff97a35a04fae
 
-timestampScheduler, 0xbb45a0b6bc8711237f429b0f2553bfdf3a9110eb
+timestampScheduler, 0x1ed890d84c5a071520fd2911950d3f53fbff147a
 
-transactionRequest, 0x81942dfdae1a11b1c0e4cd013d493549c55cffee
-
-transactionRecorder, 0x29f3c7c39ebdfa87d3839faa57a199d93a750108
+transactionRecorder, 0x1c1d4390c7391e0872957520b90c8fd5ea172e33
 
 ```

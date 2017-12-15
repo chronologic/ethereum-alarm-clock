@@ -168,11 +168,9 @@ library SchedulerLib {
             self.callData
         );
         
-        require(newRequestAddress!=0x0);
+        /// This check is redundant. see line 55 in BaseScheduler.sol
+        require(newRequestAddress != 0x0);
         /// Automatically returns newRequestAddress
     }
-    
-    /// Debugging purposes
-    event ERROR();
 
 }

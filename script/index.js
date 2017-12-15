@@ -35,7 +35,7 @@ const main = async (ms, logfile) => {
     const requestFactory = new web3.eth.Contract(RequestFactoryABI, RopstenAddresses.requestFactory)
     const requestTracker = new web3.eth.Contract(RequestTrackerABI, RopstenAddresses.requestTracker)
 
-    if (logfile === 'undefined') {
+    if (logfile === undefined) {
         console.log('logging to console...')
     }
     if (logfile === 'default') {

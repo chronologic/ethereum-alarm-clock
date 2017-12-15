@@ -72,20 +72,26 @@ contract('Block scheduling', function(accounts) {
             Buffer.from('A1B2'.padEnd(32, 'FF'))
         )
 
+        const donation = 0
+        const payment = 0
+
         /// Now let's send it an actual transaction
         const scheduleTx = await blockScheduler.schedule(
             transactionRecorder.address,
-            testData32,     //callData
+            testData32,         //callData
             [
-                1212121,    //callGas
-                123454321,  //callValue
-                54321,      //windowSize
+                1212121,        //callGas
+                123454321,      //callValue
+                54321,          //windowSize       
                 windowStart,
                 gasPrice,
-                98765,      //donation
-                80008,      //payment
+                donation,
+                payment,
             ],
-            {from: accounts[0], value: config.web3.utils.toWei('2')}
+            {
+                from: accounts[0], 
+                value: config.web3.utils.toWei('500', 'finney')
+            }
         )
 
         expect(scheduleTx.receipt)
@@ -116,10 +122,10 @@ contract('Block scheduling', function(accounts) {
         .to.equal(1212121)
 
         expect(requestData.paymentData.donation)
-        .to.equal(98765)
+        .to.equal(donation)
 
         expect(requestData.paymentData.payment)
-        .to.equal(80008)
+        .to.equal(payment)
 
         expect(requestData.schedule.windowStart)
         .to.equal(windowStart)
