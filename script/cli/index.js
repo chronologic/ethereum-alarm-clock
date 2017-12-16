@@ -28,6 +28,8 @@ commander
     .option('-t, --test', 'testing')
     .option('-c, --client', 'starts the client')
     .option('-m, --milliseconds <ms>', 'tells the client to scan every <ms> seconds', 4000)
+    .option('--logfile [path]', 'specifies the output logifle', 'console')
+    .option('--chain [ropsten, mainnet]', 'selects the chain to use', 'ropsten')
     .option('-s, --schedule', 'schedules a transactions')
     .parse(process.argv)
 
@@ -36,7 +38,11 @@ if (commander.test) {
     .catch(err => log.error(err))
 } else {
     if (commander.client) {
-        alarmClient(commander.milliseconds)
+        alarmClient(
+            commander.milliseconds,
+            commander.logfile,
+            commander.chain
+        )
         .catch(err => log.error(err))
     } else if (commander.schedule) {
         log.info('Schedule a transcation with the EAC')

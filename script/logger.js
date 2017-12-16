@@ -3,7 +3,7 @@ const fs = require('fs')
 class Logger {
 
     constructor(logfile) {
-        if (logfile === undefined) {
+        if (logfile === 'console') {
             this.logToFile = false
         } else {
             this.logToFile = true

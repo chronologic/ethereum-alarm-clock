@@ -2,10 +2,10 @@ const Web3 = require('web3')
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 const web3 = new Web3(Web3.givenProvider || provider)
 
-const RopstenAddresses = require('../deployed.json')
-const RequestFactoryABI = require('../build/contracts/RequestFactory.json').abi
-const RequestTrackerABI = require('../build/contracts/RequestTracker.json').abi
-const TransactionRequestABI = require('../build/contracts/TransactionRequest.json').abi
+const { getABI } = require('./util.js')
+const RequestFactoryABI = getABI('RequestFactory')
+const RequestTrackerABI = getABI('RequestTracker')
+const TransactionRequestABI = getABI('TransactionRequest')
 
 const { Config } = require('./config.js')
 const { scanToExecute, scanToStore } = require('./scanning.js')
@@ -24,26 +24,35 @@ const startScanning = (ms, conf) => {
 }
 
 /// Main driver function
-const main = async (ms, logfile) => {
+const main = async (ms, logfile, chain) => {
 
-    /// Loads our account
-    /// FIXME - allow user to input an account ?
+    /// loads our account
+    /// FIXME - allow for a list of accounts from a json file
     const me = (await web3.eth.getAccounts())[0]
     web3.eth.defaultAccount = me 
 
-    /// Loads the contracts we need
-    const requestFactory = new web3.eth.Contract(RequestFactoryABI, RopstenAddresses.requestFactory)
-    const requestTracker = new web3.eth.Contract(RequestTrackerABI, RopstenAddresses.requestTracker)
+    /// parses the chain argument 
+    let contracts
+    if (chain === 'ropsten') {
+        contracts = require('../ropsten.json')
+    } else {
+        throw new Error(`chain: ${chain} not supported!`)
+    }
 
-    if (logfile === undefined) {
+    /// loads the contracts we need
+    const requestFactory = new web3.eth.Contract(RequestFactoryABI, contracts.requestFactory)
+    const requestTracker = new web3.eth.Contract(RequestTrackerABI, contracts.requestTracker)
+
+    /// parses the logfile
+    if (logfile === 'console') {
         console.log('logging to console...')
     }
     if (logfile === 'default') {
-        console.log(require('os').homedir())
+        // console.log(require('os').homedir())
         logfile = 'info.log'
     }
 
-    /// Loads the config
+    /// loads the config
     const conf = new Config(
         logfile,            //conf.logfile
         requestFactory,     //conf.factory

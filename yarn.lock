@@ -6,6 +6,39 @@
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@digix/tempo/-/tempo-0.2.0.tgz#5daf91ad788d6b596a19aad22e2e667e4ec808a8"
 
+"@parity/abi@2.1.x":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@parity/abi/-/abi-2.1.2.tgz#f5946575440dd722480d41cfd53d25f991a64aef"
+  dependencies:
+    bignumber.js "3.0.1"
+    js-sha3 "0.5.5"
+    utf8 "^2.1.2"
+
+"@parity/api@^2.1.14":
+  version "2.1.14"
+  resolved "https://registry.yarnpkg.com/@parity/api/-/api-2.1.14.tgz#65ad222a733a2ca08bae63fe3f352c27966447be"
+  dependencies:
+    "@parity/abi" "2.1.x"
+    "@parity/jsonrpc" "2.1.x"
+    "@parity/wordlist" "1.1.x"
+    bignumber.js "3.0.1"
+    blockies "0.0.2"
+    es6-error "^4.0.0"
+    es6-promise "^4.1.1"
+    eventemitter3 "^2.0.2"
+    isomorphic-fetch "^2.2.1"
+    js-sha3 "0.5.5"
+    lodash "^4.17.4"
+    store "^2.0.12"
+
+"@parity/jsonrpc@2.1.x":
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/@parity/jsonrpc/-/jsonrpc-2.1.4.tgz#d64f348e6ae0b24eb995f7002a03e2ade59f5da0"
+
+"@parity/wordlist@1.1.x":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@parity/wordlist/-/wordlist-1.1.0.tgz#9e9ed3ab7837f5633b5844e60a355e9e63e427ae"
+
 "@types/chalk@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@types/chalk/-/chalk-2.2.0.tgz#b7f6e446f4511029ee8e3f43075fb5b73fbaa0ba"
@@ -650,6 +683,10 @@ bigi@^1.1.0, bigi@^1.4.0:
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/bigi/-/bigi-1.4.2.tgz#9c665a95f88b8b08fc05cfd731f561859d725825"
 
+bignumber.js@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-3.0.1.tgz#807652d10e39de37e9e3497247edc798bb746f76"
+
 bignumber.js@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-4.1.0.tgz#db6f14067c140bd46624815a7916c92d9b6c24b1"
@@ -687,6 +724,10 @@ block-stream@*:
   resolved "https://registry.yarnpkg.com/block-stream/-/block-stream-0.0.9.tgz#13ebfe778a03205cfe03751481ebb4b3300c126a"
   dependencies:
     inherits "~2.0.0"
+
+blockies@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/blockies/-/blockies-0.0.2.tgz#22ad58da4f6b382bc79bf4386c5820c70047e4ed"
 
 bluebird@3.3.1:
   version "3.3.1"
@@ -1430,6 +1471,12 @@ encodeurl@~1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.1.tgz#79e3d58655346909fe6f0f45a5de68103b294d20"
 
+encoding@^0.1.11:
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/encoding/-/encoding-0.1.12.tgz#538b66f3ee62cd1ab51ec323829d1f9480c74beb"
+  dependencies:
+    iconv-lite "~0.4.13"
+
 end-of-stream@^1.0.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/end-of-stream/-/end-of-stream-1.4.0.tgz#7a90d833efda6cfa6eac0f4949dbb0fad3a63206"
@@ -1464,6 +1511,10 @@ es5-ext@^0.10.14, es5-ext@^0.10.35, es5-ext@^0.10.9, es5-ext@~0.10.14:
     es6-iterator "~2.0.1"
     es6-symbol "~3.1.1"
 
+es6-error@^4.0.0:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/es6-error/-/es6-error-4.0.2.tgz#eec5c726eacef51b7f6b73c20db6e1b13b069c98"
+
 es6-iterator@^2.0.1, es6-iterator@~2.0.1:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/es6-iterator/-/es6-iterator-2.0.3.tgz#a7de889141a05a94b0854403b2d0a0fbfa98f3b7"
@@ -1482,6 +1533,10 @@ es6-map@^0.1.3:
     es6-set "~0.1.5"
     es6-symbol "~3.1.1"
     event-emitter "~0.3.5"
+
+es6-promise@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.1.1.tgz#8811e90915d9a0dba36274f0b242dbda78f9c92a"
 
 es6-set@~0.1.5:
   version "0.1.5"
@@ -1760,6 +1815,10 @@ event-emitter@~0.3.5:
 eventemitter3@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-1.1.1.tgz#47786bdaa087caf7b1b75e73abc5c7d540158cd0"
+
+eventemitter3@^2.0.2:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-2.0.3.tgz#b5e1079b59fb5e1ba2771c0a993be060a58c99ba"
 
 events@^1.0.0:
   version "1.1.1"
@@ -2324,7 +2383,7 @@ https-browserify@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-1.0.0.tgz#ec06c10e0a34c0f2faf199f7fd7fc78fffd03c73"
 
-iconv-lite@0.4.19:
+iconv-lite@0.4.19, iconv-lite@~0.4.13:
   version "0.4.19"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.19.tgz#f7468f60135f5e5dad3399c0a81be9a1603a082b"
 
@@ -2481,7 +2540,7 @@ is-retry-allowed@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-retry-allowed/-/is-retry-allowed-1.1.0.tgz#11a060568b67339444033d0125a61a20d564fb34"
 
-is-stream@^1.0.0, is-stream@^1.1.0:
+is-stream@^1.0.0, is-stream@^1.0.1, is-stream@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-stream/-/is-stream-1.1.0.tgz#12d4a3dd4e68e0b79ceb8dbc84173ae80d91ca44"
 
@@ -2510,6 +2569,13 @@ isobject@^2.0.0:
   resolved "https://registry.yarnpkg.com/isobject/-/isobject-2.1.0.tgz#f065561096a3f1da2ef46272f815c840d87e0c89"
   dependencies:
     isarray "1.0.0"
+
+isomorphic-fetch@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/isomorphic-fetch/-/isomorphic-fetch-2.2.1.tgz#611ae1acf14f5e81f729507472819fe9733558a9"
+  dependencies:
+    node-fetch "^1.0.1"
+    whatwg-fetch ">=0.10.0"
 
 isstream@~0.1.2:
   version "0.1.2"
@@ -3108,6 +3174,13 @@ nconf@^0.8.4:
 negotiator@0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.1.tgz#2b327184e8992101177b28563fb5e7102acd0ca9"
+
+node-fetch@^1.0.1:
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-1.7.3.tgz#980f6f72d85211a5347c6b2bc18c5b84c3eb47ef"
+  dependencies:
+    encoding "^0.1.11"
+    is-stream "^1.0.1"
 
 node-libs-browser@^2.0.0:
   version "2.1.0"
@@ -4187,6 +4260,10 @@ statuses@~1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.3.1.tgz#faf51b9eb74aaef3b3acf4ad5f61abf24cb7b93e"
 
+store@^2.0.12:
+  version "2.0.12"
+  resolved "https://registry.yarnpkg.com/store/-/store-2.0.12.tgz#8c534e2a0b831f72b75fc5f1119857c44ef5d593"
+
 stream-browserify@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/stream-browserify/-/stream-browserify-2.0.1.tgz#66266ee5f9bdb9940a4e4514cafb43bb71e5c9db"
@@ -4574,7 +4651,7 @@ utf8@2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/utf8/-/utf8-2.1.1.tgz#2e01db02f7d8d0944f77104f1609eb0c304cf768"
 
-utf8@^2.1.1:
+utf8@^2.1.1, utf8@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/utf8/-/utf8-2.1.2.tgz#1fa0d9270e9be850d9b05027f63519bf46457d96"
 
@@ -4889,6 +4966,10 @@ webpack@^3.0.0:
     nan "^2.3.3"
     typedarray-to-buffer "^3.1.2"
     yaeti "^0.0.6"
+
+whatwg-fetch@>=0.10.0:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-2.0.3.tgz#9c84ec2dcf68187ff00bc64e1274b442176e1c84"
 
 which-module@^1.0.0:
   version "1.0.0"
