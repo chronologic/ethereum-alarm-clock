@@ -2,7 +2,7 @@ const mem_cache = require('memory-cache')
 const _ = require('lodash')
 
 //// wrapper over memory-cache
-class Cache22 {
+class Cache {
     constructor (logger) {
         this.log = logger
         this.cache = new mem_cache.Cache() 
@@ -13,8 +13,8 @@ class Cache22 {
         if (_.indexOf(this.mem, k) === -1) {
             this.mem.push(k)
         }
-        const timeout = 5 * 60 * 1000 // deletes entries after 5 minutes
-        this.cache.put(k, v, timeout)
+        const timeout = 10 * 60 * 1000 // deletes entries after 10 minutes
+        this.cache.put(k, v, timeout, this.del(k))
         this.log.cache(`stored ${k} with value ${v}`)
     }
 
@@ -49,4 +49,4 @@ class Cache22 {
     }
 }
 
-module.exports.Cache22 = Cache22
+module.exports.Cache = Cache

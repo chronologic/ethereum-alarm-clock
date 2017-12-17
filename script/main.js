@@ -24,7 +24,7 @@ const startScanning = (ms, conf) => {
 }
 
 /// Main driver function
-const main = async (ms, logfile, chain) => {
+const main = async (ms, logfile, chain, walletFile, pw) => {
 
     /// loads our account
     /// FIXME - allow for a list of accounts from a json file
@@ -58,7 +58,15 @@ const main = async (ms, logfile, chain) => {
         requestFactory,     //conf.factory
         requestTracker,     //conf.tracker
         web3,               //conf.web3
+        walletFile,         //conf.wallet
+        pw                  //wallet password
     )
+
+    /// If somehow this filters through...
+    if (conf.wallet) {
+        console.log('wallet support not yet enabled')
+        return
+    }
 
     /// Begins
     startScanning(ms, conf)

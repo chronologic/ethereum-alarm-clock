@@ -3,7 +3,7 @@
 const commander = require('commander')
 const chalk = require('chalk')
 
-const alarmClient = require('../index.js')
+const alarmClient = require('../main.js')
 const Scheduler = require('../scheduler.js')
 const testScheduler = require('../schedule.js')
 
@@ -30,6 +30,8 @@ commander
     .option('-m, --milliseconds <ms>', 'tells the client to scan every <ms> seconds', 4000)
     .option('--logfile [path]', 'specifies the output logifle', 'console')
     .option('--chain [ropsten, mainnet]', 'selects the chain to use', 'ropsten')
+    .option('-w, --wallet [path]', 'specify the path to the keyfile you would like to unlock', 'none')
+    .option('-p, --password [string]', 'the password to unlock your keystore file', 'password')
     .option('-s, --schedule', 'schedules a transactions')
     .parse(process.argv)
 
@@ -41,7 +43,9 @@ if (commander.test) {
         alarmClient(
             commander.milliseconds,
             commander.logfile,
-            commander.chain
+            commander.chain,
+            commander.wallet,
+            commander.password
         )
         .catch(err => log.error(err))
     } else if (commander.schedule) {

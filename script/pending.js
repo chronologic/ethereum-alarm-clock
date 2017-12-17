@@ -5,7 +5,7 @@ const Api = require('@parity/api')
 const provider = new Api.Provider.Http('http://localhost:8545')
 const api = new Api(provider)
 
-const main = async _ => {
+const main = _ => {
     api.parity.pendingTransactions()
     .then(res => console.log(res))
 }

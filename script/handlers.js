@@ -2,7 +2,7 @@ const { ABORTEDLOG, EXECUTEDLOG } = require('./constants.js')
 
 const executeTxRequest = async (conf, txRequest) => {
     const web3 = conf.web3 
-    const requestLib = conf.requestLib 
+    // const requestLib = conf.requestLib 
     const log = conf.logger
 
     await txRequest.fillData()
@@ -35,8 +35,24 @@ const executeTxRequest = async (conf, txRequest) => {
         return 
     }
 
+    /// Start execution attempt
+
     log.info(`Attempting execution...`)
     conf.cache.set(txRequest.address, -1)
+
+    ///-----------
+    /// If (conf.wallet) is enabled... 
+    ///-----------
+    // if (conf.wallet) {
+    //     const executeTxData = txRequest.instance.methods.execute().encodeABI()
+    //     conf.wallet.sendFromNext(
+    //         txRequest.address,
+    //         executeTxData,
+    //         gasPrice
+    //     )
+    //     return
+    // }
+
     const executeTx = txRequest.instance.methods.execute().send({
         from: web3.eth.defaultAccount,
         gas: gasLimit - 12000,
@@ -55,6 +71,35 @@ const executeTxRequest = async (conf, txRequest) => {
         }
         log.info(`success. tx hash: ${res.transactionHash}`)
     })
+}
+
+/// WIP
+const claimTxRequest = async (conf, txRequest) => {
+    const log = conf.logger 
+    const web3 = conf.web3
+
+    await txRequest.fillData()
+    if (txRequest.isCancelled()) {
+        log.debug(`failed to claim cancelled request at address ${txRequest.address}`)
+        return
+    }
+    if (!txRequest.inClaimWindow()) {
+        log.debug(`failed to claim request at address ${txRequest.address} due to out of claim window`)
+        return
+    }
+    if (txRequest.isClaimed()) {
+        log.debug(`failed to claim already claimed request at address ${txRequest.address}`)
+        return 
+    }
+
+    const claimDeposit = 2 * txRequest.data.paymentData.payment
+    const gasToClaim = txRequest.instance.methods.claim().estimateGas({from: web3.eth.defaultAccount})
+    const gasCostToClaim = parseInt(await web3.eth.getGasPrice) * gasToClaim 
+
+    if (gasCostToClaim > paymentIfClaimed) {
+        log.debug(`Not claiming. Claim gas cost is higher than the calculated payment. Claim Gas Cost: ${gasCostToClaim} | Current Payment: ${paymentIfClaimed}`)
+        return 
+    }
 }
 
 module.exports.executeTxRequest = executeTxRequest
