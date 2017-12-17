@@ -131,10 +131,10 @@ contract('TransactionRequest proxy function', accounts => {
 
         await waitUntilBlock(0, afterExecutionWindow)
 
-        // const t = new config.web3.eth.Contract(require('../../build/contracts/SimpleToken.json').abi)
-        // const e = t.methods.transfer(accounts[8], 30000).encodeABI();
+        const t = new config.web3.eth.Contract(require('./SimpleToken.json').abi)
+        const encoded_data = t.methods.transfer(accounts[8], 30000).encodeABI();
         /// This data was generated locally using the method above^^
-        const encoded_data = '0xa9059cbb000000000000000000000000737b4d5a9f46839501719b5d388b7c487b55957a0000000000000000000000000000000000000000000000000000000000007530'
+        // const encoded_data = '0xa9059cbb000000000000000000000000737b4d5a9f46839501719b5d388b7c487b55957a0000000000000000000000000000000000000000000000000000000000007530'
 
         /// NOTE the method below vv SHOULD work but generates the wrong data string for some reason
         // const transferSig = config.web3.utils.sha3('transfer(address,uint256').slice(0,10)
