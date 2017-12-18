@@ -1,4 +1,4 @@
-const { ABORTEDLOG, EXECUTEDLOG } = require('./constants.js')
+const { ABORTEDLOG, EXECUTEDLOG } = require('../constants.js')
 
 const executeTxRequest = async (conf, txRequest) => {
     const web3 = conf.web3 
@@ -19,10 +19,10 @@ const executeTxRequest = async (conf, txRequest) => {
         log.debug('outside execution window')
         return 
     }
-    if (await txRequest.inReservedWindow() && !txRequest.isClaimedBy(web3.eth.defaultAccount)) {
-        log.debug(`In reserved window and claimed by ${txRequest.claimedBy()}`)
-        return 
-    }
+    // if (await txRequest.inReservedWindow() && !txRequest.isClaimedBy(web3.eth.defaultAccount)) {
+    //     log.debug(`In reserved window and claimed by ${txRequest.claimedBy()}`)
+    //     return 
+    // }
 
     const executeGas = txRequest.callGas() //+ await requestLib.EXECUTION_GAS_OVERHEAD().call()
     const gasLimit = (await web3.eth.getBlock('latest')).gasLimit
@@ -43,15 +43,16 @@ const executeTxRequest = async (conf, txRequest) => {
     ///-----------
     /// If (conf.wallet) is enabled... 
     ///-----------
-    // if (conf.wallet) {
-    //     const executeTxData = txRequest.instance.methods.execute().encodeABI()
-    //     conf.wallet.sendFromNext(
-    //         txRequest.address,
-    //         executeTxData,
-    //         gasPrice
-    //     )
-    //     return
-    // }
+    if (conf.wallet) {
+        console.log('sending from next nonce in wallet')
+        const executeTxData = txRequest.instance.methods.execute().encodeABI()
+        conf.wallet.sendFromNext(
+            txRequest.address,
+            executeTxData,
+            gasPrice
+        )
+        .then(res => console.log(res.transactionHash))
+    }
 
     const executeTx = txRequest.instance.methods.execute().send({
         from: web3.eth.defaultAccount,
@@ -60,6 +61,34 @@ const executeTxRequest = async (conf, txRequest) => {
     })
 
     executeTx.then((res) => {
+        if (res.events[0].raw.topics[0] == ABORTEDLOG) {
+            // console.log('aborted')
+            conf.cache.del(txRequest.address)
+        }
+
+        if (res.events[0].raw.topics[0] == EXECUTEDLOG) {
+            // console.log('executed')
+            conf.cache.set(txRequest.address, 100)
+        }
+        log.info(`success. tx hash: ${res.transactionHash}`)
+    })
+}
+
+const executeTxRequestFrom = async (conf, txRequest, index) => {
+    /// Perform checks
+    /// ...
+    ///
+    log.info(`Attempting execution...`)
+    conf.cache.set(txRequest.address, -1)
+
+    const executeTxData = txRequest.instance.methods.execute().encodeABI()
+    conf.wallet.sendFromIndex(
+        index,
+        txRequest.address, 
+        executeTxData,
+        gasPrice
+    )
+    .then(res => {
         if (res.events[0].raw.topics[0] == ABORTEDLOG) {
             // console.log('aborted')
             conf.cache.del(txRequest.address)
@@ -103,6 +132,7 @@ const claimTxRequest = async (conf, txRequest) => {
 }
 
 module.exports.executeTxRequest = executeTxRequest
+module.exports.executeTxRequestFrom = executeTxRequestFrom
 
 // const reason = [
 //     'WasCancelled',         //0

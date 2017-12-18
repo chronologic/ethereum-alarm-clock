@@ -3,7 +3,7 @@
 const commander = require('commander')
 const chalk = require('chalk')
 
-const alarmClient = require('../main.js')
+const alarmClient = require('../client/main.js')
 const Scheduler = require('../scheduler.js')
 const testScheduler = require('../schedule.js')
 

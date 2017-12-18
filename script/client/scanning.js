@@ -1,5 +1,5 @@
-const { GTE_HEX, NULL_ADDRESS} = require('./constants.js')
-const { TxRequest } = require('./txRequest.js')
+const { GTE_HEX, NULL_ADDRESS} = require('../constants.js')
+const { TxRequest } = require('../contracts/txRequest.js')
 
 /// Utility function to store txRequest addresses in cache.
 const store = (cache, txRequest) => {
@@ -82,7 +82,7 @@ const scanToStore = async conf => {
     return true
 }
 
-const { executeTxRequest } = require('./handlers.js')
+const { executeTxRequest, executeTxRequestFrom } = require('./handlers.js')
 const filter = require('async').filter
 
 /// Scans the cache and executes any ripe transaction requests.
@@ -92,23 +92,40 @@ const scanToExecute = async conf => {
         return 
     }
 
-    //Gets all the txRequestAddrs stored in cache
+    /// Gets all the txRequestAddrs stored in cache and creates instances of TxRequest class from them.
     const one = conf.cache.stored()
     .map((txRequestAddr) => {
         return new TxRequest(txRequestAddr, conf.web3)
     })
 
+
+    /// Filters the TxRequest instances so that we only keep the ones that are currently executable.
     filter(one, async (txRequest) => {
         await txRequest.fillData()
         return await txRequest.inExecutionWindow()
     }, (err, res) => {
         if (err) throw new Error(err)
+        /// Then tries to execute the TxRequest based on a few variable factors described below.
         res.map((txRequest) => {
+            /// Check that its entry in the cache is valid.
             if (conf.cache.get(txRequest.address) > 101) {
-                executeTxRequest(conf, txRequest)
-                .catch((err) => {
-                    conf.logger.error(err)
-                })
+                /// If it's claimed by one our accounts we have to take care to execute it from the correct one.
+                if (txRequest.isClaimed()
+                    && conf.wallet // truthy check to see if wallet is "turned on"
+                    && conf.wallet.getAccounts().indexOf(txRequest.claimedBy()) > -1)
+                {
+                    const index = conf.wallet.getAccounts().indexOf(txRequest.claimedBy())
+                    executeTxRequestFrom(conf, txRequest, index)
+                    .catch(err => {
+                        conf.logger.error(err)
+                    })
+                } else {
+                    /// Execute it from default account, or if wallet is enabled: any account.
+                    executeTxRequest(conf, txRequest)
+                    .catch(err => {
+                        conf.logger.error(err)
+                    })
+                }
             }
         })
     })

@@ -1,6 +1,6 @@
-const { getABI } = require('./util.js')
+const { getABI } = require('../util.js')
 const { RequestData } = require('./requestData.js')
-const { NULL_ADDRESS } = require('./constants.js')
+const { NULL_ADDRESS } = require('../constants.js')
 
 class TxRequest {
 

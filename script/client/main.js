@@ -2,7 +2,7 @@ const Web3 = require('web3')
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 const web3 = new Web3(Web3.givenProvider || provider)
 
-const { getABI } = require('./util.js')
+const { getABI } = require('../util.js')
 const RequestFactoryABI = getABI('RequestFactory')
 const RequestTrackerABI = getABI('RequestTracker')
 const TransactionRequestABI = getABI('TransactionRequest')
@@ -34,7 +34,7 @@ const main = async (ms, logfile, chain, walletFile, pw) => {
     /// parses the chain argument 
     let contracts
     if (chain === 'ropsten') {
-        contracts = require('../ropsten.json')
+        contracts = require('../../ropsten.json')
     } else {
         throw new Error(`chain: ${chain} not supported!`)
     }
