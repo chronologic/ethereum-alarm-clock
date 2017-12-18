@@ -42,12 +42,14 @@ class LightWallet {
     }
 
     /// Cycles through accounts and sends the transaction from next up.
-    sendFromNext (address, methodData, gasPrice, val, gasLimit) {
+    sendFromNext (recip, val, gasLimit, gasPrice, data) {
         const next = this.nonce++ % this.wallet.length 
-        return this.sendFromIndex(next, address, methodData, gasPrice, val, gasLimit)
+        return this.sendFromIndex(
+            next, recip, val, gasLimit, gasPrice, data
+        )
     }
 
-    sendFromIndex (index, address, methodData, gasPrice, val, gasLimit) {
+    sendFromIndex (index, recip, val, gasLimit, gasPrice, data) {
         if (index > this.wallet.length) {
             console.log('Index is outside of range of addresses in this wallet!')
             return
@@ -55,11 +57,11 @@ class LightWallet {
         // return Promise.resolve(index)
         return this.web3.eth.sendTransaction({
             from: index,
-            to: address,
+            to: recip,
             value: val,
             gas: gasLimit,
             gasPrice: gasPrice, 
-            data: methodData
+            data: data
         })
     }
 

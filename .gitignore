@@ -21,4 +21,6 @@ alarm_client/*
 deployed.info
 deployed.json
 gas.txt
-notes.txt 
+notes.txt
+
+script/wallet/keyfile 

@@ -46,7 +46,7 @@ const scanToStore = async conf => {
     log.debug(`Initial tracker result: ${nextRequestAddr}`)
 
     while (nextRequestAddr !== NULL_ADDRESS) {
-        clear(conf.cache, nextRequestAddr, left)
+        // clear(conf.cache, nextRequestAddr, left)
 
         log.debug(`Found request @ ${nextRequestAddr}`)
         if (!await factory.methods.isKnownRequest(nextRequestAddr).call()) {
@@ -85,7 +85,7 @@ const scanToStore = async conf => {
 const { executeTxRequest, executeTxRequestFrom } = require('./handlers.js')
 const filter = require('async').filter
 
-/// Scans the cache and executes any ripe transaction requests.
+/// Scans the cache and executes any ready transaction requests.
 const scanToExecute = async conf => {
 
     if (conf.cache.len() === 0) {
@@ -93,14 +93,14 @@ const scanToExecute = async conf => {
     }
 
     /// Gets all the txRequestAddrs stored in cache and creates instances of TxRequest class from them.
-    const one = conf.cache.stored()
+    const allTxRequests = conf.cache.stored()
     .map((txRequestAddr) => {
         return new TxRequest(txRequestAddr, conf.web3)
     })
 
 
     /// Filters the TxRequest instances so that we only keep the ones that are currently executable.
-    filter(one, async (txRequest) => {
+    filter(allTxRequests, async (txRequest) => {
         await txRequest.fillData()
         return await txRequest.inExecutionWindow()
     }, (err, res) => {
@@ -115,6 +115,7 @@ const scanToExecute = async conf => {
                     && conf.wallet.getAccounts().indexOf(txRequest.claimedBy()) > -1)
                 {
                     const index = conf.wallet.getAccounts().indexOf(txRequest.claimedBy())
+                    console.log(`attempting execution from ${index}`)
                     executeTxRequestFrom(conf, txRequest, index)
                     .catch(err => {
                         conf.logger.error(err)

@@ -14,7 +14,7 @@ class Cache {
             this.mem.push(k)
         }
         const timeout = 200 * 60 * 1000 // deletes entries after 200 minutes
-        this.cache.put(k, v, timeout, this.del(k))
+        this.cache.put(k, v)//, timeout, this.del(k))
         this.log.cache(`stored ${k} with value ${v}`)
     }
 

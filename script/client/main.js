@@ -64,9 +64,9 @@ const main = async (ms, logfile, chain, walletFile, pw) => {
 
     /// If somehow this filters through...
     if (conf.wallet) {
-        console.log('wallet support not yet enabled')
-        return
-    }
+        console.log('now using wallet support')
+        // return
+    } else { console.log('not using wallet') }
 
     /// Begins
     startScanning(ms, conf)

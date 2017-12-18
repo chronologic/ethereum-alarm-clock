@@ -1,58 +1,11 @@
 const { ABORTEDLOG, EXECUTEDLOG } = require('../constants.js')
 
-const executeTxRequest = async (conf, txRequest) => {
+/// Sends the exeuction request from web3 default account.
+const fromDefault = (conf, txRequest, gasLimit, gasPrice) => {
     const web3 = conf.web3 
-    // const requestLib = conf.requestLib 
-    const log = conf.logger
+    const log = conf.logger 
 
-    await txRequest.fillData()
-    if (txRequest.wasCalled()) {
-        log.debug('already called')
-        conf.cache.set(txRequest.address, -1)
-        return
-    }
-    if (txRequest.isCancelled()) {
-        log.debug('cancelled')
-        return 
-    }
-    if (!await txRequest.inExecutionWindow()) {
-        log.debug('outside execution window')
-        return 
-    }
-    // if (await txRequest.inReservedWindow() && !txRequest.isClaimedBy(web3.eth.defaultAccount)) {
-    //     log.debug(`In reserved window and claimed by ${txRequest.claimedBy()}`)
-    //     return 
-    // }
-
-    const executeGas = txRequest.callGas() //+ await requestLib.EXECUTION_GAS_OVERHEAD().call()
-    const gasLimit = (await web3.eth.getBlock('latest')).gasLimit
-
-    /// TODO pull out the gasPrice... rn it's hard coded
-    const gasPrice = web3.utils.toWei('100', 'gwei')
-
-    if (executeGas > gasLimit) {
-        log.error(`Execution gas above network gas limit.`)
-        return 
-    }
-
-    /// Start execution attempt
-
-    log.info(`Attempting execution...`)
-    conf.cache.set(txRequest.address, -1)
-
-    ///-----------
-    /// If (conf.wallet) is enabled... 
-    ///-----------
-    if (conf.wallet) {
-        console.log('sending from next nonce in wallet')
-        const executeTxData = txRequest.instance.methods.execute().encodeABI()
-        conf.wallet.sendFromNext(
-            txRequest.address,
-            executeTxData,
-            gasPrice
-        )
-        .then(res => console.log(res.transactionHash))
-    }
+    log.info('executing from default')
 
     const executeTx = txRequest.instance.methods.execute().send({
         from: web3.eth.defaultAccount,
@@ -74,6 +27,70 @@ const executeTxRequest = async (conf, txRequest) => {
     })
 }
 
+const executeTxRequest = async (conf, txRequest) => {
+    const web3 = conf.web3 
+    // const requestLib = conf.requestLib 
+    const log = conf.logger
+
+    await txRequest.fillData()
+    if (txRequest.wasCalled()) {
+        log.debug('already called')
+        conf.cache.set(txRequest.address, -1)
+        return
+    }
+    if (txRequest.isCancelled()) {
+        log.debug('cancelled')
+        return 
+    }
+    if (!await txRequest.inExecutionWindow()) {
+        log.debug('outside execution window')
+        return 
+    }
+    // if (await txRequest.inReservedWindow() && (txRequest.isClaimedBy(web3.eth.defaultAccount)) {
+    //     log.debug(`In reserved window and claimed by ${txRequest.claimedBy()}`)
+    //     log.debug(txRequest.isClaimedBy(web3.eth.defaultAccount))
+    //     return 
+    // }
+
+    const executeGas = txRequest.callGas() + 180000//+ await requestLib.EXECUTION_GAS_OVERHEAD().call()
+    const gasLimit = (await web3.eth.getBlock('latest')).gasLimit
+
+    /// TODO pull out the gasPrice... rn it's hard coded
+    const gasPrice = web3.utils.toWei('100', 'gwei')
+
+    if (executeGas > gasLimit) {
+        log.error(`Execution gas above network gas limit.`)
+        return 
+    }
+
+    /// Start execution attempt
+
+    log.info(`Attempting execution...`)
+    conf.cache.set(txRequest.address, -1)
+
+    if (txRequest.isClaimedBy(web3.eth.defaultAccount)) {
+        /// If it's claimed by default, send from default.
+        fromDefault(conf, txRequest, gasLimit, gasPrice)
+
+    } else if (conf.wallet) {
+        /// If not claimed by default and wallet is enabled send from a child account.
+        log.info('sending from next nonce in wallet')
+        const executeTxData = txRequest.instance.methods.execute().encodeABI()
+        conf.wallet.sendFromNext(
+            txRequest.address,
+            0,
+            gasLimit - 12000,
+            gasPrice,
+            executeTxData
+        )
+        .then(res => console.log(res.transactionHash))
+
+    } else {
+        /// Otherwise send from default.
+        fromDefault(conf, txRequest, gasLimit, gasPrice)
+    }
+}
+
 const executeTxRequestFrom = async (conf, txRequest, index) => {
     /// Perform checks
     /// ...
@@ -81,12 +98,16 @@ const executeTxRequestFrom = async (conf, txRequest, index) => {
     log.info(`Attempting execution...`)
     conf.cache.set(txRequest.address, -1)
 
+    const gasLimit = (await web3.eth.getBlock('latest')).gasLimit
+
     const executeTxData = txRequest.instance.methods.execute().encodeABI()
     conf.wallet.sendFromIndex(
         index,
         txRequest.address, 
-        executeTxData,
-        gasPrice
+        0,
+        gasLimit - 12000,
+        gasPrice,
+        executeTxData
     )
     .then(res => {
         if (res.events[0].raw.topics[0] == ABORTEDLOG) {

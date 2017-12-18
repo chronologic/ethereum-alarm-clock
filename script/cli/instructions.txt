@@ -6,7 +6,7 @@ smart contracts. Right now, we use it as a tool for development. Here's how:
 
 `node index -t` 
     sends a test transaction with an execution window that will begin
-    in 10 blocks. Use this command to populate the test contracts with 
+    in 20 blocks. Use this command to populate the test contracts with 
     upcoming requests for the client.
 
 `node index -c`
@@ -14,6 +14,7 @@ smart contracts. Right now, we use it as a tool for development. Here's how:
     the contracts for new transactionRequests every 4 seconds and attempt to 
     execute them every 5 seconds.
     (pass the `-m <ms>` option to change the number of milliseconds between scans)
+    (pass the `-w <path to keystore> -p <password>` options to use the "send-from-many" light wallet functionality [WIP!])
 
 `node index -s`
     WIP - provides an interface to schedule a new transaction.

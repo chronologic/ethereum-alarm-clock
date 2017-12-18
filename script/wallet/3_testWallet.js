@@ -14,6 +14,7 @@ const main = async _ => {
     const dest = me
 
     for (i = 0; i < wallet.getAccounts().length; ++i) {
+        /// Generate random data to test [optional]
         const testData = web3.utils.randomHex(
             Math.floor((Math.random() + 1)*32)
         )
@@ -24,8 +25,9 @@ const main = async _ => {
         const gasCost = gasPrice * gasLim
         amt -= gasCost
 
-        // console.log(wallet.getAccounts()[i])
-        wallet.sendFromNext(me, testData, gasPrice, amt, gasLim)
+        wallet.sendFromNext(
+            me, amt, gasLim, gasPrice, testData
+        )
         .then(res => console.log(res.transactionHash))
         .catch(err => console.log(err))
     }
