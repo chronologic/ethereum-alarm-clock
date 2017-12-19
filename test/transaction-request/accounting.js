@@ -46,7 +46,7 @@ contract('Test accounting', async function(accounts) {
 
 /////////////////////
     /// Tests ///  
-/////////////////////
+/////////////////////    
 
     it('tests transaction request payments', async function() {
         const curBlock = await config.web3.eth.getBlock('latest')
