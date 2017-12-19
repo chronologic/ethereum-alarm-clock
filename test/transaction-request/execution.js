@@ -10,6 +10,7 @@ const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
 /// Bring in config.web3 (v1.0.0)
 const config = require('../../config')
+const { RequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 const toBN = config.web3.utils.toBN 
 
@@ -20,8 +21,9 @@ contract('Execution', async function(accounts) {
     it('tests execution transaction sent as specified', async function() {
 
         /// Deploy the transactionRecorder
-        const transactionRecorder = await TransactionRecorder.new()
-        expect(transactionRecorder.address).to.exist 
+        const txRecorder = await TransactionRecorder.new()
+        expect(txRecorder.address)
+        .to.exist 
 
         /// TransactionRequest constants
         const claimWindowSize = 25 //blocks
@@ -32,12 +34,12 @@ contract('Execution', async function(accounts) {
         const curBlockNum = await config.web3.eth.getBlockNumber()
         const windowStart = curBlockNum + 38
 
-        const transactionRequest = await TransactionRequest.new(
+        const txRequest = await TransactionRequest.new(
             [
                 accounts[0], //createdBy
                 accounts[0], //owner
                 accounts[1], //donationBenefactor
-                transactionRecorder.address //toAddress
+                txRecorder.address //toAddress
             ], [
                 0, //donation
                 0, //payment
@@ -54,19 +56,93 @@ contract('Execution', async function(accounts) {
             'some-call-data-could-be-anything',
             {value: config.web3.utils.toWei('1')}
         )
+        expect(txRequest.address)
+        .to.exist
 
         await waitUntilBlock(0, windowStart)
 
-        const executeTx = await transactionRequest.execute({
+        const executeTx = await txRequest.execute({
             gas: 3000000,
             gasPrice: gasPrice 
         })
-        expect(executeTx.receipt).to.exist 
+        expect(executeTx.receipt)
+        .to.exist 
 
-        assert(await transactionRecorder.wasCalled() === true)
-        assert(await transactionRecorder.lastCaller() === transactionRequest.address)
-        assert((await transactionRecorder.lastCallValue()).toNumber() === 0)
-        expect(await transactionRecorder.lastCallData()).to.exist
-        assert(Math.abs(await transactionRecorder.lastCallGas() - 2000000) < 10000)
+        assert(await txRecorder.wasCalled() === true)
+        assert(await txRecorder.lastCaller() === txRequest.address)
+        assert((await txRecorder.lastCallValue()).toNumber() === 0)
+        expect(await txRecorder.lastCallData()).to.exist
+        assert(Math.abs(await txRecorder.lastCallGas() - 2000000) < 10000)
+    })
+
+    /// 2
+    it('cannot execute if transaction gasPrice != txnData.gasPrice', async () => {
+
+        const txRecorder = await TransactionRecorder.new()
+        expect(txRecorder.address)
+        .to.exist 
+
+        /// TransactionRequest constants
+        const claimWindowSize = 25 //blocks
+        const freezePeriod = 5 //blocks
+        const reservedWindowSize = 10 //blocks
+        const executionWindow = 10 //blocks
+
+        const curBlockNum = await config.web3.eth.getBlockNumber()
+        const windowStart = curBlockNum + 38
+
+        const txRequest = await TransactionRequest.new(
+            [
+                accounts[0], //createdBy
+                accounts[0], //owner
+                accounts[1], //donationBenefactor
+                txRecorder.address //toAddress
+            ], [
+                0, //donation
+                0, //payment
+                claimWindowSize,
+                freezePeriod,
+                reservedWindowSize,
+                1, //temporalUnit = 1, aka blocks
+                executionWindow,
+                windowStart,
+                2000000, //callGas
+                0, //callValue
+                gasPrice
+            ],
+            'some-call-data-could-be-anything',
+            {value: config.web3.utils.toWei('1')}
+        )
+        expect(txRequest.address)
+        .to.exist
+
+        const requestData = await RequestData.from(txRequest)
+
+        expect(requestData.schedule.windowStart)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        await waitUntilBlock(
+            0,
+            requestData.schedule.windowStart
+        )
+
+        /// FAILS BECAUSE MISMATCH GASPRICE 
+        const failedExecuteTx = await txRequest.execute({
+            from: accounts[5],
+            gas: 3000000,
+            gasPrice: config.web3.utils.toWei('88', 'gwei')
+        })
+
+        expect(await txRecorder.wasCalled())
+        .to.be.false 
+
+        expect(requestData.meta.wasCalled)
+        .to.be.false 
+
+        expect(wasAborted(failedExecuteTx))
+        .to.be.true 
+
+        expect(parseAbortData(failedExecuteTx).find(reason => reason === 'MismatchGasPrice'))
+        .to.exist
     })
 })
