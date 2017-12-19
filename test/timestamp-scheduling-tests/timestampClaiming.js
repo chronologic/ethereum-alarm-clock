@@ -53,7 +53,7 @@ contract('Timestamp claiming', async function(accounts) {
                 txRecorder.address  // toAddress
             ], [
                 0,          //donation
-                0,          //payment
+                config.web3.utils.toWei('333', 'finney'),          //payment
                 claimWindowSize,
                 freezePeriod,
                 reservedWindowSize,
@@ -328,5 +328,31 @@ contract('Timestamp claiming', async function(accounts) {
 
         expect(requestData.claimData.claimedBy)
         .to.equal(accounts[0])
+    })
+
+    /// 9 
+    it('CANNOT claim if supplied with insufficient claim deposit', async () => {
+        const requestData = await RequestData.from(txRequest)
+
+        const firstClaimStamp = requestData.schedule.windowStart - requestData.schedule.freezePeriod - requestData.schedule.claimWindowSize
+
+        expect(firstClaimStamp)
+        .to.be.above((await config.web3.eth.getBlock('latest')).timestamp)
+
+        await waitUntilBlock(
+            firstClaimStamp - (await config.web3.eth.getBlock('latest')).timestamp,
+            1
+        )
+
+        const claimTx = await txRequest.claim({
+            from: accounts[0],
+            value: 2 * requestData.paymentData.payment - 1000
+        })
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
+
+        await requestData.refresh()
+
+        expect(requestData.claimData.claimedBy)
+        .to.equal(NULL_ADDR)
     })
 })

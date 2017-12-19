@@ -24,7 +24,7 @@ Alice will receive the 100 wei payment, while Bob will receive no payment as
 well as having paid the gas costs for his execution transaction that was
 rejected.  Suppose that the gas cost Bob has now incurred are 25 wei.
 
-In this situation we could assume that Alice and bob have a roughly 50% chance
+In this situation we could assume that Alice and Bob have a roughly 50% chance
 of successfully executing any given transaction request, but since 50% of their
 attempts end up costing them money, their overall profits are being reduced by
 each failed attempt.
@@ -64,6 +64,8 @@ Claim Deposit
 
 In order to claim a request you must put down a deposit.  This deposit amount
 is equal to twice the ``payment`` amount associated with this request.
+
+claim_deposit = 2 * payment
 
 The deposit is returned during execution, or when the call is cancelled.
 

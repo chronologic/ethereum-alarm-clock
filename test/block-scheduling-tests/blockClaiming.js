@@ -44,7 +44,7 @@ contract('Block claiming', async function(accounts) {
                 txRecorder.address      // to
             ], [
                 0,                      //donation
-                0,                      //payment
+                config.web3.utils.toWei('200', 'finney'),                      //payment
                 25,                     //claim window size
                 5,                      //freeze period
                 10,                     //reserved window size
@@ -73,12 +73,10 @@ contract('Block claiming', async function(accounts) {
         expect(firstClaimBlock)
         .to.be.above(await config.web3.eth.getBlockNumber())
 
-        await waitUntilBlock(0, firstClaimBlock - 1)
+        await waitUntilBlock(0, firstClaimBlock - 2)
 
         await txRequest.claim({
-            value: config.web3.utils.toWei(
-                (2*requestData.paymentData.payment).toString()
-            )
+            value: (2*requestData.paymentData.payment)
         }).should.be.rejectedWith('VM Exception while processing transaction: revert')
 
         await requestData.refresh()
@@ -100,7 +98,7 @@ contract('Block claiming', async function(accounts) {
 
         const claimTx = await txRequest.claim({
             from: accounts[0],
-            value: config.web3.utils.toWei('2')
+            value: (2*requestData.paymentData.payment)
         })
         expect(claimTx.receipt)
         .to.exist 
@@ -125,7 +123,7 @@ contract('Block claiming', async function(accounts) {
 
         const claimTx = await txRequest.claim({
             from: accounts[0],
-            value: config.web3.utils.toWei('2')
+            value: (2*requestData.paymentData.payment)
         })
         expect(claimTx.receipt)
         .to.exist 
@@ -149,9 +147,7 @@ contract('Block claiming', async function(accounts) {
 
         await txRequest.claim({
             from: accounts[0],
-            value: config.web3.utils.toWei(
-                (2*requestData.paymentData.payment).toString()
-            )
+            value: (2*requestData.paymentData.payment)
         }).should.be.rejectedWith('VM Exception while processing transaction: revert')
 
         await requestData.refresh() 
@@ -305,5 +301,28 @@ contract('Block claiming', async function(accounts) {
         expect(requestData.claimData.claimedBy)
         .to.equal(accounts[0])
 
+    })
+
+    /// 9
+    it('CANNOT claim with insufficient claim deposit', async () => {
+        const requestData = await RequestData.from(txRequest)
+
+        const firstClaimBlock = requestData.schedule.windowStart - requestData.schedule.freezePeriod - requestData.schedule.claimWindowSize
+
+        expect(firstClaimBlock)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        await waitUntilBlock(0, firstClaimBlock)
+
+        const claimTx = await txRequest.claim({
+            from: accounts[0],
+            value: (2*requestData.paymentData.payment) - 1000
+        })
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
+
+        await requestData.refresh() 
+
+        expect(requestData.claimData.claimedBy)
+        .to.equal(NULL_ADDR)
     })
 })

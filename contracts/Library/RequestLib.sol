@@ -601,7 +601,7 @@ library RequestLib {
 
         // Require that it's in the claim window and the value sent is over the min deposit.
         require( self.schedule.inClaimWindow() );
-        require( msg.value > ClaimLib.requiredDeposit(self.paymentData.payment) ); // requiredDeposit is * 2
+        require( msg.value >= ClaimLib.requiredDeposit(self.paymentData.payment) ); // requiredDeposit is * 2
         return true;
     }
 
