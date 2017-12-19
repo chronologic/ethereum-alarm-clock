@@ -9,7 +9,7 @@ const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
 /// Bring in config.web3 (v1.0.0)
 const config = require('../../config')
-const { parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
+const { RequestData, parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 const toBN = config.web3.utils.toBN
 
@@ -62,8 +62,9 @@ contract('Cancelling', async function(accounts) {
     /// Tests ///
     /////////////
 
-    it('tests cancelling before the claim window', async function() {
-        const requestData = await parseRequestData(txRequest)
+    /// 1
+    it('tests CAN cancel before the claim window', async function() {
+        const requestData = await RequestData.from(txRequest)
 
         const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 3
 
@@ -87,8 +88,9 @@ contract('Cancelling', async function(accounts) {
         .to.be.true
     })
 
-    it('tests non-owner cannot cancel before the claim window', async function() {
-        const requestData = await parseRequestData(txRequest)
+    /// 2
+    it('tests non-owner CANNOT cancel before the claim window', async function() {
+        const requestData = await RequestData.from(txRequest)
 
         const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - requestData.schedule.claimWindowSize - 3
 
@@ -106,12 +108,27 @@ contract('Cancelling', async function(accounts) {
         await txRequest.cancel({from: accounts[4]})
         .should.be.rejectedWith('VM Exception while processing transaction: revert')
 
-        expect((await parseRequestData(txRequest)).meta.wasCalled)
+        await requestData.refresh()
+
+        expect(requestData.meta.isCancelled)
         .to.be.false
+
+        /// For completion sakes, let's test if the `Owner` can cancel.
+        const cancelTx = await txRequest.cancel({
+            Owner
+        })
+        expect(cancelTx.receipt)
+        .to.exist 
+
+        await requestData.refresh()
+
+        expect(requestData.meta.isCancelled)
+        .to.be.true
     })
 
-    it('tests cancelling during claim window when unclaimed', async function() {
-        const requestData = await parseRequestData(txRequest)
+    /// 3
+    it('tests CAN cancel during claim window when unclaimed', async function() {
+        const requestData = await RequestData.from(txRequest)
 
         const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 20
 
@@ -125,12 +142,15 @@ contract('Cancelling', async function(accounts) {
 
         const cancelTx = await txRequest.cancel({from: Owner})
 
-        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        await requestData.refresh()
+
+        expect(requestData.meta.isCancelled)
         .to.be.true
     })
 
-    it('tests not cancellable once claimed', async function() {
-        const requestData = await parseRequestData(txRequest)
+    /// 4
+    it('tests CANNOT be cancelled if claimed and before the freeze window', async function() {
+        const requestData = await RequestData.from(txRequest)
 
         const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 20
         const claimAt = cancelAt - 5
@@ -149,7 +169,9 @@ contract('Cancelling', async function(accounts) {
         expect(claimTx.receipt)
         .to.exist 
 
-        expect((await parseRequestData(txRequest)).claimData.claimedBy)
+        await requestData.refresh()
+
+        expect(requestData.claimData.claimedBy)
         .to.equal(accounts[1])
 
         await waitUntilBlock(0, cancelAt)
@@ -157,12 +179,15 @@ contract('Cancelling', async function(accounts) {
         await txRequest.cancel()
         .should.be.rejectedWith('VM Exception while processing transaction: revert')
 
-        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        await requestData.refresh()
+
+        expect(requestData.meta.isCancelled)
         .to.be.false
     })
 
-    it('tests not cancellable during the freeze window', async function() {
-        const requestData = await parseRequestData(txRequest)
+    /// 5
+    it('tests CANNOT cancel during the freeze window', async function() {
+        const requestData = await RequestData.from(txRequest)
 
         const cancelAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod 
 
@@ -180,11 +205,14 @@ contract('Cancelling', async function(accounts) {
         await txRequest.cancel()
         .should.be.rejectedWith('VM Exception while processing transaction: revert')
 
-        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        await requestData.refresh()
+
+        expect(requestData.meta.isCancelled)
         .to.be.false 
     })
 
-    it('tests not cancellable during the execution window', async function() {
+    /// 6
+    it('tests CANNOT cancel during the execution window', async function() {
         const requestData = await parseRequestData(txRequest)
 
         const cancelAt = requestData.schedule.windowStart 
@@ -207,8 +235,9 @@ contract('Cancelling', async function(accounts) {
         .to.be.false 
     })
 
-    it('tests not cancellable if was called', async function() {
-        const requestData = await parseRequestData(txRequest) 
+    /// 7
+    it('tests CANNOT cancel if was called', async function() {
+        const requestData = await RequestData.from(txRequest) 
 
         const executeAt = requestData.schedule.windowStart 
         const cancelFirst = requestData.schedule.windowStart + 10
@@ -232,27 +261,71 @@ contract('Cancelling', async function(accounts) {
         expect(executeTx.receipt)
         .to.exist 
 
-        expect((await parseRequestData(txRequest)).meta.wasCalled)
+        await requestData.refresh()
+
+        expect(requestData.meta.wasCalled)
         .to.be.true
 
-        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        expect(requestData.meta.isCancelled)
         .to.be.false
 
+        /// Tries (and fails) to cancel after execution during execution window
         await waitUntilBlock(0, cancelFirst)
 
         await txRequest.cancel()
         .should.be.rejectedWith('VM Exception while processing transaction: revert')
 
-        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        await requestData.refresh()
+
+        expect(requestData.meta.isCancelled)
         .to.be.false 
 
+        /// Tries (and fails) to cancel after execution and after execution window
         await waitUntilBlock(0, cancelSecond)
 
         await txRequest.cancel()
         .should.be.rejectedWith('VM Exception while processing transaction: revert')
 
-        expect((await parseRequestData(txRequest)).meta.isCancelled)
+        await requestData.refresh()
+
+        expect(requestData.meta.isCancelled)
         .to.be.false 
+    })
+
+    /// 8
+    it('tests CANNOT cancel if already cancelled', async function() {
+        const requestData = await RequestData.from(txRequest) 
+
+        const cancelFirst = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 20
+        const cancelSecond = requestData.schedule.windowStart - requestData.schedule.freezePeriod - 10 
+
+        expect(cancelFirst)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        expect(requestData.meta.owner)
+        .to.equal(Owner)
+
+        await waitUntilBlock(0, cancelFirst)
+
+        const cancelTx = await txRequest.cancel({
+            from: Owner
+        })
+        expect(cancelTx.receipt)
+        .to.exist 
+
+        await requestData.refresh()
+
+        expect(requestData.meta.isCancelled)
+        .to.be.true 
+
+        /// Now try to cancel again 9 blocks in the future 
+
+        await waitUntilBlock(0, cancelSecond)
+
+        await txRequest.cancel({
+            from: Owner
+        })
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
     })
 
     it('tests cancellable if call is missed', async function() {

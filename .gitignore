@@ -23,4 +23,6 @@ deployed.json
 gas.txt
 notes.txt
 
-script/wallet/keyfile 
+script/wallet/keyfile
+test/invariants.txt 
+
