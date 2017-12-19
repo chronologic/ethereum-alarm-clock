@@ -64,6 +64,7 @@ contract('Block claiming', async function(accounts) {
     /// Tests ///
     /////////////
 
+    /// 1
     it('should not claim before first claim block', async function() {
         const requestData = await RequestData.from(txRequest)
 
@@ -86,6 +87,7 @@ contract('Block claiming', async function(accounts) {
         .to.equal(NULL_ADDR)
     })
 
+    /// 2
     it('should allow claiming at the first claim block', async function() {
         const requestData = await RequestData.from(txRequest)
 
@@ -109,6 +111,7 @@ contract('Block claiming', async function(accounts) {
         .to.equal(accounts[0])
     })
 
+    /// 3
     it('should allow claiming at the last claim block', async function() {
         const requestData = await RequestData.from(txRequest)
         
@@ -133,6 +136,7 @@ contract('Block claiming', async function(accounts) {
         .to.equal(accounts[0])
     })
 
+    /// 4
     it('cannot claim after the last block', async function() {
         const requestData = await RequestData.from(txRequest)
         
@@ -232,6 +236,7 @@ contract('Block claiming', async function(accounts) {
         // .to.be.true 
     })
 
+    /// 7
     it('should determine payment amount', async function() {
         const requestData = await RequestData.from(txRequest)
 
@@ -257,5 +262,48 @@ contract('Block claiming', async function(accounts) {
         
         expect(requestData.claimData.paymentModifier - 2)
         .to.equal(expectedPaymentModifier)
+    })
+
+    /// 8 
+    it('CANNOT claim if already claimed', async () => {
+
+        const requestData = await RequestData.from(txRequest)
+
+        const claimAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - requestData.schedule.claimWindowSize
+
+        expect(claimAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        await waitUntilBlock(
+            0,
+            claimAt
+        )
+
+        const claimTx = await txRequest.claim({
+            value: config.web3.utils.toWei('1')
+        })
+        expect(claimTx.receipt)
+        .to.exist 
+
+        await requestData.refresh()
+
+        expect(requestData.claimData.claimedBy)
+        .to.equal(accounts[0])
+
+        /// Now try to claim from a different account
+
+        await txRequest.claim({
+            from: accounts[6],
+            value: config.web3.utils.toWei('1')
+        })
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
+
+        /// Just check this again to be sure
+
+        await requestData.refresh()
+
+        expect(requestData.claimData.claimedBy)
+        .to.equal(accounts[0])
+
     })
 })

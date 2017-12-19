@@ -73,6 +73,7 @@ contract('Timestamp claiming', async function(accounts) {
     /// Tests ///
     /////////////
 
+    /// 1
     it('cannot claim before first claim stamp', async function() {
         const requestData = await RequestData.from(txRequest)
 
@@ -146,6 +147,7 @@ contract('Timestamp claiming', async function(accounts) {
         .to.equal(accounts[0])
     })
 
+    /// 4
     it('can not claim after the last claim stamp', async function() {
         const requestData = await RequestData.from(txRequest)
 
@@ -283,5 +285,48 @@ contract('Timestamp claiming', async function(accounts) {
         /// TODO - sometimes this fails?
         // expect(requestData.claimData.paymentModifier)
         // .to.equal(expectedPaymentModifier)
+    })
+
+    /// 8
+    it('CANNOT claim if already claimed', async () => {
+
+        const requestData = await RequestData.from(txRequest)
+
+        const firstClaimStamp = requestData.schedule.windowStart - requestData.schedule.freezePeriod - requestData.schedule.claimWindowSize 
+
+        expect(firstClaimStamp)
+        .to.be.above((await config.web3.eth.getBlock('latest')).timestamp)
+
+        await waitUntilBlock(
+            firstClaimStamp - (await config.web3.eth.getBlock('latest')).timestamp,
+            1
+        )
+
+        const claimTx = await txRequest.claim({
+            from: accounts[0],
+            value: config.web3.utils.toWei('1')
+        })
+        expect(claimTx.receipt)
+        .to.exist 
+
+        await requestData.refresh()
+
+        expect(requestData.claimData.claimedBy)
+        .to.equal(accounts[0])
+
+        /// Now try to claim from a different account 
+
+        await txRequest.claim({
+            from: accounts[3],
+            value: config.web3.utils.toWei('1')
+        })
+        .should.be.rejectedWith('VM Exception while processing transaction: revert')
+
+        /// Check this again to be sure
+        
+        await requestData.refresh()
+
+        expect(requestData.claimData.claimedBy)
+        .to.equal(accounts[0])
     })
 })
