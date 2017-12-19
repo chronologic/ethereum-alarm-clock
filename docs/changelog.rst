@@ -4,14 +4,13 @@ Changelog
 0.9.0 (WIP)
 -----------
 
- - Full rewrite of all contracts to modern solidity syntax. [70%][still finding bugs]
- - Integrate Truffle framework. [100%][rewriting tests]
- - Port test suite from Python to ES6. [4/21]
- - New API for Schedulers [100%][need further tests]
- - (Add String Pool) [Needs discussion]
- - Digger.sol removed due to `EIP 150`_ making it obsolete. [done]
- - All stack depth checking also obsolete due to `EIP150` removed. [done]
- - SafeSendLib.sol removed due to Solidity keyword `transfer` and ``send` making it obsolete. [done]
+- Update contracts to solidity 0.4.18.
+- Integrate Truffle framework.
+- Rewrote test suite to cover more cases.
+- Simplified scheduling API from two options down to one.
+- Digger.sol removed due to `EIP 150`_ making it obsolete.
+- All stack depth checking also obsolete due to `EIP150`_ removed.
+- SafeSendLib.sol removed due to Solidity keywords `transfer` and `send` making it obsolete.
 
 0.8.0 (unreleased)
 ------------------
