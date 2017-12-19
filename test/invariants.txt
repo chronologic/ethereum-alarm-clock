@@ -31,7 +31,7 @@ Proxy function
 
 Claim deposit
 
- can be refunded if cancelled -- this can not happen
+ can be refunded if cancelled -- test 1 in claimDeposit.js
  can be refunded if after execution window and was not executed. -- test 2 in claimDepost.js
  cannot be refunded if executed -- test 3 in claimDeposit.js
  cannot be refunded before or during execution window -- test 4 in claimDeposit.js

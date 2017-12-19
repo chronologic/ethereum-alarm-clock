@@ -113,6 +113,71 @@ contract('claim deposit', async accounts => {
         expect(parseInt(balAfterCancel))
         .to.be.above(parseInt(balAfterClaim))
     })   
+    
+    it('tests claim deposit CAN be refunded if after execution window and was not executed', async () => {
+
+        const requestData = await RequestData.from(txRequest)
+
+        const claimAt = requestData.schedule.windowStart - requestData.schedule.freezePeriod - requestData.schedule.claimWindowSize
+
+        expect(claimAt)
+        .to.be.above(await config.web3.eth.getBlockNumber())
+
+        await waitUntilBlock(0, claimAt)
+
+        const balBeforeClaim = await config.web3.eth.getBalance(accounts[9])
+
+        const claimTx = await txRequest.claim({
+            from: accounts[9],
+            value: 2 * requestData.paymentData.payment
+        })
+        expect(claimTx.receipt)
+        .to.exist 
+
+        const balAfterClaim = await config.web3.eth.getBalance(accounts[9])
+
+        await requestData.refresh()
+
+        expect(requestData.claimData.claimedBy)
+        .to.equal(accounts[9])
+
+        expect(parseInt(balBeforeClaim))
+        .to.be.above(parseInt(balAfterClaim))
+
+        expect(requestData.meta.isCancelled)
+        .to.be.false
+
+        /// Now we wait until after the execution period to cancel.
+        const refundAt = requestData.schedule.windowStart + requestData.schedule.windowSize + 10
+
+        await waitUntilBlock(0, refundAt)
+
+        await txRequest.refundClaimDeposit({
+            from: accounts[6],
+            gas: 3000000
+        })
+
+        const balAfterRefund = await config.web3.eth.getBalance(accounts[9])
+
+        expect(parseInt(balAfterRefund))
+        .to.be.above(parseInt(balAfterClaim))
+
+        const cancelTx = await txRequest.cancel({
+            from: accounts[0]
+        })
+        expect(cancelTx.receipt)
+        .to.exist 
+
+        await requestData.refresh()
+
+        expect(requestData.meta.isCancelled)
+        .to.be.true 
+
+        const balAfterCancel = await config.web3.eth.getBalance(accounts[9])
+
+        expect(parseInt(balAfterCancel))
+        .to.equal(parseInt(balAfterRefund))
+    })   
 
     it('tests claim deposit CANNOT be refunded if executed', async () => {
         
@@ -229,7 +294,7 @@ contract('claim deposit', async accounts => {
         const balAfterAttemptedCancel = await config.web3.eth.getBalance(accounts[9])
 
         expect(balAfterClaim)
-        to.equal(balAfterAttemptedCancel)
+        .to.equal(balAfterAttemptedCancel)
     })  
 
 })
