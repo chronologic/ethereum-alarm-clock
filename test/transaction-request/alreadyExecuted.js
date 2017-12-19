@@ -10,10 +10,11 @@ const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
 /// Bring in config.web3 (v1.0.0)
 const config = require('../../config')
-const { parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
+const { RequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
 
 contract('Test already executed', async function(accounts) {
+
     it('rejects execution if already executed', async function() {
 
         /// Deploy a fresh transactionRecorder
@@ -60,7 +61,7 @@ contract('Test already executed', async function(accounts) {
             {value: config.web3.utils.toWei('1')}
         )
 
-        const requestData = await parseRequestData(txRequest)
+        const requestData = await RequestData.from(txRequest)
 
         expect(await txRecorder.wasCalled())
         .to.be.false
@@ -77,16 +78,18 @@ contract('Test already executed', async function(accounts) {
             gas: 3000000,
             gasPrice: gasPrice 
         })
-        // console.log(executeTx)
+        expect(executeTx.receipt)
+        .to.exist
+
         const execute = executeTx.logs.find(e => e.event === 'Executed')
         expect(execute, 'should have fired off the execute log').to.exist
 
-        const requestDataRefresh = await parseRequestData(txRequest)        
+        await requestData.refresh()
 
         expect(await txRecorder.wasCalled())
         .to.be.true 
 
-        expect(requestDataRefresh.meta.wasCalled)
+        expect(requestData.meta.wasCalled)
         .to.be.true
 
         /// Now try to duplicate the call

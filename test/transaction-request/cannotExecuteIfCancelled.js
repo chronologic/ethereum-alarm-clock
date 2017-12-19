@@ -10,9 +10,8 @@ const TransactionRequest = artifacts.require('./TransactionRequest.sol')
 
 /// Bring in config.web3 (v1.0.0)
 const config = require('../../config')
-const { parseRequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
+const { RequestData, parseAbortData, wasAborted } = require('../dataHelpers.js')
 const { wait, waitUntilBlock } = require('@digix/tempo')(web3)
-const toBN = config.web3.utils.toBN 
 
 contract('tests execution rejected if cancelled', async function(accounts) {
 
@@ -54,7 +53,7 @@ contract('tests execution rejected if cancelled', async function(accounts) {
             'some-call-data-could-be-anything',
             {value: config.web3.utils.toWei('1')}
         )
-        const requestData = await parseRequestData(txRequest)         
+        const requestData = await RequestData.from(txRequest)         
 
         expect(await txRecorder.wasCalled())
         .to.be.false 
@@ -68,9 +67,9 @@ contract('tests execution rejected if cancelled', async function(accounts) {
         const cancelTx = await txRequest.cancel({from: Owner})
         expect(cancelTx.receipt).to.exist
 
-        const requestDataRefresh = await parseRequestData(txRequest) 
+        await requestData.refresh()
 
-        expect(requestDataRefresh.meta.isCancelled)
+        expect(requestData.meta.isCancelled)
         .to.be.true
 
         await waitUntilBlock(0, windowStart)
@@ -80,12 +79,12 @@ contract('tests execution rejected if cancelled', async function(accounts) {
             gasPrice: gasPrice 
         })
 
-        const requestDataRefreshTwo = await parseRequestData(txRequest)
+        await requestData.refresh()
         
         expect(await txRecorder.wasCalled())
         .to.be.false
 
-        expect(requestDataRefreshTwo.meta.wasCalled)
+        expect(requestData.meta.wasCalled)
         .to.be.false
 
         expect(wasAborted(executeTx))

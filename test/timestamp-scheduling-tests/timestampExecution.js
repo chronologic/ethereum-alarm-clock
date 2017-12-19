@@ -84,6 +84,7 @@ contract('Timestamp execution', async function(accounts) {
     /// Tests ///
     /////////////
 
+    /// 1
     it('should reject execution if its before the execution window', async function() {
         const requestData = await parseRequestData(txRequest)
 
@@ -113,6 +114,7 @@ contract('Timestamp execution', async function(accounts) {
         .to.exist
     })
 
+    /// 2
     it('should reject execution if its after the execution window', async function() {
         const requestData = await parseRequestData(txRequest)
 

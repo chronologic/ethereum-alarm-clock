@@ -17,7 +17,7 @@ contract('Execution', async function(accounts) {
 
     const gasPrice = config.web3.utils.toWei('66', 'gwei')
     
-    it('tests transaction sent as specified', async function() {
+    it('tests execution transaction sent as specified', async function() {
 
         /// Deploy the transactionRecorder
         const transactionRecorder = await TransactionRecorder.new()
