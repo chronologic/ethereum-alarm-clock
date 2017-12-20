@@ -7,13 +7,10 @@ const alarmClient = require('../client/main.js')
 const Scheduler = require('../scheduler.js')
 const testScheduler = require('../schedule.js')
 
-const Web3 = require('web3')
-const provider = new Web3.providers.HttpProvider('http://localhost:8545')
-const web3 = new Web3(Web3.givenProvider || provider)
-
 const ethUtil = require('ethereumjs-util')
+const readlineSync = require('readline-sync')
 
-const readlineSync = require('readline-sync');
+const assert = require('chai').assert
 
 const log = {
     debug: msg => console.log(chalk.green(msg)),
@@ -29,17 +26,51 @@ commander
     .option('-c, --client', 'starts the client')
     .option('-m, --milliseconds <ms>', 'tells the client to scan every <ms> seconds', 4000)
     .option('--logfile [path]', 'specifies the output logifle', 'console')
-    .option('--chain [ropsten, mainnet]', 'selects the chain to use', 'ropsten')
+    .option('--chain [ropsten, mainnet]', 'selects the chain to use')
     .option('-w, --wallet [path]', 'specify the path to the keyfile you would like to unlock', 'none')
     .option('-p, --password [string]', 'the password to unlock your keystore file', 'password')
     .option('-s, --schedule', 'schedules a transactions')
     .parse(process.argv)
+
+const Web3 = require('web3')
+const provider = new Web3.providers.HttpProvider('http://localhost:8545')
+const web3 = new Web3(Web3.givenProvider || provider)
+
+const checkWalletEnabled = numTries => {
+    if (numTries >= 4) {
+        log.error('Not following instructions!')
+        process.exit(1)
+    }
+    const walletEnabled = readlineSync.question('Enable wallet? [y/n]\n').toLowerCase()
+
+    if (walletEnabled == 'y') {
+        wallet = readlineSync.question('Please enter the path to your keystore. Ex. ../wallet/keyfile\n')
+        password = readlineSync.question('Password? Case sensitive...\n')
+        return (wallet, password)
+    } else if (walletEnabled == 'n') {
+        wallet = 'none'
+        password = 'password'
+        return (wallet, password)
+    }  else {
+        log.error(`Value: ${walletEnabled} not valid! Please pick [y/n].`)
+        numTries += 1
+        checkWalletEnabled(numTries)
+    }
+}
 
 if (commander.test) {
     testScheduler(true)
     .catch(err => log.error(err))
 } else {
     if (commander.client) {
+
+        if (!commander.chain) {
+            commander.chain = readlineSync.question('Which chain are you using? Options: [ropsten]\n').toLowerCase()
+            assert(commander.chain == 'ropsten', chalk.red(`MUST USE ROPSTEN`))
+        }
+    
+        commander.wallet, commander.password = checkWalletEnabled(0)
+
         alarmClient(
             commander.milliseconds,
             commander.logfile,
@@ -47,7 +78,14 @@ if (commander.test) {
             commander.wallet,
             commander.password
         )
-        .catch(err => log.error(err))
+        .catch(err => {
+            if (err.toString().indexOf('Invalid JSON RPC') !== -1) {
+                log.error(`Received invalid RPC response, please make sure the blockchain is running.\n`)
+            } 
+            log.fatal(err)
+            process.exit(1)
+        })
+
     } else if (commander.schedule) {
         log.info('Schedule a transcation with the EAC')
 
@@ -128,6 +166,8 @@ payment - ${payment}
         // }        
           
     } else {
+        log.info('Please start eac with one of these options:\n-c to run the client\n-t to schedule a test transaction\n-s to enter scheduling wizard')
+        log.fatal('Exiting!')
         process.exit(1)
     }
 }
