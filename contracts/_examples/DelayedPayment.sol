@@ -12,7 +12,7 @@ contract DelayedPayment {
 
     function DelayedPayment(
         address _scheduler,
-        uint _numBlocks,
+        uint    _numBlocks,
         address _recipient
     ) {
         scheduler = SchedulerInterface(_scheduler);
@@ -45,9 +45,7 @@ contract DelayedPayment {
     function payout()
         public returns (bool)
     {
-        if (getNow() < lockedUntil) {
-            revert();
-        }
+        require(getNow() < lockedUntil);
         recipient.transfer(this.balance);
         return true;
     }

@@ -26,7 +26,7 @@ If you are a smart contract developer and would like to start scheduling
 transactions now then check out the :doc:`./quickstart`.
 
 If you are looking to build a lower level integration with the service then our
-`./TODO` is a good place to start.
+the rest of this guide is a good place to start.
 
 
 Contents:

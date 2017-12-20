@@ -70,10 +70,9 @@ library RequestScheduleLib {
      */
     function computePaymentModifier(ExecutionWindow storage self) 
         internal view returns (uint8)
-    {
-        //require(inClaimWindow(self)); // This is not needed since it is already checked before sending this function.
-        
-        uint paymentModifier = (getNow(self).sub(firstClaimBlock(self))).mul(100).div(self.claimWindowSize); 
+    {        
+        uint paymentModifier = (getNow(self).sub(firstClaimBlock(self)))
+                                .mul(100).div(self.claimWindowSize); 
         assert(paymentModifier <= 100); 
 
         return uint8(paymentModifier);

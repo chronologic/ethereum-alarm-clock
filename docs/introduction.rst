@@ -19,7 +19,7 @@ and the differences between them. There exists:
 User accounts are the accounts that humans control and operate. The controller 
 of a user account is always the person who holds the private key. In contrast,
 contract accounts are not controlled by a private key but are instead deployed 
-code which execute in a determined way when they are called. However, contracts 
+code which execute in a determined way when it is called. However, contracts 
 do not have the ability to initiate themselves.
 
 All code execution in the Ethreum Virtual Machine (the EVM) must be triggered by
@@ -28,16 +28,16 @@ do something simple like transfering ether, or it may do something more complex
 like calling a function on a contract account.
 
 Whenever a user account initiates a contract account, the execution of the contract 
-is immediate. Therefore all calls to contract accounts are both manual and included 
-in the same block as the transaction.
+is immediate. Therefore all calls to contract accounts are required to be manual and 
+are included in the same block as the initial call.
 
 The Ethereum protocol does not provide any way to create a transaction to be executed at 
 a later time. This is a problem if a developer is creating a smart contract to fire off 
-transactions that must happen at a later date or if a user would like to perform an action
-at a specific time and already knows all the parameters of the action ahead of time.
+transactions that must happen at a future date or if a user would like to perform an action
+at a specific time.
 
-The Alarm service aims to solve this problem of scheduling transaction to be executed
-at a future time in a trustless and censorship-resistant way.
+The Alarm service aims to solve both of these problems in a trustless and 
+censorship-resistant way.
 
 
 How transactions are executed

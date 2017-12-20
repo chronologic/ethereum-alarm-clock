@@ -21,7 +21,10 @@ library ClaimLib {
      * @param self The ClaimData that is being accessed.
      * @param paymentModifier The payment modifier.
      */
-    function claim(ClaimData storage self, uint8 paymentModifier) 
+    function claim(
+        ClaimData storage self, 
+        uint8 paymentModifier
+    ) 
         internal returns (bool)
     {
         self.claimedBy = msg.sender;

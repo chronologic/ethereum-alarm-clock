@@ -12,8 +12,8 @@ The Problem
 To understand the claiming mechanism it is important to understand the problem
 it solves.
 
-Consider a situation where there are two people Alice and Bob competing to
-execute the same request that will issue a payment of 100 wei to whomever
+Consider a situation where there are two people Alice and Bob are competing to
+execute the same request. The request will issue a payment of 100 wei to whomever
 executes it.
 
 Suppose that Alice and Bob both send their execution transactions at
@@ -65,7 +65,7 @@ Claim Deposit
 In order to claim a request you must put down a deposit.  This deposit amount
 is equal to twice the ``payment`` amount associated with this request.
 
-claim_deposit = 2 * payment
+``claim_deposit = 2 * payment``
 
 The deposit is returned during execution, or when the call is cancelled.
 
@@ -80,23 +80,53 @@ claimed, the more it pays.
 This is a linear transition from getting paid 0% of the total payment if the
 request is claimed at the earliest possible time up to 100% of the total payment
 at the very end of the claim window.  This multiplier is referred to as the
-*payment modifier*.
+*payment modifier*.  Refer to the code block pasted below to see how the smart 
+contract calculates the multiplier. This examples is taken from lines 71 - 79 
+of `RequestScheduleLib.sol`.
+
+
+.. code-block:: solidity
+
+    function computePaymentModifier(ExecutionWindow storage self) 
+        internal view returns (uint8)
+    {        
+        uint paymentModifier = (getNow(self).sub(firstClaimBlock(self)))
+                                .mul(100).div(self.claimWindowSize); 
+        assert(paymentModifier <= 100); 
+
+        return uint8(paymentModifier);
+    }
+
 
 It is important to note that the *payment modifier* does not apply to gas
 reimbursements which are always paid in full.  No matter when a call is
 claimed, or how it is executed, it will **always** provide a full gas
-reimbursement.  The only case where this may end up not being true is in cases
-where the gas price has changed drastically since the time the request was
-scheduled and the contract's endowment is now sufficiently low that it is not
-longer funded with sufficient ether to cover these costs.
+reimbursement.  In the past, this was not always the case since the EAC used 
+a slightly different scheme to calculate an anchor gas price.  In version 0.9.0 
+the anchor gas price was removed in favor of forcing the scheduler of the transaction 
+to explicitly specify an **exact** gas price.  So the gas to execute a transaction is
+always reimbursed exactly to the executor of the transaction.
 
-For example, if the request has a ``payment`` of 2000 wei, a
+For clarification of the payment modifier let's consider an example.
+Assume that a transaction request has a ``payment`` set to 2000 wei, a
 ``claimWindowSize`` of 255 blocks, a ``freezePeriod`` of 10 blocks, and a
-``windowStart`` set at block 500.  In this case, the request would have a
-payment of 0 at block 235.  At block 235 it would provide a payment of 20 wei.
-At block 245 it would pay 220 wei or 11% of the total payment.  At block 489 it
-would pay 2000 wei or 100% of the total payment.
+``windowStart`` set at block 500.  The first claimable block is calculated by
+subtracting the ``claimWindowSize`` and the ``freezePeriod`` from the ``windowStart``
+like so:
 
+``first_claim_block = 500 - 255 - 10 = 235``
+
+In this case, the request would have a payment of 0 at block 235.  
+
+``(235 - 235) * 100 // 255 = 0``
+
+At block 245 it would pay 60 wei or 3% of the total payment.
+
+``(245 - 235) * 100 // 255 = 3``
+
+At block 489 it would pay 1980 wei or 99% of the total payment.
+
+``(489 - 235) * 100 // 255 = 99``
 
 Gas Costs
 ---------
@@ -105,4 +135,5 @@ The gas costs for claim transactions are *not* reimbursed.  They are considered
 the cost of doing business and should be taken into consideration when claiming
 a request.  If the request is claimed sufficiently early in the claim window it
 is possible that the ``payment`` will not fully offset the transaction costs of
-claiming the request.
+claiming the request.  EAC clients should take precaution that they do not claim 
+transaction requests without estimating whether they will be profitable first. 
