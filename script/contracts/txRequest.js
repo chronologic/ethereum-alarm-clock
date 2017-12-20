@@ -30,6 +30,10 @@ class TxRequest {
         return this.data.meta.wasCalled
     }
 
+    claimWindowStart () {
+        return this.windowStart() - this.data.schedule.freezePeriod - this.data.schedule.claimWindowSize
+    }
+
     isClaimed () {
         return this.data.claimData.claimedBy !== NULL_ADDRESS
     }
@@ -70,6 +74,10 @@ class TxRequest {
         return this.data.txData.callGas
     }
 
+    gasPrice () {
+        return this.data.txData.gasPrice
+    }
+
     async fillData () {
         const requestData = await RequestData.from(this.instance)
         this.data = requestData
@@ -82,9 +90,13 @@ class TxRequest {
         return await this.data.refresh()
     }
 
-    // address () {
-    //     return this.instance.options.address
-    // }
+    async claimPaymentModifier () {
+        return Math.floor(
+            100 * (
+            await this.now() - this.claimWindowStart()
+            ) / this.data.schedule.claimWindowSize
+        )
+    }
 
 }
 

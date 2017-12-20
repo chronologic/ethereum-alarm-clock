@@ -54,7 +54,6 @@ class LightWallet {
             console.log('Index is outside of range of addresses in this wallet!')
             return
         }
-        // return Promise.resolve(index)
         return this.web3.eth.sendTransaction({
             from: index,
             to: recip,

@@ -88,6 +88,7 @@ const filter = require('async').filter
 /// Scans the cache and executes any ready transaction requests.
 const scanToExecute = async conf => {
 
+    /// If the cache doesn't contain anything, return this scanning cycle.
     if (conf.cache.len() === 0) {
         return 
     }

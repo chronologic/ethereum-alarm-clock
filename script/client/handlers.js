@@ -46,17 +46,19 @@ const executeTxRequest = async (conf, txRequest) => {
         log.debug('outside execution window')
         return 
     }
-    // if (await txRequest.inReservedWindow() && (txRequest.isClaimedBy(web3.eth.defaultAccount)) {
-    //     log.debug(`In reserved window and claimed by ${txRequest.claimedBy()}`)
-    //     log.debug(txRequest.isClaimedBy(web3.eth.defaultAccount))
-    //     return 
-    // }
+    if (await txRequest.inReservedWindow() && txRequest.isClaimed()) {
+        if (!txRequest.isClaimedBy(web3.eth.defaultAccount)) {
+            log.debug(`In reserved window and claimed by ${txRequest.claimedBy()}`)
+            log.debug(txRequest.isClaimedBy(web3.eth.defaultAccount))
+            return 
+        }
+    }
 
     const executeGas = txRequest.callGas() + 180000//+ await requestLib.EXECUTION_GAS_OVERHEAD().call()
     const gasLimit = (await web3.eth.getBlock('latest')).gasLimit
 
     /// TODO pull out the gasPrice... rn it's hard coded
-    const gasPrice = web3.utils.toWei('100', 'gwei')
+    const gasPrice = txRequest.gasPrice()
 
     if (executeGas > gasLimit) {
         log.error(`Execution gas above network gas limit.`)
@@ -142,16 +144,60 @@ const claimTxRequest = async (conf, txRequest) => {
         return 
     }
 
+    const paymentIfClaimed = Math.floor(
+        txRequest.data.paymentData.payment *
+        txRequest.claimPaymentModifier() / 100
+    )
+
     const claimDeposit = 2 * txRequest.data.paymentData.payment
     const gasToClaim = txRequest.instance.methods.claim().estimateGas({from: web3.eth.defaultAccount})
-    const gasCostToClaim = parseInt(await web3.eth.getGasPrice) * gasToClaim 
+    const gasCostToClaim = parseInt(await web3.eth.getGasPrice()) * gasToClaim 
 
     if (gasCostToClaim > paymentIfClaimed) {
         log.debug(`Not claiming. Claim gas cost is higher than the calculated payment. Claim Gas Cost: ${gasCostToClaim} | Current Payment: ${paymentIfClaimed}`)
         return 
     }
+
+    const claimDiceRoll = Math.floor(Math.random() * 100)
+
+    if (claimDiceRoll >= await txRequest.claimPaymentModifier()) {
+        log.debug(`Not claiming. Lady luck's not on your side! Rolled a ${claimDiceRoll} and needed at least ${await txRequest.claimPaymentModifier()}`)
+        return 
+    }
+
+    log.info(`Attemptin' to claim. Payment ${paymentIfClaimed}`)
+
+    /// Check if wallet is enabled
+    if (conf.wallet) {
+
+        const claimData = txRequest.instance.methods.claim().encodeABI()
+
+        sendFromNext(
+            txRequest.address,
+            claimDeposit, 
+            gasToClaim,
+            await web3.eth.getGasPrice(),
+            claimData
+        )
+        .then(res => log.info(`transaction claimed!`))
+        .catch(err => log.error)
+
+    } else {
+
+        txRequest.instance.methods.claim({
+            from: web3.eth.defaultAccount,
+            value: claimDeposit,
+            gas: gasToClaim, 
+            gasPrice: await web3.eth.getGasPrice()
+        })
+        .then(res => log.info(`transaction claimed!`))
+        .catch(err => log.error)
+
+    }
+
 }
 
+module.exports.claimTxRequest = claimTxRequest
 module.exports.executeTxRequest = executeTxRequest
 module.exports.executeTxRequestFrom = executeTxRequestFrom
 
