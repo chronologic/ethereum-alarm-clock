@@ -112,10 +112,11 @@ contract RequestFactory is RequestFactoryInterface {
             }
 
             // Try to return the ether sent with the message.  If this failed
-            // then revert() to force it to be returned.
-            // msg.sender.transfer(msg.value);
-            revert();
-            //assert(false); causes the tx to fail and retunr ether but waste gas
+            // then revert() to force it to be returned
+            if (!msg.sender.send(msg.value)) {
+                revert();
+            }
+            return 0x0;
         }
 
         return createRequest(addressArgs, uintArgs, callData);
@@ -163,16 +164,12 @@ contract RequestFactory is RequestFactoryInterface {
         );
     }
 
-    // TODO: decide whether this should be a local mapping or from tracker.
+    /// Mapping to hold known requests.
     mapping (address => bool) requests;
 
     function isKnownRequest(address _address) 
-        public view returns (bool)
+        public view returns (bool isKnown)
     {
-        return requests[_address];
+        isKnown = requests[_address];
     }
 }
-
-
-// contract TestnetRequestFactory is RequestFactory(0x8e67d439713b2022cac2ff4ebca21e173ccba4a0) {
-// }

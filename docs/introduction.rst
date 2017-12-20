@@ -4,43 +4,48 @@ Introduction
 .. contents:: :local:
 
 
-What problem does this solve
-----------------------------
+What problem does this solve?
+-----------------------------
 
 The simplest way to explain the utility of the Alarm service is to explain the
 problem it solves.
 
-First, you need to understand the difference between private key based accounts
-and contract accounts.  There are two types of accounts on the Ethereum
-blockchain.
+We will begin with a refresher about the two types of accounts on ethereum
+and the differences between them. There exists:
 
-1. Accounts that have a private key.
-2. Contracts *(which do not have a private key)*
+1. User accounts (controlled by the holder of the private key)
+2. Contracts *(which are not controlled by a private key)*
 
-Private key accounts are the accounts that humans operate, where as contract
-accounts are deployed pieces of code capable of executing some computer
-program.  Contract accounts cannot however trigger their own code execution.
+User accounts are the accounts that humans control and operate. The controller 
+of a user account is always the person who holds the private key. In contrast,
+contract accounts are not controlled by a private key but are instead deployed 
+code which execute in a determined way when they are called. However, contracts 
+do not have the ability to initiate themselves.
 
-All code execution in the Ethreum Virtual Machine, or EVM must be triggered by
+All code execution in the Ethreum Virtual Machine (the EVM) must be triggered by
 a private key based account.  This is done by sending a transaction, which may
 do something simple like transfering ether, or it may do something more complex
 like calling a function on a contract account.
 
-The second part of the problem is that when you send a transaction it is
-executed as soon as it is included in a block.  The Ethereum protocol does not
-provide any way to create a transaction to be executed at a later time.
+Whenever a user account initiates a contract account, the execution of the contract 
+is immediate. Therefore all calls to contract accounts are both manual and included 
+in the same block as the transaction.
 
-This leads us to the problem that the Alarm service solves.  With the
-functionality provided by this service, transactions can be securely scheduled
-to be executed at a later time.
+The Ethereum protocol does not provide any way to create a transaction to be executed at 
+a later time. This is a problem if a developer is creating a smart contract to fire off 
+transactions that must happen at a later date or if a user would like to perform an action
+at a specific time and already knows all the parameters of the action ahead of time.
+
+The Alarm service aims to solve this problem of scheduling transaction to be executed
+at a future time in a trustless and censorship-resistant way.
 
 
 How transactions are executed
 -----------------------------
 
 When a transaction is scheduled a new smart contract is created that holds all
-of the information needed to execute the transaction.  It may be useful to
-think of this as an order on an exchange.  When called during the specified
+of the information needed to execute the transaction.  An useful analogy may be to
+think of this as an order on an exchange.  When this contract "order" called during the specified
 execution window, this contract will send the transaction as specified and then
 pay the account that triggered the execution.
 
@@ -66,10 +71,6 @@ possible that your transaction will not be executed at all.
 
 In an ideal situation, there is a sufficient volume of scheduled transactions
 that operating a server to execute these transactions is a profitable endeavor.
-The reality is that I operate between 3-5 execution servers dedicated to filling
-this role until there is sufficient volume that I am confident I can turn those
-servers off or until it is no longer feasible for me to continue paying their
-costs.
 
 
 How scheduling transactions works

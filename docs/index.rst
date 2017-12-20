@@ -6,15 +6,14 @@
 Welcome to Ethereum Alarm Clock's documentation!
 ================================================
 
-The Ethereum Alarm Clock is a service that allows scheduling transactions to be
-executed at a later time on the ethereum blockchain.  This is accomplished by
-specifying all of the details for the transaction you wish to send, as well as
-providing up-front payment for gas costs, allowing your transaction to be
-executed for you at a later time.
+The Ethereum Alarm Clock is a collection of smart contracts that allows for the scheduling 
+of transactions to be executed at a later date on the ethereum blockchain. Users must 
+provide all the details for the transaction as well as an up-front payment used to cover
+the gas costs. Service clients will then scan the blockchain for all upcoming transactions,
+and claim and execute them if they are incentivized to do so.
 
-The service is completely trustless, meaning that the entire service operates
-as smart contracts on the Ethereum blockchain, with no priviledged access given
-to any party.
+The service is completely trustless and censorship resistant, with no priviledged
+access given to any party.
 
 The code for this service is open source under the MIT license and can be
 viewed on the `github repository`_.  Each release of the alarm service includes

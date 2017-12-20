@@ -23,7 +23,7 @@ right solution for these use cases.
 Interface
 ---------
 
-.. literalinclude:: ../contracts/RequestFactoryInterface.sol
+.. literalinclude:: ../contracts/Interface/RequestFactoryInterface.sol
     :language: solidity
 
 
@@ -44,12 +44,11 @@ a new :class:`TransactionRequest` which fails due to validation errors.  The ``e
 
 
 * ``0 => InsufficientEndowment``
-* ``0 => ReservedWindowBiggerThanExecutionWindow``
-* ``0 => InvalidTemporalUnit``
-* ``0 => ExecutionWindowTooSoon``
-* ``0 => InvalidRequiredStackDepth``
-* ``0 => CallGasTooHigh``
-* ``0 => EmptyToAddress``
+* ``1 => ReservedWindowBiggerThanExecutionWindow``
+* ``2 => InvalidTemporalUnit``
+* ``3 => ExecutionWindowTooSoon``
+* ``4 => CallGasTooHigh``
+* ``5 => EmptyToAddress``
 
 
 Function Arguments
@@ -81,13 +80,13 @@ The arrays map to to the following :class:`TransactionRequest` attributes.
     *  ``uintArgs[7]  => schedule.windowSize``
     *  ``uintArgs[8]  => txnData.callGas``
     *  ``uintArgs[9]  => txnData.callValue``
-    *  ``uintArgs[10] => txnData.requiredStackDepth``
+    *  ``uintArgs[10] => txnData.gasPrice``
 
 
 Validation
 ----------
 
-.. method:: RequestFactory.validateRequestParams(address[3] addressArgs, uint[11] uintArgs, bytes callData, uint endowment) returns (bool[7] result)
+.. method:: RequestFactory.validateRequestParams(address[3] addressArgs, uint[11] uintArgs, bytes callData, uint endowment) returns (bool[6] result)
 
 The ``validateRequestParams`` function can be used to validate the parameters
 to both ``createRequest`` and ``createValidatedRequest``.  The additional
@@ -116,8 +115,6 @@ The required minimum endowment can be computed as the sum of the following:
 * ``2 * donation`` to pay for maximum possible donation
 * ``2 * callGas * tx.gasprice`` to pay for ``callGas`` with up to a 2x increase
   in the network gas price.
-* ``2 * 700 * requiredStackDepth * tx.gasprice`` to pay gas for the stack depth
-  checking with up to a 2x increase in network gas costs.
 * ``2 * 180000 * tx.gasprice`` to pay for the gas overhead involved in
   transaction execution.
 
@@ -153,15 +150,7 @@ freezePeriod``.
 * When using timestamp based scheduling, ``block.timestamp`` is used.
 
 
-Check #5: Invalid Stack Depth Check
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-* ``result[4]``
-
-Checks that the ``requiredStackDepth`` is less than or equal to 1000.
-
-
-Check #6: Call Gas too high
+Check #5: Call Gas too high
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * ``result[5]``
@@ -170,7 +159,8 @@ Check that the specified ``callGas`` value is not greater than the current
 ``gasLimit - 140000`` where ``140000`` is the gas overhead of request
 execution.
 
-Check #7: Empty To Address
+
+Check #6: Empty To Address
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * ``result[6]``

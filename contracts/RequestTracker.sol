@@ -9,10 +9,6 @@ import "contracts/Library/MathLib.sol";
  * @dev The API for the GroveLib backend that keeps track of transaction requests.
  */
 contract RequestTracker is RequestTrackerInterface {
-    /*
-     * testnet: 
-     * mainnet: 
-     */
     using GroveLib for GroveLib.Index;
 
     mapping (address => GroveLib.Index) requestsByAddress;
@@ -21,7 +17,7 @@ contract RequestTracker is RequestTrackerInterface {
      * Returns the windowStart value for the given request.
      */
     function getWindowStart(address factory, address request)
-        view returns (uint)
+        public view returns (uint)
     {
         return uint(requestsByAddress[factory].getNodeValue(bytes32(request)));
     }
@@ -30,7 +26,7 @@ contract RequestTracker is RequestTrackerInterface {
      * Returns the request which comes directly before the given request.
      */
     function getPreviousRequest(address factory, address request)
-        view returns (address)
+        public view returns (address)
     {
         return address(requestsByAddress[factory].getPreviousNode(bytes32(request)));
     }
@@ -39,7 +35,7 @@ contract RequestTracker is RequestTrackerInterface {
      * Returns the request which comes directly after the given request.
      */
     function getNextRequest(address factory, address request)
-        view returns (address)
+        public view returns (address)
     {
         return address(requestsByAddress[factory].getNextNode(bytes32(request)));
     }
@@ -69,7 +65,7 @@ contract RequestTracker is RequestTrackerInterface {
      * factory.
      */
     function isKnownRequest(address factory, address request)
-        view returns (bool)
+        public view returns (bool)
     {
         return requestsByAddress[factory].exists(bytes32(request));
     }
@@ -78,7 +74,7 @@ contract RequestTracker is RequestTrackerInterface {
      * Query the index for the given factory.
      */
     function query(address factory, bytes2 operator, uint value)
-        view returns (address)
+        public view returns (address)
     {
         return address(requestsByAddress[factory].query(operator, MathLib.safeCastSigned(value)));
     }

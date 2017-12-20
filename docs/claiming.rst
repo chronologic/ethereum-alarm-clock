@@ -22,7 +22,7 @@ before Bob's.
 
 Alice will receive the 100 wei payment, while Bob will receive no payment as
 well as having paid the gas costs for his execution transaction that was
-rejected.  Suppose that the gas cost Bob has now incurred are 25 wei.
+rejected.  Suppose that the gas cost Bob has now incurred is 25 wei.
 
 In this situation we could assume that Alice and Bob have a roughly 50% chance
 of successfully executing any given transaction request, but since 50% of their
@@ -35,8 +35,8 @@ requests they try to execute.
 Now suppose that we add more competition via three additional people attempting
 to execute each transaction.  Now Bob and Alice will only end up executing an
 average of 1 out of every 5 transaction requests, with the other 4 costing them
-25 wei each.  Now nobody is making a profit because the cost of the failed
-transactions now cancels out any profit they are making.
+25 wei each.  Now the result is that nobody is making a profit because the cost 
+of the failed transactions cancel out any profit they are making.
 
 
 The Solution

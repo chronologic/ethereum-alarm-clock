@@ -116,9 +116,9 @@ library PaymentLib {
     ) 
         internal pure returns (uint)
     {
-        return _payment.add(_donation)
-                       .mul(2)
-                       .add(_computeHelper(_callGas, _callValue, _gasOverhead, _gasPrice));
+        return _payment
+                    .add(_donation).mul(2)
+                    .add(_computeHelper(_callGas, _callValue, _gasOverhead, _gasPrice));
     }
 
     /// Was getting a stack depth error after replacing old MathLib with Zeppelin's SafeMath.
@@ -149,6 +149,7 @@ library PaymentLib {
                                uint donation,
                                uint callGas,
                                uint callValue,
+                               uint gasPrice,
                                uint gasOverhead)
         public pure returns (bool)
     {
@@ -157,7 +158,7 @@ library PaymentLib {
             donation,
             callGas,
             callValue,
-            0,
+            gasPrice,
             gasOverhead
         );
     }

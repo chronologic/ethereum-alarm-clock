@@ -48,8 +48,8 @@ to the following errors.
 * ``2 => BeforeCallWindow``
 * ``3 => AfterCallWindow``
 * ``4 => ReservedForClaimer``
-* ``5 => StackTooDeep``
-* ``6 => InsufficientGas``
+* ``5 => InsufficientGas``
+* ``6 => MismatchGasPrice``
 
 
 .. method:: TransactionRequest.Executed(uint payment, uint donation, uint measuredGasConsumption)
@@ -162,10 +162,9 @@ fields.
 
     The amount of gas that will be sent with the transaction.
 
+.. attribute:: uint gasPrice 
 
-.. attribute:: uint requiredStackDepth
-
-    The number of stack frames required by this transaction.
+    The gas price required to send when executing the transaction.
 
 
 Payment Data
@@ -341,7 +340,8 @@ Information about ownership, creation, and the result of the transaction request
 Actions
 -------
 
-The :class:`TransactionRequest` contract has three primary actions that can be performed.
+The :class:`TransactionRequest` contract has three primary actions that can be performed and 
+a fourth action, `proxy`, which will be called in certain circumstances.
 
 * Cancellation: Cancels the request.
 * Claiming: Reserves exclusive execution rights during a portion of the execution window.
@@ -402,6 +402,20 @@ denoted by ``windowStart + windowSize``.
 
 See the :doc:`./execution` section of the documentation for details about the
 execution process.
+
+Proxy 
+^^^^^
+
+.. method:: TransactionRequest.proxy(address _to, bytes _data)
+
+Proxy can only be called by the user who scheduled the TransactionRequest and
+only after the execution window has passed. It exposes two fields, `_to` which will 
+be the address of that the call will send to, and `_data` which is the encoded data 
+to be sent with the transaction. The purpose of this function is to call another 
+contract to do things like for example, transfer tokens. In the case a user schedules 
+a call to buy from an ICO with the EAC, they will need to proxy call the token contract 
+after the execution in order to move the tokens they bought out of the TransactionRequest 
+contract.
 
 
 Retrieval of Ether

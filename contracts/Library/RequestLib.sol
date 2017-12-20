@@ -112,6 +112,7 @@ library RequestLib {
             request.paymentData.donation,
             request.txnData.callGas,
             request.txnData.callValue,
+            request.txnData.gasPrice,
             _EXECUTION_GAS_OVERHEAD
         );
         isValid[1] = RequestScheduleLib.validateReservedWindowSize(
