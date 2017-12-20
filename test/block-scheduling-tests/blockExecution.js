@@ -43,8 +43,8 @@ contract('Block execution', async function(accounts) {
                 Benefactor,         //donationBenefactor
                 txRecorder.address //toAddress
             ], [
-                0,                  //donation
-                0,                  //payment
+                12345,                  //donation
+                224455,                  //payment
                 25,                 //claim window size
                 5,                  //freeze period
                 10,                 //reserved window size
@@ -138,6 +138,7 @@ contract('Block execution', async function(accounts) {
         .to.exist
     })
 
+    /// 3
     it('should allow the execution at the start of the execution window', async function() {
         const requestData = await parseRequestData(txRequest)
 
@@ -150,12 +151,22 @@ contract('Block execution', async function(accounts) {
         const startExecutionWindow = requestData.schedule.windowStart
         await waitUntilBlock(0, startExecutionWindow)
 
+        const balBeforeExecute = await config.web3.eth.getBalance(accounts[0])
+
         const executeTx = await txRequest.execute(
             {
+                from: accounts[0],
                 gas: 3000000,
                 gasPrice: gasPrice 
             }
         )
+        expect(executeTx.receipt)
+        .to.exist 
+
+        const balAfterExecute = await config.web3.eth.getBalance(accounts[0])
+
+        expect(parseInt(balAfterExecute))
+        .to.be.at.least(parseInt(balBeforeExecute))
 
         const requestDataTwo = await parseRequestData(txRequest)
 
@@ -166,6 +177,7 @@ contract('Block execution', async function(accounts) {
         .to.be.true 
     })
 
+    /// 4
     it('should allow the execution at the end of the execution window', async function() {
         const requestData = await parseRequestData(txRequest) 
 
@@ -181,12 +193,22 @@ contract('Block execution', async function(accounts) {
         /// because the next transaction will be mined in the next
         /// block, aka the exact block for `endExecutionWindow`
 
+        const balBeforeExecute = await config.web3.eth.getBalance(accounts[3])
+
         const executeTx = await txRequest.execute(
             {
+                from: accounts[3],
                 gas: 3000000,
                 gasPrice: gasPrice,
             }
         )
+        expect(executeTx.receipt)
+        .to.exist 
+
+        const balAfterExecute = await config.web3.eth.getBalance(accounts[3])
+
+        expect(parseInt(balAfterExecute))
+        .to.be.at.least(parseInt(balBeforeExecute))
 
         const requestDataTwo = await parseRequestData(txRequest) 
 

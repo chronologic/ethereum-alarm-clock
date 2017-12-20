@@ -24,7 +24,7 @@ this.
         // - bytes callData
         // - address toAddress
         //
-        function scheduleTransaction(address toAddress,
+        function schedule(address toAddress,
                                      bytes callData,
                                      uint8 windowSize,
                                      uint[3] uintArgs) public returns (address);

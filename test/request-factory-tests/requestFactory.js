@@ -63,7 +63,7 @@ contract('Request factory', async function(accounts) {
                 callValue
             ],
             'this-is-call-data',
-            config.web3.utils.toWei('10') //endowment
+            config.web3.utils.toWei('10') //endowment calculate actual endowment
         )
 
         isValid.forEach(bool => expect(bool).to.be.true)

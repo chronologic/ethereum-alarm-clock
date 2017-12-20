@@ -32,7 +32,7 @@ contract BaseScheduler is SchedulerInterface {
      * @param _uintArgs [5] The donation value attached to this transaction.
      * @param _uintArgs [6] The payment value attached to this transaction.
      * @return The address of the new TransactionRequest.   
-     */
+     */ 
     function schedule(address   _toAddress,
                       bytes     _callData,
                       uint[7]   _uintArgs)

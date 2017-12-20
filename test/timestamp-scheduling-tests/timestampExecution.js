@@ -49,16 +49,16 @@ contract('Timestamp execution', async function(accounts) {
                 accounts[1], //donationBenefactor
                 txRecorder.address //toAddress
             ], [
-                0, //donation
-                0, //payment
+                12345, //donation
+                224455, //payment
                 claimWindowSize,
                 freezePeriod,
                 reservedWindowSize,
-                2, // temporalUnit
+                2,          // temporalUnit
                 executionWindow,
                 windowStart,
-                2000000, //callGas
-                0,  //callValue
+                2000000,    //callGas
+                0,          //callValue
                 gasPrice
             ],
             'some-call-data-goes-here',
@@ -146,6 +146,7 @@ contract('Timestamp execution', async function(accounts) {
         .to.exist
     })
 
+    /// 3
     it('should allow execution at the start of the execution window', async function() {
         const requestData = await parseRequestData(txRequest)
 
@@ -155,15 +156,25 @@ contract('Timestamp execution', async function(accounts) {
         expect(requestData.meta.wasCalled)
         .to.be.false 
 
-        const startExecutionWindow = requestData.schedule.windowStart 
+        const startExecutionWindow = requestData.schedule.windowStart
         const secsToWait = startExecutionWindow - (await config.web3.eth.getBlock('latest')).timestamp 
+        console.log(secsToWait)
         await waitUntilBlock(secsToWait, 1)
+
+        const balBeforeExecute = await config.web3.eth.getBalance(accounts[1])
 
         const executeTx = await txRequest.execute({
             from: accounts[1], 
             gas: 3000000,
             gasPrice: gasPrice
         })
+        expect(executeTx.receipt)
+        .to.exist 
+
+        const balAfterExecute = await config.web3.eth.getBalance(accounts[1])
+
+        expect(parseInt(balAfterExecute))
+        .to.be.at.least(parseInt(balBeforeExecute))
 
         const requestDataRefresh = await parseRequestData(txRequest)
 
@@ -174,6 +185,7 @@ contract('Timestamp execution', async function(accounts) {
         .to.be.true 
     })
 
+    /// 4
     it('should allow execution at the end of the execution window', async function() {
         const requestData = await parseRequestData(txRequest)
 
@@ -187,13 +199,20 @@ contract('Timestamp execution', async function(accounts) {
         const secsToWait = endExecutionWindow - (await config.web3.eth.getBlock('latest')).timestamp 
         await waitUntilBlock(secsToWait - 1, 1)
 
+        const balBeforeExecute = await config.web3.eth.getBalance(accounts[5])
+
         const executeTx = await txRequest.execute({
-            from: accounts[1], 
+            from: accounts[5], 
             gas: 3000000,
             gasPrice: gasPrice 
         })
         expect(executeTx.receipt)
         .to.exist 
+
+        const balAfterExecute = await config.web3.eth.getBalance(accounts[5])
+
+        expect(parseInt(balAfterExecute))
+        .to.be.at.least(parseInt(balBeforeExecute))
 
         const requestDataRefresh = await parseRequestData(txRequest)
 
