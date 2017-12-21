@@ -9,6 +9,12 @@ contract TransactionRequestInterface {
     function claim() public payable returns (bool);
 
     /*
+     * @dev Proxy function
+     */
+    function proxy(address recipient, bytes callData)
+        public payable returns (bool);
+
+    /*
      * @dev Data accessors
      */
     function requestData() public view returns (address[6],

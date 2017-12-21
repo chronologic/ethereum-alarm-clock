@@ -5,13 +5,23 @@ const web3 = new Web3(Web3.givenProvider || provider)
 const { LightWallet } = require('../client/lightWallet.js')
 const { TxRequest } = require('../contracts/txRequest.js')
 
-const main = async num => {
+const createWallet = async (num, file, password) => {
 
     const wallet = new LightWallet(web3)
     wallet.create(num)
-    wallet.encryptAndStore('keyfile', 'pw')
+
+    console.log(`
+New wallet created!
+
+Accounts:
+${wallet.getAccounts().join('\n')}
+
+Saving encrypted file to ${file}. Don't forget your password!`)
+
+    wallet.encryptAndStore(file, password)
 
 }
 
-main(5)
-.catch(err => console.log(err))
+// createWallet(6, 'keys', 'pw')
+// .catch(err => console.error)
+module.exports.createWallet = createWallet

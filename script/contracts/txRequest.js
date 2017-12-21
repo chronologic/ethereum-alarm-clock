@@ -63,10 +63,10 @@ class TxRequest {
     }
 
     async inReservedWindow() {
-        console.log(await this.now())
-        console.log(this.executionWindowEnd())
-        console.log(this.reservedExecutionWindowEnd())
-        console.log(this.windowStart() <= await this.now() && await this.now() < this.reservedExecutionWindowEnd())
+        // console.log(await this.now())
+        // console.log(this.executionWindowEnd())
+        // console.log(this.reservedExecutionWindowEnd())
+        // console.log(this.windowStart() <= await this.now() && await this.now() < this.reservedExecutionWindowEnd())
         return this.windowStart() <= await this.now() && await this.now() < this.reservedExecutionWindowEnd()
     }
 

@@ -14,8 +14,58 @@ smart contracts. Right now, we use it as a tool for development. Here's how:
     the contracts for new transactionRequests every 4 seconds and attempt to 
     execute them every 5 seconds.
     (pass the `-m <ms>` option to change the number of milliseconds between scans)
-    (pass the `-w <path to keystore> -p <password>` options to use the "send-from-many" light wallet functionality [WIP!])
+    (pass the `-w <path to keystore> -p <password>` options to use the "send-from-many" light wallet functionality)
 
 `node index -s`
     WIP - provides an interface to schedule a new transaction.
-    
+
+
+Creating a LightWallet
+----------------------
+
+You can use the eac commandline program to create a light wallet with 
+a set of addresses that will be cycled through by the client. To do this
+run the eac executable with the `--createWallet` flag. The client will then 
+ask you for a few questions and create a new wallet file for you. The wallet 
+file will be encrypted and saved onto your computer and you will need your 
+password to decrypt it. 
+
+```
+$ eac --createWallet
+How many accounts would you like in your wallet?
+3
+Where would you like to save the encrypted keys? Please provide a valid filename or path.
+./keys
+Please enter a password for the keyfile. Write this down!
+<your password>
+New wallet created!
+Accounts:
+0x79E944aA5c44C1dA75e30313682bd506A80F2115
+0x838378b72b022551F0Ef49b1dA9eFCCF1A1D7294
+0x4b7CE6c8d193E31d22C620BcDf8d3590fe2f99C2
+Saving encrypted file to ./keys. Don't forget your password!
+```
+
+Now next time you start eac you can start it like so to activate wallet support!
+
+```
+$ eac -c --wallet ./keys --password <your password>
+```
+
+However, before you do this for real you will want to fund each of your accounts
+with enough ether to enable them to claim and execute transactions. A good number 
+is at least 1 ether for each account. You can do this manually, or you can use 
+the script provided in `script/wallet/2_fundWallet.js`. If you change your 
+mind about running an EAC server, you can always send the ether back to
+your main account. Use the script at `script/wallet/3_testWallet.js` to 
+drain all of your wallet accounts of their ether.
+
+***NOTE***
+Only use these scripts if you understand what they are doing. The lightwallet 
+support is still considered alpha status until we can figure out how to 
+better streamline the user experience.
+***END NOTE***
+
+After you have funded your children account and you begin running the client you
+will see a friendly message stating that you are now running with wallet support 
+enabled! Enjoy executing transactions 🙂

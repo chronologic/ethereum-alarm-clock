@@ -19,14 +19,24 @@ class LightWallet {
             return 
         }
 
-        fs.writeFileSync(
-            file,
-            JSON.stringify(this.wallet.encrypt(password))
-        )
-        this.wallet.clear()
-        if (!this.wallet.length === 0) {
-            throw new Error(`Something went wrong when saving keyfile. Assume file: ${file} is corrupted and try again.`)
-        }
+        fs.open(file, 'wx', (err, fd) => {
+            if (err) {
+                if (err.code === 'EEXIST') {
+                    console.error(`${file} already exists, will not overwrite`);
+                    return;
+                }
+                throw err;
+            }
+            
+            fs.writeFileSync(
+                file,
+                JSON.stringify(this.wallet.encrypt(password))
+            )
+            this.wallet.clear()
+            if (!this.wallet.length === 0) {
+                throw new Error(`Something went wrong when saving keyfile. Assume file: ${file} is corrupted and try again.`)
+            }
+        })
     }
 
     decryptAndLoad (file, password) {

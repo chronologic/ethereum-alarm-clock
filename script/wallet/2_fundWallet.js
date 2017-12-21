@@ -16,19 +16,19 @@ const fund = (value, recip) => {
     .then(res => console.log(res.transactionHash))
 }
 
-const main = async _ => {
+const fundAccounts = async (etherAmount, file, password) => {
 
     const wallet = new LightWallet(web3)
-    wallet.decryptAndLoad('keyfile', 'pw')
+    wallet.decryptAndLoad(file, password)
 
     const me = (await web3.eth.getAccounts())[0]
     web3.eth.defaultAccount = me
 
-    const amt = web3.utils.toWei('5', 'ether')
+    const amt = web3.utils.toWei(etherAmount, 'ether')
 
     wallet.getAccounts().forEach(account => fund(amt, account))
     
 }
 
-main()
+main('main', 'keyfile', 'pw')
 .catch(err => console.log(err))

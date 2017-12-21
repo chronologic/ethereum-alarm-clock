@@ -17,13 +17,16 @@ const fromDefault = (conf, txRequest, gasLimit, gasPrice) => {
         if (res.events[0].raw.topics[0] == ABORTEDLOG) {
             // console.log('aborted')
             conf.cache.del(txRequest.address)
+            return 
         }
 
         if (res.events[0].raw.topics[0] == EXECUTEDLOG) {
             // console.log('executed')
             conf.cache.set(txRequest.address, 100)
         }
+
         log.info(`success. tx hash: ${res.transactionHash}`)
+        console.log(`Executed a transaction! Hash: ${res.transactionHash}`)
     })
 }
 
@@ -85,7 +88,10 @@ const executeTxRequest = async (conf, txRequest) => {
             gasPrice,
             executeTxData
         )
-        .then(res => console.log(res.transactionHash))
+        .then(res => {
+            log.info(`success. tx hash: ${res.transactionHash}`)
+            console.log(`Executed a transaction! Hash: ${res.transactionHash}`)
+        })
 
     } else {
         /// Otherwise send from default.
@@ -113,15 +119,18 @@ const executeTxRequestFrom = async (conf, txRequest, index) => {
     )
     .then(res => {
         if (res.events[0].raw.topics[0] == ABORTEDLOG) {
-            // console.log('aborted')
+            console.log(`aborted - ${res.transactionHash}`)
             conf.cache.del(txRequest.address)
+            return
         }
 
         if (res.events[0].raw.topics[0] == EXECUTEDLOG) {
             // console.log('executed')
             conf.cache.set(txRequest.address, 100)
         }
+        
         log.info(`success. tx hash: ${res.transactionHash}`)
+        console.log(`Executed a transaction! Hash: ${res.transactionHash}`)
     })
 }
 

@@ -2,7 +2,6 @@
 const getABI = name => {
     const fs = require('fs')
 
-    // console.log(`${__dirname.slice(0, -7)}/build/contracts/${name}.json`)
     if (fs.existsSync(`${__dirname.slice(0,-7)}/build/contracts/${name}.json`)) {
         const json = require(`${__dirname.slice(0,-7)}/build/contracts/${name}.json`)
         return json.abi

@@ -48,8 +48,7 @@ const main = async (ms, logfile, chain, walletFile, pw) => {
         console.log('logging to console...')
     }
     if (logfile === 'default') {
-        // console.log(require('os').homedir())
-        logfile = 'info.log'
+        logfile = require('os').homedir() + '/.eac.log'
     }
 
     /// loads the config
@@ -64,9 +63,9 @@ const main = async (ms, logfile, chain, walletFile, pw) => {
 
     /// If somehow this filters through...
     if (conf.wallet) {
-        console.log('now using wallet support')
+        console.log('Wallet support: Enabled')
         // return
-    } else { console.log('not using wallet') }
+    } else { console.log('Wallet support: Disabled') }
 
     /// Begins
     startScanning(ms, conf)
