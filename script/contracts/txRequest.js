@@ -34,6 +34,26 @@ class TxRequest {
         return this.windowStart() - this.data.schedule.freezePeriod - this.data.schedule.claimWindowSize
     }
 
+    claimWindowEnd() {
+        return this.claimWindowStart() + this.data.schedule.claimWindowSize
+    }
+
+    async beforeClaimWindow () {
+        return await this.now() < this.claimWindowStart()
+    }
+
+    async inClaimWindow () {
+        return this.claimWindowStart() <= await this.now() && await this.now() <  this.claimWindowEnd
+    }
+
+    freezePeriodEnd () {
+        return this.claimWindowEnd() + this.data.schedule.freezePeriod
+    }
+
+    async inFreezePeriod () {
+        return this.claimWindowEnd() <= await this.now() && await this.now() < this.freezePeriodEnd()
+    }
+
     isClaimed () {
         return this.data.claimData.claimedBy !== NULL_ADDRESS
     }
@@ -56,6 +76,10 @@ class TxRequest {
 
     async inExecutionWindow() {
         return this.windowStart() <= await this.now() && await this.now() <= this.executionWindowEnd()
+    }
+
+    async afterExecutionWindow () {
+        return await this.now() >= this.executionWindowEnd()
     }
 
     reservedExecutionWindowEnd() {

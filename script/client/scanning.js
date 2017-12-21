@@ -146,5 +146,22 @@ const scanToExecute = async conf => {
     })
 }
 
+const { handleTxRequest } = require('./handlers.js')
+
+const scanCache = async conf => {
+
+    /// Nothing stored in cache, return early.
+    if (conf.cache.len() === 0) return
+
+    const allTxRequests = conf.cache.stored()
+        .map(txRequestAddr => new TxRequest(txRequestAddr, conf.web3))
+
+    allTxRequests.forEach(txRequest => {
+        txRequest.fillData()
+        .then(_ => handleTxRequest(conf, txRequest))
+    })
+}
+
+module.exports.scanCache = scanCache
 module.exports.scanToExecute = scanToExecute
 module.exports.scanToStore = scanToStore

@@ -8,7 +8,7 @@ const RequestTrackerABI = getABI('RequestTracker')
 const TransactionRequestABI = getABI('TransactionRequest')
 
 const { Config } = require('./config.js')
-const { scanToExecute, scanToStore } = require('./scanning.js')
+const { scanCache, scanToExecute, scanToStore } = require('./scanning.js')
 
 /// Begins scanning
 const startScanning = (ms, conf) => {
@@ -19,7 +19,7 @@ const startScanning = (ms, conf) => {
 
     setInterval(_ => {
         /// This is also an async function
-        scanToExecute(conf)
+        scanCache(conf)
     }, ms + 1000)
 }
 

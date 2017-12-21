@@ -134,6 +134,78 @@ const executeTxRequestFrom = async (conf, txRequest, index) => {
     })
 }
 
+const hasPendingTx = async txRequest => {
+
+    const parityEnabled = false 
+    if (!parityEnabled) return false
+
+    /// Only available if using parity.
+    const pApi = require('@parity/api')
+    const provider = new ApiProvider.Http('http://localhost:8545')
+    const api = new pApi(provider)
+
+    api.parity.pendingTransaction()
+    .then(res => {
+        const found = res.filter(tx => tx.to === txRequest.address)
+        if (found.length > 0) {
+            return true
+        }
+        return false
+    })
+    .catch(err => new Error('err'))
+
+}
+
+/// General handler for transaction requests
+const handleTxRequest = async (conf, txRequest) => {
+    const log = conf.logger 
+    const web3 = conf.web3 
+
+    /// Early exit conditions
+    //   - pending transaction
+    //   - cancelled
+    //   - before claim window
+    //   - in freeze period 
+    if (await hasPendingTx(txRequest)) {
+        log.debug('Ignoring txRequest with pending transaction in the tx pool.')
+        return 
+    }
+
+    if (txRequest.isCancelled()) {
+        log.debug('Ignoring cancelled txRequest.')
+        /// Should remove from cache.
+        return 
+    }
+
+    if (txRequest.beforeClaimWindow()) {
+        log.debug(`Ignoring txRequest not in claim window. Now: ${await txRequest.now()} | Claimable at: ${txRequest.claimWindowStart()}`)
+        return 
+    }
+
+    if (txRequest.inClaimWindow()) {
+        log.debug('Spawning a claimTxRequest process.')
+        // claimTxRequest(conf, txRequest)
+        return
+    }
+
+    if (txRequest.inFreezePeriod()) {
+        log.debug(`Ignoring frozen request. Now: ${await txRequest.now()} | Window start: ${this.getWindowStart()}`)
+        return 
+    }
+
+    if (txRequest.inExecutionWindow()) {
+        log.debug('Spawning an execution attempt!')
+        executeTxRequest(conf, txRequest)
+        return
+    }
+
+    if (txRequest.afterExecutionWindow()) {
+        log.debug('Spawning a clean up request')
+        // cleanup(txRequest)
+        return
+    }
+}
+
 /// WIP
 const claimTxRequest = async (conf, txRequest) => {
     const log = conf.logger 
@@ -181,7 +253,7 @@ const claimTxRequest = async (conf, txRequest) => {
         return 
     }
 
-    log.info(`Attemptin' to claim. Payment ${paymentIfClaimed}`)
+    log.info(`Attempting to claim. Payment ${paymentIfClaimed}`)
 
     /// Check if wallet is enabled
     if (conf.wallet) {
@@ -214,6 +286,7 @@ const claimTxRequest = async (conf, txRequest) => {
 }
 
 module.exports.claimTxRequest = claimTxRequest
+module.exports.handleTxRequest = handleTxRequest
 module.exports.executeTxRequest = executeTxRequest
 module.exports.executeTxRequestFrom = executeTxRequestFrom
 

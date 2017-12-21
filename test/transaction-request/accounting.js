@@ -376,8 +376,8 @@ contract('Test accounting', async function(accounts) {
         /// Since revert() only returns the gas that wasn't used, 
         /// the balance of the account after a failed transaction
         /// will be below what it was before.
-        expect(afterAccountBal)
-        .to.be.below(beforeAccountBal)
+        expect(afterAccountBal.toNumber())
+        .to.be.below(beforeAccountBal.toNumber())
 
         await requestData.refresh()
 
