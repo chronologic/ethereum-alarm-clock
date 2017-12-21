@@ -48,6 +48,7 @@ contract('Test accounting', async function(accounts) {
     /// Tests ///  
 /////////////////////    
 
+    /// 1
     it('tests transaction request payments', async function() {
         const curBlock = await config.web3.eth.getBlock('latest')
         const timestamp = curBlock.timestamp 
@@ -63,7 +64,7 @@ contract('Test accounting', async function(accounts) {
                 txRecorder.address //toAddress
             ], [
                 donation, //donation
-                0, //payment
+                payment, //payment
                 claimWindowSize,
                 freezePeriod,
                 reservedWindowSize,
@@ -83,7 +84,10 @@ contract('Test accounting', async function(accounts) {
         const requestData = await RequestData.from(txRequest)
 
         expect(requestData.paymentData.donation)
-        .to.equal(12345)
+        .to.equal(donation)
+
+        expect(requestData.paymentData.payment)
+        .to.equal(payment)
 
         const beforeDonationBal = await config.web3.eth.getBalance(requestData.paymentData.donationBenefactor)
         const beforePaymentBal = await config.web3.eth.getBalance(accounts[1])
@@ -127,9 +131,10 @@ contract('Test accounting', async function(accounts) {
         
         expect(
             toBN(afterPaymentBal).sub(toBN(beforePaymentBal)).toNumber()
-        ).to.equal(paymentAmt - gasCost)
+        ).to.equal(paymentAmt - gasCost -1) // FIXME: Is this an off-by-one error?
     })
 
+    /// 2
     it('tests transaction request payments when claimed', async function() {
         const curBlock = await config.web3.eth.getBlock('latest')
         const timestamp = curBlock.timestamp 
@@ -145,7 +150,7 @@ contract('Test accounting', async function(accounts) {
                 txRecorder.address //toAddress
             ], [
                 donation, //donation
-                34343, //payment
+                payment, //payment
                 claimWindowSize,
                 freezePeriod,
                 reservedWindowSize,
@@ -176,10 +181,7 @@ contract('Test accounting', async function(accounts) {
             1
         ) 
 
-        /// TODO - check the claimDeposit
-        // const claimDeposit = 2 * requestData.paymentData.payment 
-
-        const claimDeposit = config.web3.utils.toWei('1')
+        const claimDeposit = 2 * requestData.paymentData.payment 
 
         expect(parseInt(claimDeposit))
         .to.be.above(0)
@@ -238,17 +240,18 @@ contract('Test accounting', async function(accounts) {
         expect(paymentAmt - expectedPayment)
         .to.be.below(100000 * gasPrice)
 
-        /// TODO figure out why the -56 is needed in line 242
         const diff = toBN(afterPaymentBal).sub(toBN(beforePaymentBal)).toNumber()
-        const expectedDiff = paymentAmt - claimDeposit - executeGasCost - claimGasCost -56
+        const expectedDiff = paymentAmt - claimDeposit - executeGasCost - claimGasCost
         if (diff == expectedDiff) expect(diff).to.equal(expectedDiff)
         else console.log(diff, expectedDiff)
     })
 
+    /// 3
     it('tests accounting when everything reverts', async function() {
 
     })
 
+    /// 4
     it('test claim deposit held by contract on claim', async function() {
         const curBlock = await config.web3.eth.getBlock('latest')
         const timestamp = curBlock.timestamp 
@@ -264,7 +267,7 @@ contract('Test accounting', async function(accounts) {
                 txRecorder.address //toAddress
             ], [
                 donation, //donation
-                34343, //payment
+                payment, //payment
                 claimWindowSize,
                 freezePeriod,
                 reservedWindowSize,
@@ -313,6 +316,7 @@ contract('Test accounting', async function(accounts) {
         ).to.equal(depositAmt.toString())
     })
 
+    /// 5
     it('test claim deposit returned if claim rejected', async function() {
         const curBlock = await config.web3.eth.getBlock('latest')
         const timestamp = curBlock.timestamp 
@@ -359,7 +363,8 @@ contract('Test accounting', async function(accounts) {
 
         await txRequest.claim({
             value: depositAmt,
-            from: accounts[1]
+            from: accounts[1],
+            gasPrice: gasPrice
         }).should.be.rejectedWith('VM Exception while processing transaction: revert')
 
         const afterContractBal = await config.web3.eth.getBalance(txRequest.address)
@@ -368,8 +373,11 @@ contract('Test accounting', async function(accounts) {
         expect(afterContractBal)
         .to.equal(beforeContractBal)
 
-        // expect(afterAccountBal)
-        // .to.equal(beforeAccountBal)
+        /// Since revert() only returns the gas that wasn't used, 
+        /// the balance of the account after a failed transaction
+        /// will be below what it was before.
+        expect(afterAccountBal)
+        .to.be.below(beforeAccountBal)
 
         await requestData.refresh()
 

@@ -139,15 +139,22 @@ const claimTxRequest = async (conf, txRequest) => {
     const log = conf.logger 
     const web3 = conf.web3
 
+    /// Wait for the transaction request to fill the data.
     await txRequest.fillData()
+
+    /// Check to see if that the transaction request is not cancelled.
     if (txRequest.isCancelled()) {
         log.debug(`failed to claim cancelled request at address ${txRequest.address}`)
         return
     }
+
+    /// Check to see that the transaction is within claim window.
     if (!txRequest.inClaimWindow()) {
         log.debug(`failed to claim request at address ${txRequest.address} due to out of claim window`)
         return
     }
+
+    /// Check to see that the transaction is _not_ claimed.
     if (txRequest.isClaimed()) {
         log.debug(`failed to claim already claimed request at address ${txRequest.address}`)
         return 
