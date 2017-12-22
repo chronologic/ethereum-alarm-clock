@@ -39,11 +39,15 @@ class TxRequest {
     }
 
     async beforeClaimWindow () {
+        // console.log(await this.now())
+        // console.log(this.claimWindowStart())
+        // console.log(await this.now() < this.claimWindowStart)
         return await this.now() < this.claimWindowStart()
     }
 
     async inClaimWindow () {
-        return this.claimWindowStart() <= await this.now() && await this.now() <  this.claimWindowEnd
+        console.log(this.claimWindowEnd())
+        return this.claimWindowStart() <= await this.now() && await this.now() <  this.claimWindowEnd()
     }
 
     freezePeriodEnd () {

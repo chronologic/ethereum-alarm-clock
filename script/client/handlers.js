@@ -177,14 +177,14 @@ const handleTxRequest = async (conf, txRequest) => {
         return 
     }
 
-    if (txRequest.beforeClaimWindow()) {
+    if (await txRequest.beforeClaimWindow()) {
         log.debug(`Ignoring txRequest not in claim window. Now: ${await txRequest.now()} | Claimable at: ${txRequest.claimWindowStart()}`)
         return 
     }
 
     if (txRequest.inClaimWindow()) {
         log.debug('Spawning a claimTxRequest process.')
-        // claimTxRequest(conf, txRequest)
+        claimTxRequest(conf, txRequest)
         return
     }
 
@@ -211,9 +211,6 @@ const claimTxRequest = async (conf, txRequest) => {
     const log = conf.logger 
     const web3 = conf.web3
 
-    /// Wait for the transaction request to fill the data.
-    await txRequest.fillData()
-
     /// Check to see if that the transaction request is not cancelled.
     if (txRequest.isCancelled()) {
         log.debug(`failed to claim cancelled request at address ${txRequest.address}`)
@@ -234,11 +231,14 @@ const claimTxRequest = async (conf, txRequest) => {
 
     const paymentIfClaimed = Math.floor(
         txRequest.data.paymentData.payment *
-        txRequest.claimPaymentModifier() / 100
+        await txRequest.claimPaymentModifier() / 100
     )
 
     const claimDeposit = 2 * txRequest.data.paymentData.payment
-    const gasToClaim = txRequest.instance.methods.claim().estimateGas({from: web3.eth.defaultAccount})
+    // console.log(await txRequest.instance.methods.claim().estimateGas())
+    const gasToClaim = 2000000
+    // await txRequest.instance.methods.claim()
+    // .estimateGas()//{from: web3.eth.defaultAccount})
     const gasCostToClaim = parseInt(await web3.eth.getGasPrice()) * gasToClaim 
 
     if (gasCostToClaim > paymentIfClaimed) {
@@ -272,9 +272,13 @@ const claimTxRequest = async (conf, txRequest) => {
 
     } else {
 
-        txRequest.instance.methods.claim({
+        // console.log(web3.eth.defaultAccount)
+        // console.log(claimDeposit)
+        // console.log(gasToClaim)
+        // console.log(await web3.eth.getGasPrice())
+        txRequest.instance.methods.claim().send({
             from: web3.eth.defaultAccount,
-            value: claimDeposit,
+            // value: claimDeposit,
             gas: gasToClaim, 
             gasPrice: await web3.eth.getGasPrice()
         })

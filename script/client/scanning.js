@@ -95,56 +95,56 @@ const scanToStore = async conf => {
     return true
 }
 
-const { executeTxRequest, executeTxRequestFrom } = require('./handlers.js')
-const filter = require('async').filter
+// const { executeTxRequest, executeTxRequestFrom } = require('./handlers.js')
+// const filter = require('async').filter
 
-/// Scans the cache and executes any ready transaction requests.
-const scanToExecute = async conf => {
+// /// Scans the cache and executes any ready transaction requests.
+// const scanToExecute = async conf => {
 
-    /// If the cache doesn't contain anything, return this scanning cycle.
-    if (conf.cache.len() === 0) {
-        return 
-    }
+//     /// If the cache doesn't contain anything, return this scanning cycle.
+//     if (conf.cache.len() === 0) {
+//         return 
+//     }
 
-    /// Gets all the txRequestAddrs stored in cache and creates instances of TxRequest class from them.
-    const allTxRequests = conf.cache.stored()
-    .map((txRequestAddr) => {
-        return new TxRequest(txRequestAddr, conf.web3)
-    })
+//     /// Gets all the txRequestAddrs stored in cache and creates instances of TxRequest class from them.
+//     const allTxRequests = conf.cache.stored()
+//     .map((txRequestAddr) => {
+//         return new TxRequest(txRequestAddr, conf.web3)
+//     })
 
 
-    /// Filters the TxRequest instances so that we only keep the ones that are currently executable.
-    filter(allTxRequests, async (txRequest) => {
-        await txRequest.fillData()
-        return await txRequest.inExecutionWindow()
-    }, (err, res) => {
-        if (err) throw new Error(err)
-        /// Then tries to execute the TxRequest based on a few variable factors described below.
-        res.map((txRequest) => {
-            /// Check that its entry in the cache is valid.
-            if (conf.cache.get(txRequest.address) > 101) {
-                /// If it's claimed by one our accounts we have to take care to execute it from the correct one.
-                if (txRequest.isClaimed()
-                    && conf.wallet // truthy check to see if wallet is "turned on"
-                    && conf.wallet.getAccounts().indexOf(txRequest.claimedBy()) > -1)
-                {
-                    const index = conf.wallet.getAccounts().indexOf(txRequest.claimedBy())
-                    console.log(`Attempting execution from ${index}`)
-                    executeTxRequestFrom(conf, txRequest, index)
-                    .catch(err => {
-                        conf.logger.error(err)
-                    })
-                } else {
-                    /// Execute it from default account, or if wallet is enabled: any account.
-                    executeTxRequest(conf, txRequest)
-                    .catch(err => {
-                        conf.logger.error(err)
-                    })
-                }
-            }
-        })
-    })
-}
+//     /// Filters the TxRequest instances so that we only keep the ones that are currently executable.
+//     filter(allTxRequests, async (txRequest) => {
+//         await txRequest.fillData()
+//         return await txRequest.inExecutionWindow()
+//     }, (err, res) => {
+//         if (err) throw new Error(err)
+//         /// Then tries to execute the TxRequest based on a few variable factors described below.
+//         res.map((txRequest) => {
+//             /// Check that its entry in the cache is valid.
+//             if (conf.cache.get(txRequest.address) > 101) {
+//                 /// If it's claimed by one our accounts we have to take care to execute it from the correct one.
+//                 if (txRequest.isClaimed()
+//                     && conf.wallet // truthy check to see if wallet is "turned on"
+//                     && conf.wallet.getAccounts().indexOf(txRequest.claimedBy()) > -1)
+//                 {
+//                     const index = conf.wallet.getAccounts().indexOf(txRequest.claimedBy())
+//                     console.log(`Attempting execution from ${index}`)
+//                     executeTxRequestFrom(conf, txRequest, index)
+//                     .catch(err => {
+//                         conf.logger.error(err)
+//                     })
+//                 } else {
+//                     /// Execute it from default account, or if wallet is enabled: any account.
+//                     executeTxRequest(conf, txRequest)
+//                     .catch(err => {
+//                         conf.logger.error(err)
+//                     })
+//                 }
+//             }
+//         })
+//     })
+// }
 
 const { handleTxRequest } = require('./handlers.js')
 
@@ -163,5 +163,5 @@ const scanCache = async conf => {
 }
 
 module.exports.scanCache = scanCache
-module.exports.scanToExecute = scanToExecute
+// module.exports.scanToExecute = scanToExecute
 module.exports.scanToStore = scanToStore

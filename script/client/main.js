@@ -8,7 +8,7 @@ const RequestTrackerABI = getABI('RequestTracker')
 const TransactionRequestABI = getABI('TransactionRequest')
 
 const { Config } = require('./config.js')
-const { scanCache, scanToExecute, scanToStore } = require('./scanning.js')
+const { scanCache, scanToStore } = require('./scanning.js')
 
 /// Begins scanning
 const startScanning = (ms, conf) => {
