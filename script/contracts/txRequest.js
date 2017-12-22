@@ -46,7 +46,8 @@ class TxRequest {
     }
 
     async inClaimWindow () {
-        console.log(this.claimWindowEnd())
+        // console.log(this.claimWindowStart())
+        // console.log(this.claimWindowEnd())
         return this.claimWindowStart() <= await this.now() && await this.now() <  this.claimWindowEnd()
     }
 

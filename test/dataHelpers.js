@@ -28,7 +28,7 @@ const parseAbortData = (executeTx) => {
 
 const parseRequestData = async (transactionRequest) => {
     const data = await transactionRequest.requestData()
-    return {
+    return {this
         "claimData": {
             "claimedBy": data[0][0],
             "claimDeposit": data[2][0].toNumber(),

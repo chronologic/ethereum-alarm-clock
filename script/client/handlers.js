@@ -120,7 +120,7 @@ const executeTxRequestFrom = async (conf, txRequest, index) => {
     .then(res => {
         if (res.events[0].raw.topics[0] == ABORTEDLOG) {
             console.log(`aborted - ${res.transactionHash}`)
-            conf.cache.del(txRequest.address)
+            conf.cache.set(txRequest.address, 105)
             return
         }
 
@@ -182,19 +182,32 @@ const handleTxRequest = async (conf, txRequest) => {
         return 
     }
 
-    if (txRequest.inClaimWindow()) {
+    if (await txRequest.inClaimWindow()) {
+        // console.log(await txRequest.inClaimWindow())
         log.debug('Spawning a claimTxRequest process.')
+        if (conf.cache.get(txRequest.address) <= 102) {
+            return
+        }
         claimTxRequest(conf, txRequest)
         return
     }
 
-    if (txRequest.inFreezePeriod()) {
-        log.debug(`Ignoring frozen request. Now: ${await txRequest.now()} | Window start: ${this.getWindowStart()}`)
+    if (await txRequest.inFreezePeriod()) {
+        // console.log(await txRequest.inFreezePeriod())
+        log.debug(`Ignoring frozen request. Now: ${await txRequest.now()} | Window start: ${txRequest.getWindowStart()}`)
         return 
     }
 
     if (txRequest.inExecutionWindow()) {
         log.debug('Spawning an execution attempt!')
+        /// This is a magic number. It's a messy hack with the cache
+        /// that sets all executed request to a number at -1 if its being 
+        /// executed. It's the best we can do until we can include a pending
+        /// transaction check.
+        if (conf.cache.get(txRequest.address) <= 101) {
+            log.info(`skipping ${txRequest.address} already executed`)
+            return
+        }
         executeTxRequest(conf, txRequest)
         return
     }
@@ -234,7 +247,7 @@ const claimTxRequest = async (conf, txRequest) => {
         await txRequest.claimPaymentModifier() / 100
     )
 
-    const claimDeposit = 2 * txRequest.data.paymentData.payment
+    const claimDeposit = 2 * txRequest.data.paymentData.payment + 100
     // console.log(await txRequest.instance.methods.claim().estimateGas())
     const gasToClaim = 2000000
     // await txRequest.instance.methods.claim()
@@ -253,22 +266,26 @@ const claimTxRequest = async (conf, txRequest) => {
         return 
     }
 
-    log.info(`Attempting to claim. Payment ${paymentIfClaimed}`)
+    log.info(`Attempting to claim ${txRequest.address} | Payment ${paymentIfClaimed}`)
 
     /// Check if wallet is enabled
     if (conf.wallet) {
 
         const claimData = txRequest.instance.methods.claim().encodeABI()
 
-        sendFromNext(
+        conf.cache.set(txRequest.address, 102)
+        conf.wallet.sendFromNext(
             txRequest.address,
             claimDeposit, 
             gasToClaim,
-            await web3.eth.getGasPrice(),
+            await web3.eth.getGasPrice() - 25000,
             claimData
         )
         .then(res => log.info(`transaction claimed!`))
-        .catch(err => log.error)
+        .catch(err => {
+            log.error(err)
+            conf.cache.set(txRequest.address, 103)
+        })
 
     } else {
 
@@ -276,14 +293,18 @@ const claimTxRequest = async (conf, txRequest) => {
         // console.log(claimDeposit)
         // console.log(gasToClaim)
         // console.log(await web3.eth.getGasPrice())
+        conf.cache.set(txRequest.address, 102)
         txRequest.instance.methods.claim().send({
             from: web3.eth.defaultAccount,
-            // value: claimDeposit,
+            value: claimDeposit,
             gas: gasToClaim, 
             gasPrice: await web3.eth.getGasPrice()
         })
         .then(res => log.info(`transaction claimed!`))
-        .catch(err => log.error)
+        .catch(err => {
+            log.error(err)
+            conf.cache.set(txRequest.address, 103)
+        })
 
     }
 

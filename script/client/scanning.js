@@ -25,7 +25,7 @@ const scanToStore = async conf => {
     const log = conf.logger
 
     /// The left and right bounds for which to scan for...
-    const left = await conf.web3.eth.getBlockNumber() - 10
+    const left = await conf.web3.eth.getBlockNumber() - 100
     const right = left + 300
 
     const tracker = conf.tracker 

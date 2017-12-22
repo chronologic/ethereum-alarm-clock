@@ -64,8 +64,11 @@ const checkWalletEnabled = numTries => {
 
 if (commander.test) {
 
-    testScheduler(true)
-    .catch(err => log.error(err))
+    setInterval(() => {
+        testScheduler(true)
+        .catch(err => log.error(err)
+    )},
+    50)
 
 } else if (commander.createWallet) {
     clear()
