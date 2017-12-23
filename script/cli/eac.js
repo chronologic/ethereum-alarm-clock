@@ -5,7 +5,7 @@ const chalk = require('chalk')
 const chalkAnimation = require('chalk-animation');
 
 const alarmClient = require('../client/main.js')
-const Scheduler = require('../scheduler.js')
+const schedule = require('../scheduler.js')
 const testScheduler = require('../schedule.js')
 
 const ethUtil = require('ethereumjs-util')
@@ -25,7 +25,6 @@ const log = {
 
 commander 
     .version('0.9.0')
-    .option('--createWallet', 'Guides you through creating a new wallet.')
     .option('-t, --test', 'testing')
     .option('-c, --client', 'starts the client')
     .option('-m, --milliseconds <ms>', 'tells the client to scan every <ms> seconds', 4000)
@@ -40,84 +39,35 @@ const Web3 = require('web3')
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 const web3 = new Web3(Web3.givenProvider || provider)
 
-const checkWalletEnabled = numTries => {
-    if (numTries >= 4) {
-        log.error('Not following instructions!')
-        process.exit(1)
-    }
-    const walletEnabled = readlineSync.question('Enable wallet? [y/n]\n').toLowerCase()
-
-    if (walletEnabled == 'y') {
-        wallet = readlineSync.question('Please enter the path to your keystore. Ex. ../wallet/keyfile\n')
-        password = readlineSync.question('Password? Case sensitive...\n')
-        return [wallet, password]
-    } else if (walletEnabled == 'n') {
-        wallet = 'none'
-        password = 'password'
-        return [wallet, password]
-    }  else {
-        log.error(`Value: ${walletEnabled} not valid! Please pick [y/n].`)
-        numTries += 1
-        checkWalletEnabled(numTries)
-    }
-}
 
 if (commander.test) {
-
-    setInterval(() => {
-        testScheduler(true)
-        .catch(err => log.error(err)
-    )},
-    50)
-
-} else if (commander.createWallet) {
-    clear()
-
-    const numAccounts = readlineSync.question(chalk.blue('How many accounts would you like in your wallet?\n> '))
-
-    function isNumber(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0) }
-
-    if (!isNumber(numAccounts) || numAccounts > 10 || numAccounts <= 0) {
-        log.error('Must specify a number between 1 - 10 for number of accounts.')
-        process.exit(1)
-    }
-
-    const file = readlineSync.question(chalk.blue('Where would you like to save the encrypted keys? Please provide a valid filename or path.\n> '))
-    const password = readlineSync.question(chalk.blue("Please enter a password for the keyfile. Write this down!\n> "))
-
-    require('../wallet/1_createWallet').createWallet(numAccounts, file, password)
-} else {
+    testScheduler(true)
+} 
+else {
     if (commander.client) {
         clear()
         console.log(chalk.green('⏰⏰⏰ Welcome to the Ethereum Alarm Clock client ⏰⏰⏰\n'))
 
-        // if (!commander.chain) {
-        //     commander.chain = readlineSync.question('Which chain are you using? Options: [ropsten]\n').toLowerCase()
-        //     assert(commander.chain == 'ropsten', chalk.red(`MUST USE ROPSTEN`))
-        // }
-        commander.chain = 'ropsten'
+        if (!commander.chain) commander.chain = 'ropsten'
     
-        // [commander.wallet, commander.password] = checkWalletEnabled(0)
-
         alarmClient(
             commander.milliseconds,
             commander.logfile,
             commander.chain,
             commander.wallet,
             commander.password
-        )
-        .catch(err => {
+        ).catch(err => {
             if (err.toString().indexOf('Invalid JSON RPC') !== -1) {
                 log.error(`Received invalid RPC response, please make sure the blockchain is running.\n`)
-            } 
-            log.fatal(err)
+            } else {
+                log.fatal(err)
+            }
             process.exit(1)
         })
-
     } else if (commander.schedule) {
-        log.fatal('not yet available. exiting...')
-        process.exit(1)
-        log.info('Schedule a transcation with the EAC')
+        /// Starts the scheduling wizard.
+        clear()
+        log.info('🧙 🧙 🧙  Schedule a transaction  🧙 🧙 🧙\n')
 
         let toAddress
         let callData
@@ -129,7 +79,7 @@ if (commander.test) {
         let donation
         let payment 
 
-        toAddress = readlineSync.question('Enter the recipient address: ')
+        toAddress = readlineSync.question(chalk.black.bgBlue('Enter the recipient address:\n'))
 
         /// Validate the address 
         toAddress = ethUtil.addHexPrefix(toAddress)
@@ -139,24 +89,26 @@ if (commander.test) {
             process.exit(1)
         }
 
-        callData = readlineSync.question('Enter call data: ')
+        callData = readlineSync.question(chalk.black.bgBlue('Enter call data: [press enter to skip]\n'))
 
         /// Just assume utf8 input for now
         callData = web3.utils.utf8ToHex(callData)
 
-        callGas = readlineSync.question('Enter call gas: ')
+        callGas = readlineSync.question(chalk.black.bgBlue(`Enter the call gas: [press enter for recommended]\n`))
 
-        callValue = readlineSync.question('Enter call value: ')
+        callValue = readlineSync.question('Enter call value:\n')
 
-        windowSize = readlineSync.question('Enter window size: ')
+        windowSize = readlineSync.question('Enter window size:\n')
 
-        windowStart = readlineSync.question('Enter window start: ')
+        windowStart = readlineSync.question('Enter window start:\n')
 
-        gasPrice = readlineSync.question('Enter a gas price: ')
+        gasPrice = readlineSync.question('Enter a gas price:\n')
 
-        donation = readlineSync.question('Enter a donation amount: ')
+        donation = readlineSync.question('Enter a donation amount:\n')
 
-        payment = readlineSync.question('Enter a payment amount: ')
+        payment = readlineSync.question('Enter a payment amount:\n')
+
+        clear()
 
         log.debug(`
 toAddress - ${toAddress}
@@ -170,31 +122,70 @@ donation - ${donation}
 payment - ${payment}
 `)
 
-        Scheduler(
-            toAddress,
-            callData,
-            callGas,
-            callValue,
-            windowSize,
-            windowStart,
-            gasPrice,
-            donation,
-            payment
+        const confirm = readlineSync.question('Are all of these variables correct? [Y/n]\n')
+        if (confirm === '' || confirm.toLowerCase() === 'y') {
+            /// Do nothing, just continue
+        } else {
+            log.error('quitting!')
+            setTimeout(() => process.exit(1), 1500)
+            return
+        }
+
+        /// Next use the requestLib to validate
+        const contracts = require('../../ropsten.json')
+        const RequestLibABI = require('../RequestLib.json').abi 
+        const requestLib = new web3.eth.Contract(
+            RequestLibABI,
+            contracts.requestLib
         )
-        // var MAX = 60, MIN = 0, value = 30, key;
-        // console.log('\n\n' + (new Array(20)).join(' ') +
-        //   '[Z] <- -> [X]  FIX: [SPACE]\n');
-        // while (true) {
-        //   console.log('\x1B[1A\x1B[K|' +
-        //     (new Array(value + 1)).join('-') + 'O' +
-        //     (new Array(MAX - value + 1)).join('-') + '| ' + value);
-        //   key = readlineSync.keyIn('',
-        //     {hideEchoBack: true, mask: '', limit: 'zx '});
-        //   if (key === 'z') { if (value > MIN) { value--; } }
-        //   else if (key === 'x') { if (value < MAX) { value++; } }
-        //   else { break; }
-        // }        
-          
+
+        const ora = require('ora')
+        const spin_one = ora('Validating scheduled params...').start()
+        requestLib.methods.validate(
+            [
+                web3.eth.defaultAccount,
+                web3.eth.defaultAccount,
+                0x0,
+                toAddress
+            ], [
+                donation,
+                payment,
+                
+            ]
+
+        ).call()
+        .then(isValid => {
+            isValid.forEach((bool, idx) => {
+                if (!bool) {
+                    console.log(idx + ' is false')
+                    return 
+                }
+            })
+
+            spin_one.succeed('Validated!')
+            const spin_two = ora('Sending transaction! Will await a response...').start()
+
+            schedule(
+                toAddress,
+                callData,
+                callGas,
+                callValue,
+                windowSize,
+                windowStart,
+                gasPrice,
+                donation,
+                payment
+            ).then(res => {
+                cosole.log(res.status)
+                spinner.succeed(`Transaction mined! Hash: ${res.transactionHash}`)
+            })
+            .catch(err => {
+                spinner.fail('Something went wrong! See the error message below.')
+                setTimeout(() => console.log(err), 2000)
+            })    
+        })
+        .catch(err => log.error(err))
+
     } else {
         log.info('Please start eac with one of these options:\n-c to run the client\n-t to schedule a test transaction\n-s to enter scheduling wizard')
         log.fatal('Exiting!')

@@ -29,7 +29,7 @@ const schedule = async (
         RopstenAddresses.blockScheduler
     )
 
-    await blockScheduler.methods.schedule(
+    return blockScheduler.methods.schedule(
         toAddress,
         callData,
         [
@@ -45,9 +45,7 @@ const schedule = async (
         from: web3.eth.defaultAccount,
         gas: 3000000,
         value: web3.utils.toWei('300', 'finney')
-    }).then(tx => {
-        console.log(`Transaction mined! ${tx.transactionHash}`)
-    }).catch(err => console.error(err))
+    })
 }
 
 module.exports = schedule
