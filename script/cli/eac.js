@@ -25,7 +25,7 @@ const log = {
 
 commander 
     .version('0.9.0')
-    .option('--createWallet', 'Guides you through creating a new wallet.')
+    // .option('--createWallet', 'Guides you through creating a new wallet.')
     .option('-t, --test', 'testing')
     .option('-c, --client', 'starts the client')
     .option('-m, --milliseconds <ms>', 'tells the client to scan every <ms> seconds', 4000)
@@ -40,37 +40,41 @@ const Web3 = require('web3')
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 const web3 = new Web3(Web3.givenProvider || provider)
 
-const checkWalletEnabled = numTries => {
-    if (numTries >= 4) {
-        log.error('Not following instructions!')
-        process.exit(1)
-    }
-    const walletEnabled = readlineSync.question('Enable wallet? [y/n]\n').toLowerCase()
+// const checkWalletEnabled = numTries => {
+//     if (numTries >= 4) {
+//         log.error('Not following instructions!')
+//         process.exit(1)
+//     }
+//     const walletEnabled = readlineSync.question('Enable wallet? [y/n]\n').toLowerCase()
 
-    if (walletEnabled == 'y') {
-        wallet = readlineSync.question('Please enter the path to your keystore. Ex. ../wallet/keyfile\n')
-        password = readlineSync.question('Password? Case sensitive...\n')
-        return [wallet, password]
-    } else if (walletEnabled == 'n') {
-        wallet = 'none'
-        password = 'password'
-        return [wallet, password]
-    }  else {
-        log.error(`Value: ${walletEnabled} not valid! Please pick [y/n].`)
-        numTries += 1
-        checkWalletEnabled(numTries)
-    }
-}
+//     if (walletEnabled == 'y') {
+//         wallet = readlineSync.question('Please enter the path to your keystore. Ex. ../wallet/keyfile\n')
+//         password = readlineSync.question('Password? Case sensitive...\n')
+//         return [wallet, password]
+//     } else if (walletEnabled == 'n') {
+//         wallet = 'none'
+//         password = 'password'
+//         return [wallet, password]
+//     }  else {
+//         log.error(`Value: ${walletEnabled} not valid! Please pick [y/n].`)
+//         numTries += 1
+//         checkWalletEnabled(numTries)
+//     }
+// }
 
 if (commander.test) {
 
-    setInterval(() => {
+    // setInterval(() => {
         testScheduler(true)
-        .catch(err => log.error(err)
-    )},
-    50)
+        // .catch(err => log.error(err)
+    // )},
+    // 1000)
 
+/// --createWallet will walke the user through creating a new wallet.
 } else if (commander.createWallet) {
+    log.info('not implemented')
+    process.exit(1)
+    /// Currently not implemented.
     clear()
 
     const numAccounts = readlineSync.question(chalk.blue('How many accounts would you like in your wallet?\n> '))
@@ -86,19 +90,14 @@ if (commander.test) {
     const password = readlineSync.question(chalk.blue("Please enter a password for the keyfile. Write this down!\n> "))
 
     require('../wallet/1_createWallet').createWallet(numAccounts, file, password)
+
 } else {
     if (commander.client) {
         clear()
         console.log(chalk.green('⏰⏰⏰ Welcome to the Ethereum Alarm Clock client ⏰⏰⏰\n'))
 
-        // if (!commander.chain) {
-        //     commander.chain = readlineSync.question('Which chain are you using? Options: [ropsten]\n').toLowerCase()
-        //     assert(commander.chain == 'ropsten', chalk.red(`MUST USE ROPSTEN`))
-        // }
         commander.chain = 'ropsten'
     
-        // [commander.wallet, commander.password] = checkWalletEnabled(0)
-
         alarmClient(
             commander.milliseconds,
             commander.logfile,

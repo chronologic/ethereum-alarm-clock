@@ -17,7 +17,7 @@ const main = async (v) => {
 
     const me = (await web3.eth.getAccounts())[0]
 
-    const windowStart = await web3.eth.getBlockNumber() + 255
+    const windowStart = await web3.eth.getBlockNumber() + 25
     const gasPrice = web3.utils.toWei('100', 'gwei')
 
     // console.log(BlockSchedulerABI)
@@ -58,7 +58,6 @@ const main = async (v) => {
 
 module.exports = main
 
-// setInterval(() => {
-//     main()
-//     .catch(err => log(err))
-// }, 30000)
+const repeat = () => {
+
+}
