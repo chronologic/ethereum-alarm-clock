@@ -2,6 +2,10 @@ const fs = require('fs')
 
 class Logger {
 
+    // 1 - debug
+    // 2 - info / cache
+    // 3 - error
+
     constructor(logfile) {
         if (logfile === 'console') {
             this.logToFile = false

@@ -7,7 +7,8 @@ smart contracts. Right now, we use it as a tool for development. Here's how:
 `node index -t` 
     sends a test transaction with an execution window that will begin
     in 20 blocks. Use this command to populate the test contracts with 
-    upcoming requests for the client.
+    upcoming requests for the client. (Only works if you're running a local node 
+    on http://localhost:8545)
 
 `node index -c`
     starts the client and logs info to the console. The client will scan

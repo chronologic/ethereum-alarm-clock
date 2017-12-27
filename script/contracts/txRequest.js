@@ -107,6 +107,10 @@ class TxRequest {
         return this.data.txData.gasPrice
     }
 
+    getOwner () {
+        return this.data.meta.owner
+    }
+
     async fillData () {
         const requestData = await RequestData.from(this.instance)
         this.data = requestData

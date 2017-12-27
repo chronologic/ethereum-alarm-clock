@@ -100,6 +100,7 @@ library RequestLib {
         request.schedule.windowStart = uintArgs[7];
         request.txnData.callGas = uintArgs[8];
         request.txnData.callValue = uintArgs[9];
+        request.txnData.gasPrice = uintArgs[10];
 
         // Uint8 values
         request.claimData.paymentModifier = 0;

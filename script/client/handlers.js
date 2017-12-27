@@ -1,3 +1,5 @@
+const { catchNotMinedError } = require('./errorHelpers')
+
 const { ABORTEDLOG, EXECUTEDLOG } = require('../constants.js')
 
 /// Sends the exeuction request from web3 default account.
@@ -28,12 +30,16 @@ const fromDefault = (conf, txRequest, gasLimit, gasPrice) => {
         log.info(`success. tx hash: ${res.transactionHash}`)
         console.log(`Executed a transaction! Hash: ${res.transactionHash}`)
     })
+    .catch(err => {
+        if (catchNotMinedError(err)) {
+            log.info(catchNotMinedError(err))
+        } else { throw new Error(err) }
+    })
 }
 
 const executeTxRequest = async (conf, txRequest) => {
-    const web3 = conf.web3 
-    // const requestLib = conf.requestLib 
     const log = conf.logger
+    const web3 = conf.web3 
 
     await txRequest.fillData()
     if (txRequest.wasCalled()) {
@@ -92,6 +98,11 @@ const executeTxRequest = async (conf, txRequest) => {
             log.info(`success. tx hash: ${res.transactionHash}`)
             console.log(`Executed a transaction! Hash: ${res.transactionHash}`)
         })
+        .catch(err => {
+            if (catchNotMinedError(err)) {
+                log.info(catchNotMinedError(err))
+            } else { throw new Error(err) }
+        })
 
     } else {
         /// Otherwise send from default.
@@ -132,27 +143,33 @@ const executeTxRequestFrom = async (conf, txRequest, index) => {
         log.info(`success. tx hash: ${res.transactionHash}`)
         console.log(`Executed a transaction! Hash: ${res.transactionHash}`)
     })
+    .catch(err => {
+        if (catchNotMinedError(err)) {
+            log.info(catchNotMinedError(err))
+        } else { throw new Error(err) }
+    })
 }
 
-const hasPendingTx = async txRequest => {
+/**
+ * Uses the Parity specific RPC request `parity_pendingTransactions` to search
+ * for pending transactions in the transaction pool.
+ * @param {TransactionRequest} txRequest 
+ * @returns {Promise<boolean>} True if a pending transaction to this address exists.  
+ */
+const hasPendingTx = (confProvider, txRequest) => {
 
-    const parityEnabled = false 
-    if (!parityEnabled) return false
-
-    /// Only available if using parity.
+    /// Only available if using parity locally.
     const pApi = require('@parity/api')
-    const provider = new ApiProvider.Http('http://localhost:8545')
+    const provider = new pApi.Provider.Http(`${confProvider}`)
     const api = new pApi(provider)
 
-    api.parity.pendingTransaction()
-    .then(res => {
-        const found = res.filter(tx => tx.to === txRequest.address)
-        if (found.length > 0) {
-            return true
-        }
+    api.parity.pendingTransactions()
+    .then(transactions => {
+        const recips = transactions.map(tx => tx.to)
+        if (recips.indexOf(txRequest.address) !== -1) return true 
         return false
     })
-    .catch(err => new Error('err'))
+    .catch(err => new Error('Are you sure Parity is running locally?'))
 
 }
 
@@ -166,13 +183,13 @@ const handleTxRequest = async (conf, txRequest) => {
     //   - cancelled
     //   - before claim window
     //   - in freeze period 
-    if (await hasPendingTx(txRequest)) {
+    if (await hasPendingTx(conf.provider, txRequest)) {
         log.debug('Ignoring txRequest with pending transaction in the tx pool.')
         return 
     }
 
     if (txRequest.isCancelled()) {
-        log.debug('Ignoring cancelled txRequest.')
+        log.debug('Ignoring cancelled txRequest.')  
         /// Should remove from cache.
         return 
     }
@@ -183,7 +200,6 @@ const handleTxRequest = async (conf, txRequest) => {
     }
 
     if (await txRequest.inClaimWindow()) {
-        // console.log(await txRequest.inClaimWindow())
         log.debug('Spawning a claimTxRequest process.')
         if (conf.cache.get(txRequest.address) <= 102) {
             return
@@ -193,13 +209,12 @@ const handleTxRequest = async (conf, txRequest) => {
     }
 
     if (await txRequest.inFreezePeriod()) {
-        // console.log(await txRequest.inFreezePeriod())
         log.debug(`Ignoring frozen request. Now: ${await txRequest.now()} | Window start: ${txRequest.getWindowStart()}`)
         return 
     }
 
     if (txRequest.inExecutionWindow()) {
-        log.debug('Spawning an execution attempt!')
+        log.debug('Spawning an execution attempt')
         /// This is a magic number. It's a messy hack with the cache
         /// that sets all executed request to a number at -1 if its being 
         /// executed. It's the best we can do until we can include a pending
@@ -214,9 +229,82 @@ const handleTxRequest = async (conf, txRequest) => {
 
     if (txRequest.afterExecutionWindow()) {
         log.debug('Spawning a clean up request')
-        // cleanup(txRequest)
+        // cleanup(conf, txRequest)
+        // This request should handle returning funds if the transaction was not executed.
         return
     }
+}
+
+/// WIP
+const cleanup = async (conf, txRequest) => {
+    const web3 = conf.web3 
+    const log = conf.logger 
+
+    if (!txRequest.afterExecutionWindow()) {
+        log.debug('Not after window')
+        return 
+    }
+    if (txRequest.isCancelled()) {
+        log.debug('Cancelled')
+        return 
+    }
+    if (txRequest.wasCalled()) {
+        log.debug('Already executed')
+        return 
+    }
+    if (await web3.eth.getBalance(txRequest.address) === 0) {
+        log.debug('No Ether left in contract')
+        return 
+    }
+
+    if (conf.wallet) {
+        const accounts = conf.wallet.getAccounts()
+        if (accounts.indexOf(txRequest.getOwner()) != -1) {
+            const data = txRequest.instance.methods.cancel().encodeABI()
+            sendFromIndex(
+                accounts.indexOf(txRequest.getOwner()),
+                txRequest.address,
+                0,
+                3000000,
+                await web3.eth.getGasPrice(),
+                data
+            )
+            .then(tx => log.info('Clean up successful'))
+            .catch(err => {
+                if (catchNotMinedError(err)) {
+                    log.info(catchNotMinedError(err))
+                } else { throw new Error(err) }
+            })
+        } else {
+            const gasToCancel = txRequest.instance.methods.cancel().estimateGas()
+            const gasCostToCancel = gasToCancel * await web3.eth.getGasPrice()
+
+            if gasCostToCancel > await web3.eth.getBalance(txRequest.address) {
+                log.debug('TxRequest does not have enough ether to cover costs of cancelling')
+                return
+            }
+
+            const data = txRequest.instance.methods.cancel().encodeABI()
+
+            sendFromNext(
+                txRequest.address,
+                0,
+                gasToCancel + 12000,
+                await web3.eth.getGasPrice(),
+                data
+            )
+            .then(tx => log.info('Clean up successful'))
+            .catch(err => {
+                if (catchNotMinedError(err)) {
+                    log.info(catchNotMinedError(err))
+                } else { throw new Error(err) }
+            })
+        }
+    }
+
+    // if (txRequest.getOwner() != web3.eth.defaultAccount) {
+
+    // }
 }
 
 /// WIP
@@ -283,16 +371,14 @@ const claimTxRequest = async (conf, txRequest) => {
         )
         .then(res => log.info(`transaction claimed!`))
         .catch(err => {
-            log.error(err)
+            if (catchNotMinedError(err)) {
+                log.info(catchNotMinedError(err))
+            } else { throw new Error(err) }
             conf.cache.set(txRequest.address, 103)
         })
 
     } else {
 
-        // console.log(web3.eth.defaultAccount)
-        // console.log(claimDeposit)
-        // console.log(gasToClaim)
-        // console.log(await web3.eth.getGasPrice())
         conf.cache.set(txRequest.address, 102)
         txRequest.instance.methods.claim().send({
             from: web3.eth.defaultAccount,
@@ -302,24 +388,15 @@ const claimTxRequest = async (conf, txRequest) => {
         })
         .then(res => log.info(`transaction claimed!`))
         .catch(err => {
-            log.error(err)
+            if (catchNotMinedError(err)) {
+                log.info(catchNotMinedError(err))
+            } else { throw new Error(err) }
             conf.cache.set(txRequest.address, 103)
         })
-
     }
-
 }
 
 module.exports.claimTxRequest = claimTxRequest
 module.exports.handleTxRequest = handleTxRequest
 module.exports.executeTxRequest = executeTxRequest
 module.exports.executeTxRequestFrom = executeTxRequestFrom
-
-// const reason = [
-//     'WasCancelled',         //0
-//     'AlreadyCalled',        //1
-//     'BeforeCallWindow',     //2
-//     'AfterCallWindow',      //3
-//     'ReservedForClaimer',   //4
-//     'InsufficientGas'       //5
-// ]

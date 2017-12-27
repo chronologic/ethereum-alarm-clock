@@ -17,7 +17,7 @@ const main = async (v) => {
 
     const me = (await web3.eth.getAccounts())[0]
 
-    const windowStart = await web3.eth.getBlockNumber() + 25
+    const windowStart = await web3.eth.getBlockNumber() + 12
     const gasPrice = web3.utils.toWei('100', 'gwei')
 
     // console.log(BlockSchedulerABI)
@@ -37,11 +37,11 @@ const main = async (v) => {
         [
             1212121,    //callGas
             123454321,  //callValue
-            30,        //windowSize
+            255,        //windowSize
             windowStart,
             gasPrice,
             12,          //donation
-            web3.utils.toWei('250', 'finney')           //payment
+            24           //payment
 
         ]
     ).send({
@@ -56,9 +56,9 @@ const main = async (v) => {
     .catch(err => console.error(err))
 }
 
-module.exports = main
+// module.exports = main
 
 // setInterval(() => {
-    // main()
-    // .catch(err => log(err))
+    main()
+    .catch(err => log(err))
 // }, 30000)

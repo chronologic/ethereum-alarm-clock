@@ -24,11 +24,11 @@ const fundAccounts = async (etherAmount, file, password) => {
     const me = (await web3.eth.getAccounts())[0]
     web3.eth.defaultAccount = me
 
-    const amt = web3.utils.toWei(etherAmount, 'ether')
+    const amt = web3.utils.toWei(etherAmount, 'ether');
 
-    wallet.getAccounts().forEach(account => fund(amt, account))
+    (await wallet.getAccounts()).forEach(account => fund(amt, account))
     
 }
 
-main('main', 'keyfile', 'pw')
+fundAccounts('5', 'keyfile', 'pw')
 .catch(err => console.log(err))

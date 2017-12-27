@@ -9,6 +9,7 @@ class Config {
         factory,
         tracker,
         web3,
+        provider,
         walletFile,
         password
     ) {
@@ -18,6 +19,7 @@ class Config {
         this.factory = factory 
         this.tracker = tracker
         this.web3 = web3
+        this.provider = provider
         this.wallet = this.instantiateWallet(walletFile, password)
     }
 
