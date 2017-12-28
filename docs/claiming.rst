@@ -9,10 +9,11 @@ Claiming
 The Problem
 -----------
 
-To understand the claiming mechanism it is important to understand the problem
-it solves.
+The claiming mechanism solves a very important problem contained within the 
+incentive scheme of the EAC. It's best to provide an example first then go into 
+the specifics of the solution later.
 
-Consider a situation where there are two people Alice and Bob are competing to
+Consider a situation where there are two people, Alice and Bob, competing to
 execute the same request. The request will issue a payment of 100 wei to whomever
 executes it.
 
@@ -46,7 +47,8 @@ The claiming process is the current solution to this issue.
 
 Prior to the execution window there is a section of time referred to as the
 claim window during which the request may be claimed by a single party for
-execution.  Part of claiming includes putting down a deposit.
+execution.  An essiential part of claiming is that the claimer must put down 
+a claim deposit in order to attain the rights to execute the request.
 
 When a request has been claimed, the claimer is granted exclusive rights to
 execute the request during a window of blocks at the beginning of the execution

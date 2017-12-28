@@ -25,7 +25,7 @@ contract BaseScheduler is SchedulerInterface {
      * @param _toAddress The address destination of the transaction.
      * @param _callData The bytecode that will be included with the transaction.
      * @param _uintArgs [0] The callGas of the transaction.
-     * @param _uintArgs [1] The value of ether to be send with the transaction.
+     * @param _uintArgs [1] The value of ether to be sent with the transaction.
      * @param _uintArgs [2] The size of the execution window of the transaction.
      * @param _uintArgs [3] The (block or timestamp) of when the execution window starts.
      * @param _uintArgs [4] The gasPrice which will be used to execute this transaction.

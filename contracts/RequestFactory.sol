@@ -42,9 +42,9 @@ contract RequestFactory is RequestFactoryInterface {
      * @param _callData        -  The call data
      */
     function createRequest(
-        address[3] _addressArgs,
-        uint[11]   _uintArgs,
-        bytes    _callData
+        address[3]  _addressArgs,
+        uint[11]    _uintArgs,
+        bytes       _callData
     )
         public payable returns (address)
     {
@@ -55,7 +55,7 @@ contract RequestFactory is RequestFactoryInterface {
                 _addressArgs[1],  // paymentData.donationBenefactor
                 _addressArgs[2]   // txnData.toAddress
             ],
-            _uintArgs,  //uint[11]
+            _uintArgs,            //uint[11]
             _callData
         );
 
@@ -78,16 +78,16 @@ contract RequestFactory is RequestFactoryInterface {
      *  Parameters are the same as `createRequest`
      */
     function createValidatedRequest(
-        address[3] addressArgs,
-        uint[11] uintArgs,
-        bytes callData
+        address[3]  _addressArgs,
+        uint[11]    _uintArgs,
+        bytes       _callData
     ) 
         public payable returns (address)
     {
         bool[6] memory isValid = validateRequestParams(
-            addressArgs,
-            uintArgs,
-            callData,
+            _addressArgs,
+            _uintArgs,
+            _callData,
             msg.value
         );
 
@@ -119,7 +119,7 @@ contract RequestFactory is RequestFactoryInterface {
             return 0x0;
         }
 
-        return createRequest(addressArgs, uintArgs, callData);
+        return createRequest(_addressArgs, _uintArgs, _callData);
     }
 
     /// ----------------------------
@@ -144,23 +144,23 @@ contract RequestFactory is RequestFactoryInterface {
      * @dev Validate the constructor arguments for either `createRequest` or `createValidatedRequest`.
      */
     function validateRequestParams(
-        address[3] addressArgs,
-        uint[11] uintArgs,
-        bytes callData,
-        uint endowment
-    ) 
-        internal returns (bool[6])
+        address[3]  _addressArgs,
+        uint[11]    _uintArgs,
+        bytes       _callData,
+        uint        _endowment
+    )
+        public returns (bool[6])
     {
         return RequestLib.validate(
             [
                 msg.sender,      // meta.createdBy
-                addressArgs[0],  // meta.owner
-                addressArgs[1],  // paymentData.donationBenefactor
-                addressArgs[2]   // txnData.toAddress
+                _addressArgs[0],  // meta.owner
+                _addressArgs[1],  // paymentData.donationBenefactor
+                _addressArgs[2]   // txnData.toAddress
             ],
-            uintArgs,
-            callData,
-            endowment
+            _uintArgs,
+            _callData,
+            _endowment
         );
     }
 

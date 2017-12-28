@@ -7,7 +7,7 @@ Architecture
 Overview
 --------
 
-The Alarm service is made of the following contracts.
+The Ethereum Alarm Clock infrastructure consists of the following contracts:
 
 * :class:`TransactionRequest`: Represents a single scheduled transaction.
 * :class:`RequestFactory`: Low level API for creating :class:`TransactionRequest` contracts.

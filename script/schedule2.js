@@ -56,9 +56,9 @@ const main = async (v) => {
     .catch(err => console.error(err))
 }
 
-// module.exports = main
+module.exports = main
 
 // setInterval(() => {
-    main()
-    .catch(err => log(err))
+    // main()
+    // .catch(err => log(err))
 // }, 30000)

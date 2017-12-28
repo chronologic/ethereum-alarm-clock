@@ -3,11 +3,8 @@ pragma solidity ^0.4.17;
 /// @title GroveLib - Library for queriable indexed ordered data.
 /// @author PiperMerriam - <pipermerriam@gmail.com>
 library GroveLib {
-        /*
-         *  Indexes for ordered data
-         *
-         *  Address: 0x7c1eb207c07e7ab13cf245585bd03d0fa478d034
-         */
+
+        // Indexes for ordered data
         struct Index {
                 bytes32 root;
                 mapping (bytes32 => Node) nodes;
@@ -22,7 +19,9 @@ library GroveLib {
                 uint height;
         }
 
-        function max(uint a, uint b) internal returns (uint) {
+        function max(uint a, uint b) 
+            internal pure returns (uint)
+        {
             if (a >= b) {
                 return a;
             }
@@ -35,49 +34,63 @@ library GroveLib {
         /// @dev Retrieve the unique identifier for the node.
         /// @param index The index that the node is part of.
         /// @param id The id for the node to be looked up.
-        function getNodeId(Index storage index, bytes32 id) constant returns (bytes32) {
+        function getNodeId(Index storage index, bytes32 id) 
+            public view returns (bytes32)
+        {
             return index.nodes[id].id;
         }
 
         /// @dev Retrieve the value for the node.
         /// @param index The index that the node is part of.
         /// @param id The id for the node to be looked up.
-        function getNodeValue(Index storage index, bytes32 id) constant returns (int) {
+        function getNodeValue(Index storage index, bytes32 id)
+            public view returns (int)
+        {
             return index.nodes[id].value;
         }
 
         /// @dev Retrieve the height of the node.
         /// @param index The index that the node is part of.
         /// @param id The id for the node to be looked up.
-        function getNodeHeight(Index storage index, bytes32 id) constant returns (uint) {
+        function getNodeHeight(Index storage index, bytes32 id)
+            public view returns (uint)
+        {
             return index.nodes[id].height;
         }
 
         /// @dev Retrieve the parent id of the node.
         /// @param index The index that the node is part of.
         /// @param id The id for the node to be looked up.
-        function getNodeParent(Index storage index, bytes32 id) constant returns (bytes32) {
+        function getNodeParent(Index storage index, bytes32 id)
+            public view returns (bytes32)
+        {
             return index.nodes[id].parent;
         }
 
         /// @dev Retrieve the left child id of the node.
         /// @param index The index that the node is part of.
         /// @param id The id for the node to be looked up.
-        function getNodeLeftChild(Index storage index, bytes32 id) constant returns (bytes32) {
+        function getNodeLeftChild(Index storage index, bytes32 id)
+            public view returns (bytes32)
+        {
             return index.nodes[id].left;
         }
 
         /// @dev Retrieve the right child id of the node.
         /// @param index The index that the node is part of.
         /// @param id The id for the node to be looked up.
-        function getNodeRightChild(Index storage index, bytes32 id) constant returns (bytes32) {
+        function getNodeRightChild(Index storage index, bytes32 id)
+            public view returns (bytes32)
+        {
             return index.nodes[id].right;
         }
 
         /// @dev Retrieve the node id of the previous node in the tree.
         /// @param index The index that the node is part of.
         /// @param id The id for the node to be looked up.
-        function getPreviousNode(Index storage index, bytes32 id) constant returns (bytes32) {
+        function getPreviousNode(Index storage index, bytes32 id)
+            public view returns (bytes32)
+        {
             Node storage currentNode = index.nodes[id];
 
             if (currentNode.id == 0x0) {
@@ -124,7 +137,9 @@ library GroveLib {
         /// @dev Retrieve the node id of the previous node in the tree.
         /// @param index The index that the node is part of.
         /// @param id The id for the node to be looked up.
-        function getNextNode(Index storage index, bytes32 id) constant returns (bytes32) {
+        function getNextNode(Index storage index, bytes32 id)
+            public view returns (bytes32)
+        {
             Node storage currentNode = index.nodes[id];
 
             if (currentNode.id == 0x0) {
@@ -185,8 +200,8 @@ library GroveLib {
                     remove(index, id);
                 }
 
-                uint leftHeight;
-                uint rightHeight;
+                // uint leftHeight;
+                // uint rightHeight;
 
                 bytes32 previousNodeId = 0x0;
 
@@ -231,14 +246,18 @@ library GroveLib {
         /// @dev Checks whether a node for the given unique identifier exists within the given index.
         /// @param index The index that should be searched
         /// @param id The unique identifier of the data element to check for.
-        function exists(Index storage index, bytes32 id) constant returns (bool) {
+        function exists(Index storage index, bytes32 id) 
+            public view returns (bool)
+        {
             return (index.nodes[id].height > 0);
         }
 
         /// @dev Remove the node for the given unique identifier from the index.
         /// @param index The index that should be removed
         /// @param id The unique identifier of the data element to remove.
-        function remove(Index storage index, bytes32 id) public {
+        function remove(Index storage index, bytes32 id)
+            public
+        {
             Node storage replacementNode;
             Node storage parent;
             Node storage child;
@@ -341,12 +360,18 @@ library GroveLib {
             }
 
             // Now we zero out all of the fields on the nodeToDelete.
-            nodeToDelete.id = 0x0;
-            nodeToDelete.value = 0;
-            nodeToDelete.parent = 0x0;
-            nodeToDelete.left = 0x0;
-            nodeToDelete.right = 0x0;
-            nodeToDelete.height = 0;
+            delete nodeToDelete.id;
+            delete nodeToDelete.value;
+            delete nodeToDelete.parent;
+            delete nodeToDelete.left;
+            delete nodeToDelete.right;
+            delete nodeToDelete.height;
+            // nodeToDelete.id = 0x0;
+            // nodeToDelete.value = 0;
+            // nodeToDelete.parent = 0x0;
+            // nodeToDelete.left = 0x0;
+            // nodeToDelete.right = 0x0;
+            // nodeToDelete.height = 0;
 
             // Walk back up the tree rebalancing
             if (rebalanceOrigin != 0x0) {
@@ -360,7 +385,9 @@ library GroveLib {
         bytes2 constant LTE = "<=";
         bytes2 constant EQ = "==";
 
-        function _compare(int left, bytes2 operator, int right) internal returns (bool) {
+        function _compare(int left, bytes2 operator, int right)
+            internal pure returns (bool)
+        {
             if (operator == GT) {
                 return (left > right);
             }
@@ -378,10 +405,12 @@ library GroveLib {
             }
 
             // Invalid operator.
-            throw;
+            revert();
         }
 
-        function _getMaximum(Index storage index, bytes32 id) internal returns (int) {
+        function _getMaximum(Index storage index, bytes32 id)
+            internal view returns (int)
+        {
                 Node storage currentNode = index.nodes[id];
 
                 while (true) {
@@ -392,7 +421,9 @@ library GroveLib {
                 }
         }
 
-        function _getMinimum(Index storage index, bytes32 id) internal returns (int) {
+        function _getMinimum(Index storage index, bytes32 id)
+            internal view returns (int)
+        {
                 Node storage currentNode = index.nodes[id];
 
                 while (true) {
@@ -404,16 +435,19 @@ library GroveLib {
         }
 
 
-        /** @dev Query the index for the edge-most node that satisfies the
+        /** 
+         * @dev Query the index for the edge-most node that satisfies the
          *  given query.  For >, >=, and ==, this will be the left-most node
          *  that satisfies the comparison.  For < and <= this will be the
          *  right-most node that satisfies the comparison.
-         */
-        /// @param index The index that should be queried
-        /** @param operator One of '>', '>=', '<', '<=', '==' to specify what
+         *
+         * @param index The index that should be queried
+         * @param operator One of '>', '>=', '<', '<=', '==' to specify what
          *  type of comparison operator should be used.
          */
-        function query(Index storage index, bytes2 operator, int value) public returns (bytes32) {
+        function query(Index storage index, bytes2 operator, int value)
+            public returns (bytes32)
+        {
                 bytes32 rootNodeId = index.root;
                 
                 if (rootNodeId == 0x0) {
@@ -496,7 +530,9 @@ library GroveLib {
                 }
         }
 
-        function _rebalanceTree(Index storage index, bytes32 id) internal {
+        function _rebalanceTree(Index storage index, bytes32 id)
+            internal
+        {
             // Trace back up rebalancing the tree and updating heights as
             // needed..
             Node storage currentNode = index.nodes[id];
@@ -540,26 +576,30 @@ library GroveLib {
             }
         }
 
-        function _getBalanceFactor(Index storage index, bytes32 id) internal returns (int) {
-                Node storage node = index.nodes[id];
+        function _getBalanceFactor(Index storage index, bytes32 id)
+            internal view returns (int)
+        {
+            Node storage node = index.nodes[id];
 
-                return int(index.nodes[node.left].height) - int(index.nodes[node.right].height);
+            return int(index.nodes[node.left].height) - int(index.nodes[node.right].height);
         }
 
-        function _updateNodeHeight(Index storage index, bytes32 id) internal {
-                Node storage node = index.nodes[id];
+        function _updateNodeHeight(Index storage index, bytes32 id)
+            internal
+        {
+            Node storage node = index.nodes[id];
 
-                node.height = max(index.nodes[node.left].height, index.nodes[node.right].height) + 1;
+            node.height = max(index.nodes[node.left].height, index.nodes[node.right].height) + 1;
         }
 
-        function _rotateLeft(Index storage index, bytes32 id) internal {
+        function _rotateLeft(Index storage index, bytes32 id)
+            internal
+        {
             Node storage originalRoot = index.nodes[id];
 
-            if (originalRoot.right == 0x0) {
-                // Cannot rotate left if there is no right originalRoot to rotate into
-                // place.
-                throw;
-            }
+            // Cannot rotate left if there is no right originalRoot to rotate into
+            // place.
+            require(originalRoot.right != 0x0);
 
             // The right child is the new root, so it gets the original
             // `originalRoot.parent` as it's parent.
@@ -609,11 +649,9 @@ library GroveLib {
         function _rotateRight(Index storage index, bytes32 id) internal {
             Node storage originalRoot = index.nodes[id];
 
-            if (originalRoot.left == 0x0) {
-                // Cannot rotate right if there is no left node to rotate into
-                // place.
-                throw;
-            }
+            // Cannot rotate right if there is no left node to rotate into
+            // place.
+            require(originalRoot.left != 0x0);
 
             // The left child is taking the place of node, so we update it's
             // parent to be the original parent of the node.

@@ -42,8 +42,8 @@ const web3 = new Web3(provider)
 const main = async _ => {
     if (program.test) 
     {
-        console.log(program.test)
-        // testScheduler(true)
+        // console.log(program.test)
+        testScheduler(true)
     }
 
     else if (program.createWallet) {
@@ -118,22 +118,52 @@ const main = async _ => {
 
             callData = readlineSync.question(chalk.black.bgBlue('Enter call data: [press enter to skip]\n'))
 
-            /// Just assume utf8 input for now
-            callData = web3.utils.utf8ToHex(callData)
+            if (!web3.utils.isHex(callData)) {
+                callData = web3.utils.utf8ToHex(callData)
+            }
 
             callGas = readlineSync.question(chalk.black.bgBlue(`Enter the call gas: [press enter for recommended]\n`))
 
+            if (!callGas) {
+                callGas = 3000000
+            }
+
             callValue = readlineSync.question(chalk.black.bgBlue('Enter call value:\n'))
+
+            if (!callValue) {
+                callValue = 0
+            }
 
             windowSize = readlineSync.question(chalk.black.bgBlue('Enter window size:\n'))
 
-            windowStart = readlineSync.question(chalk.black.bgBlue('Enter window start:\n'))
+            if (!windowSize) {
+                windowsize = 255
+            }
+
+            windowStart = readlineSync.question(chalk.black.bgBlue(`Enter window start: [Current block number - ${await web3.eth.getBlockNumber()}\n`))
+
+            if (windowStart < await web3.eth.getBlockNumber() + 15) {
+                log.error('That window start time is too soon!')
+                process.exit(1)
+            }
 
             gasPrice = readlineSync.question(chalk.black.bgBlue('Enter a gas price:\n'))
 
+            if (!gasPrice) {
+                gasPrice = web3.utils.toWei('50', 'gwei')
+            }
+
             donation = readlineSync.question(chalk.black.bgBlue('Enter a donation amount:\n'))
 
+            if (!donation) {
+                donation = 33
+            }
+
             payment = readlineSync.question(chalk.black.bgBlue('Enter a payment amount:\n'))
+
+            if (!payment) {
+                payment = 0
+            }
 
             clear()
 

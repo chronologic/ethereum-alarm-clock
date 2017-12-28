@@ -70,3 +70,28 @@ better streamline the user experience.
 After you have funded your children account and you begin running the client you
 will see a friendly message stating that you are now running with wallet support 
 enabled! Enjoy executing transactions 🙂
+
+Reference
+----------
+
+```
+$ eac --help
+
+  Usage: eac [options]                                                                                 │
+                                                                                                       │
+                                                                                                       │
+  Options:                                                                                             │
+                                                                                                       │
+    -V, --version            output the version number                                                 │
+    -t, --test               sends a test transaction to the network                                   │
+    --createWallet           guides you through creating a new wallet.                                 │
+    -c, --client             starts the executing client                                               │
+    -m, --milliseconds <ms>  tells the client to scan every <ms> seconds (default: 4000)               │
+    --logfile [path]         specifies the output logifle (default: default)                           │
+    --chain [ropsten]        selects the chain to use                                                  │
+    --provider <string>      set the HttpProvider to use (default: http://localhost:8545)              │
+    -w, --wallet [path]      specify the path to the keyfile you would like to unlock (default: none)  │
+    -p, --password [string]  the password to unlock your keystore file (default: password)             │
+    -s, --schedule           schedules a transactions                                                  │
+    -h, --help               output usage information 
+```  

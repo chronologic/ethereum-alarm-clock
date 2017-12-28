@@ -12,7 +12,7 @@ import "contracts/zeppelin/SafeMath.sol";
 library SchedulerLib {
     using SafeMath for uint;
 
-    address constant DONATION_BENEFACTOR = 0x246eB2e1E59b857678Bf0d0B7f25cC25b6106044;
+    address constant DONATION_BENEFACTOR = 0xecc9c5fff8937578141592e7E62C2D2E364311b8;
 
     struct FutureTransaction {
         address toAddress;          // Destination of the transaction.

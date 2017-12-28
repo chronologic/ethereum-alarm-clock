@@ -14,7 +14,7 @@ contract RequestTracker is RequestTrackerInterface {
     mapping (address => GroveLib.Index) requestsByAddress;
 
     /*
-     * Returns the windowStart value for the given request.
+     * @dev Returns the windowStart value for the given request.
      */
     function getWindowStart(address factory, address request)
         public view returns (uint)
@@ -23,7 +23,7 @@ contract RequestTracker is RequestTrackerInterface {
     }
 
     /*
-     * Returns the request which comes directly before the given request.
+     * @dev Returns the request which comes directly before the given request.
      */
     function getPreviousRequest(address factory, address request)
         public view returns (address)
@@ -32,7 +32,7 @@ contract RequestTracker is RequestTrackerInterface {
     }
 
     /*
-     * Returns the request which comes directly after the given request.
+     * @dev Returns the request which comes directly after the given request.
      */
     function getNextRequest(address factory, address request)
         public view returns (address)

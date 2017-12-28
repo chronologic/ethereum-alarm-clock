@@ -279,7 +279,7 @@ const cleanup = async (conf, txRequest) => {
             const gasToCancel = txRequest.instance.methods.cancel().estimateGas()
             const gasCostToCancel = gasToCancel * await web3.eth.getGasPrice()
 
-            if gasCostToCancel > await web3.eth.getBalance(txRequest.address) {
+            if (gasCostToCancel > await web3.eth.getBalance(txRequest.address)) {
                 log.debug('TxRequest does not have enough ether to cover costs of cancelling')
                 return
             }

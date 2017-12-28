@@ -1,16 +1,19 @@
 Changelog
 =========
 
-0.9.0 (WIP)
------------
+0.9.0-beta
+----------
 
 - Update contracts to solidity 0.4.18.
-- Integrate Truffle framework.
-- Rewrote test suite to cover more cases.
-- Simplified scheduling API from two options down to one.
 - Digger.sol removed due to `EIP 150`_ making it obsolete.
 - All stack depth checking also obsolete due to `EIP150`_ removed.
 - SafeSendLib.sol removed due to Solidity keywords `transfer` and `send` making it obsolete.
+- Simplified scheduling API to singular `schedule()` function.
+- Added the `proxy()` function to `TransactionRequest` contract.
+- Integrate Truffle framework.
+- Rewrote entire test suite to use Truffle.
+- Revamped the documentation.
+
 
 0.8.0 (unreleased)
 ------------------

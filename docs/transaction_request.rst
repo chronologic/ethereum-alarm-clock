@@ -119,12 +119,12 @@ These arrays then map to the following data fields on the request.
     * ``uintValues[6]  => schedule.claimWindowSize``
     * ``uintValues[7]  => schedule.freezePeriod``
     * ``uintValues[8]  => schedule.reservedWindowSize``
-    * ``uintValues[9]  => schedule.temporalUnit)``
+    * ``uintValues[9]  => schedule.temporalUnit``
     * ``uintValues[10] => schedule.windowStart``
     * ``uintValues[11] => schedule.windowSize``
     * ``uintValues[12] => txnData.callGas``
     * ``uintValues[13] => txnData.callValue``
-    * ``uintValues[14] => txnData.requiredStackDepth``
+    * ``uintValues[14] => txnData.gasPrice``
 
 * Unsigned 8 bit Integers (``uint8``)
     * ``uint8Values[0] => claimData.paymentModifier``
@@ -156,7 +156,6 @@ fields.
 .. attribute:: uint callValue
 
     The amount of ether, in wei, that will be sent with the transaction.
-
 
 .. attribute:: uint callGas
 

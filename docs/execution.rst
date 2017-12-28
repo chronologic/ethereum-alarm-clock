@@ -12,7 +12,8 @@ Execution
     Anyone wishing to write their own execution client should be sure they fully
     understand all of the intricacies related to the execution of transaction
     requests.  The guarantees in place for those executing requests are only in
-    place if the executing client is written appropriately.
+    place if the executing client is written appropriately. Reading this documentation
+    is a good start.
 
 
 Important Windows of Blocks/Time
@@ -53,7 +54,7 @@ request being executed at the desired time since it is not possible to force a
 transaction to be included in a specific block.  The party executing
 your request may either fail to get the transaction included in the correct
 block *or* they may choose to not try for fear that their transaction will not
-be mined in the correct block, thereby not reveiving their reimbursment
+be mined in the correct block, thereby not receiving their reimbursment
 for their gas costs.
 
 Similarly, very short ranges of time for timestamp based calls may even make it

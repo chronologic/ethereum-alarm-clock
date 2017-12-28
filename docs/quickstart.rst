@@ -4,13 +4,25 @@ Quickstart
 .. contents:: :local:
 
 
+Introduction
+------------
+
+This guide is inteded for smart contract developers that may want to use the EAC services 
+from within their own applications. Since all the functionality of the Alarm Clock 
+is built into the Ethereum chain via smart contracts, it can be accessed from other 
+contracts. This makes it useful as a foundational tool to design and implement more 
+complex utilities that depend on future transactions. For this guide we will be using 
+the Solidity language. If you are unfamiliar with Solidity we recommend you familiarize 
+yourself with its `documentation`_ first. 
+
+
 Scheduling your first transaction
 ---------------------------------
 
-The first step is to establish how we will interact with the Alarm service's
+The first step is to establish how we will interact with the EAC service's
 :class:`Scheduler` contract.  We can use the Scheduler Interface to accomplish this. 
 The Scheduler interface contract contains some logic that is shared between both the 
-Block Scheduler and the Timestamp Scheduler.  The function that we are interest is the 
+Block Scheduler and the Timestamp Scheduler.  The function that we are interested in is the 
 `schedule()` function.  See the signature of this function below:
 
 
@@ -23,9 +35,12 @@ Block Scheduler and the Timestamp Scheduler.  The function that we are interest 
         public payable returns (address);
 
 
-``SchedulerInterface.sol`` is an abstract contract exposes the function ``schedule`` which will
+``SchedulerInterface.sol`` is an abstract contract that exposes the API for the Schedulers
+including the ``schedule()`` function that we will use in the contract we write. 
+
+function ``schedule`` which will
 return the address of the newly created :class:`TransactionRequest` contract.  We will import this 
-contract into whatever contract we write so to ensure that our contract will be 
+contract into the contract we write so to ensure that our contract will be 
 compliant with the official API of the EAC.
 
 Now lets write a simple contract that can use the scheduling service.
@@ -83,3 +98,4 @@ transaction increases, be sure to increase the required ``callGas`` in accordanc
 Right now, the gas limit for a transaction is somewhere in the ballpark of 8,000,000 
 so there's plenty of wiggle room for experimentation.
 
+.. _documentation: https://solidity.readthedocs.io/en/develop/

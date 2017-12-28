@@ -18,7 +18,7 @@ contract RequestFactoryInterface {
                                    uint[11] uintArgs,
                                    bytes callData,
                                    uint endowment) 
-        internal returns (bool[6]);
+        public returns (bool[6]);
 
     function isKnownRequest(address _address)
         public view returns (bool);

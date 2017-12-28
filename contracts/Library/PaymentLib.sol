@@ -105,6 +105,8 @@ library PaymentLib {
 
     /**
      * @dev Compute the endowment value for the given TransactionRequest parameters.
+     * See request_factory.rst in docs folder under Check #1 for more information about
+     * this calculation.
      */
     function computeEndowment(
         uint _payment,
@@ -132,15 +134,14 @@ library PaymentLib {
     )
         internal pure returns (uint)
     {
-        return _callGas.mul(_gasPrice).mul(2)
-                      .add(_gasOverhead.mul(_gasPrice).mul(2))
+        return _callGas.mul(_gasPrice)
+                      .add(_gasOverhead.mul(_gasPrice))
                       .add(_callValue);
     }
     /*
      * Validation: ensure that the request endowment is sufficient to cover.
      * - payment * maxMultiplier
      * - donation * maxMultiplier
-     * - stack depth checking
      * - gasReimbursment
      * - callValue
      */
