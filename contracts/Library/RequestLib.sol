@@ -178,7 +178,7 @@ library RequestLib {
             0
         ];
 
-        deserialize(self, addressValues, boolValues, uintValues, uint8Values, _callData);
+        require( deserialize(self, addressValues, boolValues, uintValues, uint8Values, _callData) );
 
         initialized = true;
     }

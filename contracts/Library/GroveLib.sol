@@ -200,9 +200,6 @@ library GroveLib {
                     remove(index, id);
                 }
 
-                // uint leftHeight;
-                // uint rightHeight;
-
                 bytes32 previousNodeId = 0x0;
 
                 if (index.root == 0x0) {
@@ -344,10 +341,10 @@ library GroveLib {
                 parent = index.nodes[nodeToDelete.parent];
 
                 if (parent.left == nodeToDelete.id) {
-                    parent.left = 0x0;
+                    delete parent.left;
                 }
                 if (parent.right == nodeToDelete.id) {
-                    parent.right = 0x0;
+                    delete parent.right;
                 }
 
                 // keep note of where the rebalancing should begin.
@@ -356,7 +353,7 @@ library GroveLib {
             else {
                 // This is both a leaf node and the root node, so we need to
                 // unset the root node pointer.
-                index.root = 0x0;
+                delete index.root;
             }
 
             // Now we zero out all of the fields on the nodeToDelete.
@@ -366,12 +363,6 @@ library GroveLib {
             delete nodeToDelete.left;
             delete nodeToDelete.right;
             delete nodeToDelete.height;
-            // nodeToDelete.id = 0x0;
-            // nodeToDelete.value = 0;
-            // nodeToDelete.parent = 0x0;
-            // nodeToDelete.left = 0x0;
-            // nodeToDelete.right = 0x0;
-            // nodeToDelete.height = 0;
 
             // Walk back up the tree rebalancing
             if (rebalanceOrigin != 0x0) {
@@ -607,7 +598,7 @@ library GroveLib {
             newRoot.parent = originalRoot.parent;
 
             // The original root needs to have it's right child nulled out.
-            originalRoot.right = 0x0;
+            delete originalRoot.right;
 
             if (originalRoot.parent != 0x0) {
                 // If there is a parent node, it needs to now point downward at
@@ -659,7 +650,7 @@ library GroveLib {
             newRoot.parent = originalRoot.parent;
 
             // Null out the originalRoot.left
-            originalRoot.left = 0x0;
+            delete originalRoot.left;
 
             if (originalRoot.parent != 0x0) {
                 // If the node has a parent, update the correct child to point

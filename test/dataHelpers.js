@@ -28,6 +28,7 @@ const parseAbortData = (executeTx) => {
 
 const parseRequestData = async (transactionRequest) => {
     const data = await transactionRequest.requestData()
+    // console.log(data)
     return {
         "claimData": {
             "claimedBy": data[0][0],
@@ -70,7 +71,7 @@ const parseRequestData = async (transactionRequest) => {
 class RequestData {
 
     constructor(data, txRequest) {
-        if (typeof data === 'undefined' || typeof txRequest === 'undefined') {
+        if (typeof data === undefined || typeof txRequest === undefined) {
             throw new Error('Can not call the constructor!')
         }
         
