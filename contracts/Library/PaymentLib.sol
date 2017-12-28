@@ -71,6 +71,7 @@ library PaymentLib {
 
     /**
      * @dev Send the donationOwed amount to the donationBenefactor.
+     * Note: The send is allowed to fail.
      */
     function sendDonation(PaymentData storage self) 
         internal returns (bool)
@@ -86,6 +87,7 @@ library PaymentLib {
 
     /**
      * @dev Send the paymentOwed amount to the paymentBenefactor.
+     * Note: The send is allowed to fail.
      */
     function sendPayment(PaymentData storage self)
         internal returns (bool)
@@ -119,8 +121,8 @@ library PaymentLib {
         internal pure returns (uint)
     {
         return _payment
-                    .add(_donation).mul(2)
-                    .add(_computeHelper(_callGas, _callValue, _gasOverhead, _gasPrice));
+                .add(_donation).mul(2)
+                .add(_computeHelper(_callGas, _callValue, _gasOverhead, _gasPrice));
     }
 
     /// Was getting a stack depth error after replacing old MathLib with Zeppelin's SafeMath.
@@ -135,8 +137,8 @@ library PaymentLib {
         internal pure returns (uint)
     {
         return _callGas.mul(_gasPrice)
-                      .add(_gasOverhead.mul(_gasPrice))
-                      .add(_callValue);
+                        .add(_gasOverhead.mul(_gasPrice))
+                        .add(_callValue);
     }
     /*
      * Validation: ensure that the request endowment is sufficient to cover.
@@ -145,22 +147,22 @@ library PaymentLib {
      * - gasReimbursment
      * - callValue
      */
-    function validateEndowment(uint endowment,
-                               uint payment,
-                               uint donation,
-                               uint callGas,
-                               uint callValue,
-                               uint gasPrice,
-                               uint gasOverhead)
+    function validateEndowment(uint _endowment,
+                               uint _payment,
+                               uint _donation,
+                               uint _callGas,
+                               uint _callValue,
+                               uint _gasPrice,
+                               uint _gasOverhead)
         public pure returns (bool)
     {
-        return endowment >= computeEndowment(
-            payment,
-            donation,
-            callGas,
-            callValue,
-            gasPrice,
-            gasOverhead
+        return _endowment >= computeEndowment(
+            _payment,
+            _donation,
+            _callGas,
+            _callValue,
+            _gasPrice,
+            _gasOverhead
         );
     }
 }

@@ -10,11 +10,11 @@ import "contracts/Library/MathLib.sol";
 import "contracts/zeppelin/SafeMath.sol";
 
 library RequestLib {
-    using ExecutionLib for ExecutionLib.ExecutionData;
-    using RequestScheduleLib for RequestScheduleLib.ExecutionWindow;
     using ClaimLib for ClaimLib.ClaimData;
-    using RequestMetaLib for RequestMetaLib.RequestMeta;
+    using ExecutionLib for ExecutionLib.ExecutionData;
     using PaymentLib for PaymentLib.PaymentData;
+    using RequestMetaLib for RequestMetaLib.RequestMeta;
+    using RequestScheduleLib for RequestScheduleLib.ExecutionWindow;
     using SafeMath for uint;
 
     /*
@@ -24,19 +24,19 @@ library RequestLib {
      *  put them in arrays. - Piper
      */
     struct SerializedRequest {
-        address[6] addressValues;
-        bool[3] boolValues;
-        uint[15] uintValues;
-        uint8[1] uint8Values;
+        address[6]  addressValues;
+        bool[3]     boolValues;
+        uint[15]    uintValues;
+        uint8[1]    uint8Values;
     }
 
     struct Request {
-        ExecutionLib.ExecutionData txnData;
-        RequestMetaLib.RequestMeta meta;
-        PaymentLib.PaymentData paymentData;
-        ClaimLib.ClaimData claimData;
-        RequestScheduleLib.ExecutionWindow schedule;
-        SerializedRequest serializedValues;
+        ExecutionLib.ExecutionData          txnData;
+        RequestMetaLib.RequestMeta          meta;
+        PaymentLib.PaymentData              paymentData;
+        ClaimLib.ClaimData                  claimData;
+        RequestScheduleLib.ExecutionWindow  schedule;
+        SerializedRequest                   serializedValues;
     }
 
     enum AbortReason {
@@ -49,58 +49,57 @@ library RequestLib {
         MismatchGasPrice    //6
     }
 
+    event Aborted(uint8 reason);
     event Cancelled(uint rewardPayment, uint measuredGasConsumption);
     event Claimed();
-    event Aborted(uint8 reason);
     event Executed(uint payment, uint donation, uint measuredGasConsumption);
 
     /**
-     * @dev Validate the initialization parameters for a transaction request.
-     * Public view function
+     * @dev Validate the initialization parameters of a transaction request.
      */
     function validate(
-        address[4] addressArgs,
-        uint[11] uintArgs,
-        bytes callData,
-        uint endowment
+        address[4]  _addressArgs,
+        uint[11]    _uintArgs,
+        bytes       _callData,
+        uint        _endowment
     ) 
         public view returns (bool[6] isValid)
     {
         Request memory request;
 
         // callData is special.
-        request.txnData.callData = callData;
+        request.txnData.callData = _callData;
 
         // Address values
-        request.claimData.claimedBy = 0x0;
-        request.meta.createdBy = addressArgs[0];
-        request.meta.owner = addressArgs[1];
-        request.paymentData.donationBenefactor = addressArgs[2];
-        request.paymentData.donationBenefactor = 0x0;
-        request.txnData.toAddress = addressArgs[3];
+        request.claimData.claimedBy =               0x0;
+        request.meta.createdBy =                    _addressArgs[0];
+        request.meta.owner =                        _addressArgs[1];
+        request.paymentData.donationBenefactor =    _addressArgs[2];
+        request.paymentData.donationBenefactor =    0x0;
+        request.txnData.toAddress =                 _addressArgs[3];
 
         // Boolean values
-        request.meta.isCancelled = false;
-        request.meta.wasCalled = false;
-        request.meta.wasSuccessful = false;
+        request.meta.isCancelled =      false;
+        request.meta.wasCalled =        false;
+        request.meta.wasSuccessful =    false;
 
         // UInt values
-        request.claimData.claimDeposit = 0;
-        request.paymentData.gasPrice = tx.gasprice;
-        request.paymentData.donation = uintArgs[0];
-        request.paymentData.payment = uintArgs[1];
-        request.paymentData.donationOwed = 0;
-        request.paymentData.paymentOwed = 0;
-        request.schedule.claimWindowSize = uintArgs[2];
-        request.schedule.freezePeriod = uintArgs[3];
-        request.schedule.reservedWindowSize = uintArgs[4];
+        request.claimData.claimDeposit =        0;
+        request.paymentData.gasPrice =          tx.gasprice;
+        request.paymentData.donation =          _uintArgs[0];
+        request.paymentData.payment =           _uintArgs[1];
+        request.paymentData.donationOwed =      0;
+        request.paymentData.paymentOwed =       0;
+        request.schedule.claimWindowSize =      _uintArgs[2];
+        request.schedule.freezePeriod =         _uintArgs[3];
+        request.schedule.reservedWindowSize =   _uintArgs[4];
         // This must be capped at 1 or it throws an exception.
-        request.schedule.temporalUnit = RequestScheduleLib.TemporalUnit(MathLib.min(uintArgs[5], 2));
-        request.schedule.windowSize = uintArgs[6];
-        request.schedule.windowStart = uintArgs[7];
-        request.txnData.callGas = uintArgs[8];
-        request.txnData.callValue = uintArgs[9];
-        request.txnData.gasPrice = uintArgs[10];
+        request.schedule.temporalUnit =         RequestScheduleLib.TemporalUnit(MathLib.min(_uintArgs[5], 2));
+        request.schedule.windowSize =           _uintArgs[6];
+        request.schedule.windowStart =          _uintArgs[7];
+        request.txnData.callGas =               _uintArgs[8];
+        request.txnData.callValue =             _uintArgs[9];
+        request.txnData.gasPrice =              _uintArgs[10];
 
         // Uint8 values
         request.claimData.paymentModifier = 0;
@@ -108,7 +107,7 @@ library RequestLib {
         // The order of these errors matters as it determines which
         // ValidationError event codes are logged when validation fails.
         isValid[0] = PaymentLib.validateEndowment(
-            endowment,
+            _endowment,
             request.paymentData.payment,
             request.paymentData.donation,
             request.txnData.callGas,
@@ -120,7 +119,7 @@ library RequestLib {
             request.schedule.reservedWindowSize,
             request.schedule.windowSize
         );
-        isValid[2] = RequestScheduleLib.validateTemporalUnit(uintArgs[5]);
+        isValid[2] = RequestScheduleLib.validateTemporalUnit(_uintArgs[5]);
         isValid[3] = RequestScheduleLib.validateWindowStart(
             request.schedule.temporalUnit,
             request.schedule.freezePeriod,
@@ -135,51 +134,51 @@ library RequestLib {
         /// Automatically returns isValid
     }
 
-    /*
-     *  Initialize a new Request.
+    /**
+     * @dev Initialize a new Request.
      */
     function initialize(
         Request storage self,
-        address[4] addressArgs,
-        uint[11] uintArgs,
-        bytes callData
+        address[4]      _addressArgs,
+        uint[11]        _uintArgs,
+        bytes           _callData
     ) 
         public returns (bool initialized)
     {
         address[6] memory addressValues = [
-            0x0,             // self.claimData.claimedBy
-            addressArgs[0],  // self.meta.createdBy
-            addressArgs[1],  // self.meta.owner
-            addressArgs[2],  // self.paymentData.donationBenefactor
-            0x0,             // self.paymentData.paymentBenefactor
-            addressArgs[3]   // self.txnData.toAddress
+            0x0,                // self.claimData.claimedBy
+            _addressArgs[0],    // self.meta.createdBy
+            _addressArgs[1],    // self.meta.owner
+            _addressArgs[2],    // self.paymentData.donationBenefactor
+            0x0,                // self.paymentData.paymentBenefactor
+            _addressArgs[3]     // self.txnData.toAddress
         ];
 
         bool[3] memory boolValues = [false, false, false];
 
         uint[15] memory uintValues = [
-            0,               // self.claimData.claimDeposit
-            tx.gasprice,     // self.paymentData.gasPrice
-            uintArgs[0],     // self.paymentData.donation
-            0,               // self.paymentData.donationOwed
-            uintArgs[1],     // self.paymentData.payment
-            0,               // self.paymentData.paymentOwed
-            uintArgs[2],     // self.schedule.claimWindowSize
-            uintArgs[3],     // self.schedule.freezePeriod
-            uintArgs[4],     // self.schedule.reservedWindowSize
-            uintArgs[5],     // self.schedule.temporalUnit
-            uintArgs[6],     // self.schedule.windowSize
-            uintArgs[7],     // self.schedule.windowStart
-            uintArgs[8],     // self.txnData.callGas
-            uintArgs[9],     // self.txnData.callValue
-            uintArgs[10]     // self.txnData.gasPrice
+            0,                  // self.claimData.claimDeposit
+            tx.gasprice,        // self.paymentData.gasPrice
+            _uintArgs[0],       // self.paymentData.donation
+            0,                  // self.paymentData.donationOwed
+            _uintArgs[1],       // self.paymentData.payment
+            0,                  // self.paymentData.paymentOwed
+            _uintArgs[2],       // self.schedule.claimWindowSize
+            _uintArgs[3],       // self.schedule.freezePeriod
+            _uintArgs[4],       // self.schedule.reservedWindowSize
+            _uintArgs[5],       // self.schedule.temporalUnit
+            _uintArgs[6],       // self.schedule.windowSize
+            _uintArgs[7],       // self.schedule.windowStart
+            _uintArgs[8],       // self.txnData.callGas
+            _uintArgs[9],       // self.txnData.callValue
+            _uintArgs[10]       // self.txnData.gasPrice
         ];
 
         uint8[1] memory uint8Values = [
             0
         ];
 
-        deserialize(self, addressValues, boolValues, uintValues, uint8Values, callData);
+        deserialize(self, addressValues, boolValues, uintValues, uint8Values, _callData);
 
         initialized = true;
     }
@@ -235,8 +234,8 @@ library RequestLib {
         serialized = true;
     }
 
-    /*
-     *  Populates a Request object from the full output of `serialize`.
+    /**
+     * @dev Populates a Request object from the full output of `serialize`.
      *
      *  Parameter order is alphabetical by type, then namespace, then name.
      */
@@ -322,7 +321,7 @@ library RequestLib {
          *  +--------------------+
          *
          *  1. Mark as called (must be before actual execution to prevent
-         *     re-entrance.
+         *     re-entrance)
          *  2. Send Transaction and record success or failure.
          *
          *  +---------------------+
@@ -334,6 +333,7 @@ library RequestLib {
          *  3. Send remaining ether back to owner.
          *
          */
+
         uint startGas = msg.gas;
 
         // +----------------------+
@@ -429,8 +429,7 @@ library RequestLib {
                  totalDonationPayment,
                  measuredGasConsumption);
     
-        // Send the payment.
-        // FIXME: NO MORE PUSHES FOR PAYMENTS, CLIENTS MUST CALL
+        // Attempt to send the payment. This is allowed to fail so it may need to be called again.
         self.paymentData.sendPayment();
 
         // Send all extra ether back to the owner.
@@ -455,17 +454,9 @@ library RequestLib {
     }
 
     function requiredExecutionGas(Request storage self) 
-        public view returns (uint)
+        public view returns (uint requiredGas)
     {
-        uint requiredGas = self.txnData.callGas.add(_EXECUTION_GAS_OVERHEAD);
-
-        // if (msg.sender != tx.origin) {
-        //     var stackCheckGas = ExecutionLib.GAS_PER_DEPTH()
-        //                                     .mul(self.txnData.requiredStackDepth);
-        //     requiredGas = requiredGas.add(stackCheckGas);
-        // }
-
-        return requiredGas;
+        requiredGas = self.txnData.callGas.add(_EXECUTION_GAS_OVERHEAD);
     }
 
     /*
@@ -485,7 +476,7 @@ library RequestLib {
      *  The amount of gas used by the portion of the `execute` function
      *  that cannot be accounted for via gas tracking.
      */
-    uint private constant  _EXECUTE_EXTRA_GAS = 90000; // Same... Doubled this from Piper's original - Logan
+    uint private constant  _EXECUTE_EXTRA_GAS = 90000; // again, check for accuracy... Doubled this from Piper's original - Logan
 
     function EXECUTE_EXTRA_GAS() 
         public pure returns (uint)
@@ -503,7 +494,7 @@ library RequestLib {
      *    * not claimed && beforeFreezeWindow && msg.sender == owner
      */
     function isCancellable(Request storage self) 
-        internal returns (bool)
+        internal view returns (bool)
     {
         if (self.meta.isCancelled) {
             // already cancelled!
@@ -561,7 +552,7 @@ library RequestLib {
         if (msg.sender != self.meta.owner) {
             /// Create the rewardBenefactor
             address rewardBenefactor = msg.sender;
-            /// Create the rewardOwed variable, it is paymentOwed and one-hundredth
+            /// Create the rewardOwed variable, it is one-hundredth
             /// of the payment.
             uint rewardOwed = self.paymentData.paymentOwed.add(
                 self.paymentData.payment.div(100)
@@ -586,8 +577,8 @@ library RequestLib {
         Cancelled(rewardPayment, measuredGasConsumption);
 
         // send the remaining ether to the owner.
-        // return sendOwnerEther(self);
-        return true;
+        return sendOwnerEther(self);
+        // return true;
     }
 
     /*
@@ -664,8 +655,8 @@ library RequestLib {
             uint ownerRefund = this.balance.sub(self.claimData.claimDeposit)
                                             .sub(self.paymentData.paymentOwed)
                                             .sub(self.paymentData.donationOwed);
-            self.meta.owner.transfer(ownerRefund);
-            return true;
+            return self.meta.owner.send(ownerRefund);
+            // return true;
         }
         return false;
     }
