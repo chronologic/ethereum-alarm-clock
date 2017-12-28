@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 /// Super simple token contract that moves funds into the owner account on creation and
 /// only exposes enough API to be used for `test/proxy.js`
 contract SimpleToken {

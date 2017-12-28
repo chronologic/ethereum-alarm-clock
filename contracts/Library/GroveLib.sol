@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
 /// @title GroveLib - Library for queriable indexed ordered data.
 /// @author PiperMerriam - <pipermerriam@gmail.com>
@@ -446,7 +446,7 @@ library GroveLib {
          *  type of comparison operator should be used.
          */
         function query(Index storage index, bytes2 operator, int value)
-            public returns (bytes32)
+            public view returns (bytes32)
         {
                 bytes32 rootNodeId = index.root;
                 

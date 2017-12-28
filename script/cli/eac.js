@@ -6,7 +6,7 @@ const chalk = require('chalk')
 const alarmClient = require('../client/main.js')
 const schedule = require('../scheduler.js')
 // temporary
-const testScheduler = require('../schedule2.js')
+const testScheduler = require('../testScheduler.js')
 
 const readlineSync = require('readline-sync')
 const clear = require('clear')
