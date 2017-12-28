@@ -85,7 +85,6 @@ library RequestLib {
 
         // UInt values
         request.claimData.claimDeposit =        0;
-        request.paymentData.gasPrice =          tx.gasprice;
         request.paymentData.donation =          _uintArgs[0];
         request.paymentData.payment =           _uintArgs[1];
         request.paymentData.donationOwed =      0;
@@ -156,9 +155,8 @@ library RequestLib {
 
         bool[3] memory boolValues = [false, false, false];
 
-        uint[15] memory uintValues = [
+        uint[14] memory uintValues = [
             0,                  // self.claimData.claimDeposit
-            tx.gasprice,        // self.paymentData.gasPrice
             _uintArgs[0],       // self.paymentData.donation
             0,                  // self.paymentData.donationOwed
             _uintArgs[1],       // self.paymentData.payment
@@ -213,20 +211,19 @@ library RequestLib {
 
         // UInt256 values
         self.serializedValues.uintValues[0] = self.claimData.claimDeposit;
-        self.serializedValues.uintValues[1] = self.paymentData.gasPrice;
-        self.serializedValues.uintValues[2] = self.paymentData.donation;
-        self.serializedValues.uintValues[3] = self.paymentData.donationOwed;
-        self.serializedValues.uintValues[4] = self.paymentData.payment;
-        self.serializedValues.uintValues[5] = self.paymentData.paymentOwed;
-        self.serializedValues.uintValues[6] = self.schedule.claimWindowSize;
-        self.serializedValues.uintValues[7] = self.schedule.freezePeriod;
-        self.serializedValues.uintValues[8] = self.schedule.reservedWindowSize;
-        self.serializedValues.uintValues[9] = uint(self.schedule.temporalUnit);
-        self.serializedValues.uintValues[10] = self.schedule.windowSize;
-        self.serializedValues.uintValues[11] = self.schedule.windowStart;
-        self.serializedValues.uintValues[12] = self.txnData.callGas;
-        self.serializedValues.uintValues[13] = self.txnData.callValue;
-        self.serializedValues.uintValues[14] = self.txnData.gasPrice;
+        self.serializedValues.uintValues[1] = self.paymentData.donation;
+        self.serializedValues.uintValues[2] = self.paymentData.donationOwed;
+        self.serializedValues.uintValues[3] = self.paymentData.payment;
+        self.serializedValues.uintValues[4] = self.paymentData.paymentOwed;
+        self.serializedValues.uintValues[5] = self.schedule.claimWindowSize;
+        self.serializedValues.uintValues[6] = self.schedule.freezePeriod;
+        self.serializedValues.uintValues[7] = self.schedule.reservedWindowSize;
+        self.serializedValues.uintValues[8] = uint(self.schedule.temporalUnit);
+        self.serializedValues.uintValues[9] = self.schedule.windowSize;
+        self.serializedValues.uintValues[10] = self.schedule.windowStart;
+        self.serializedValues.uintValues[11] = self.txnData.callGas;
+        self.serializedValues.uintValues[12] = self.txnData.callValue;
+        self.serializedValues.uintValues[13] = self.txnData.gasPrice;
 
         // Uint8 values
         self.serializedValues.uint8Values[0] = self.claimData.paymentModifier;
@@ -241,49 +238,48 @@ library RequestLib {
      */
     function deserialize(
         Request storage self,
-        address[6] addressValues,
-        bool[3] boolValues,
-        uint[15] uintValues,
-        uint8[1] uint8Values,
-        bytes callData
+        address[6]  _addressValues,
+        bool[3]     _boolValues,
+        uint[14]    _uintValues,
+        uint8[1]    _uint8Values,
+        bytes       _callData
     )
         internal returns (bool deserialized)
     {
         // callData is special.
-        self.txnData.callData = callData;
+        self.txnData.callData = _callData;
 
         // Address values
-        self.claimData.claimedBy = addressValues[0];
-        self.meta.createdBy = addressValues[1];
-        self.meta.owner = addressValues[2];
-        self.paymentData.donationBenefactor = addressValues[3];
-        self.paymentData.paymentBenefactor = addressValues[4];
-        self.txnData.toAddress = addressValues[5];
+        self.claimData.claimedBy =              _addressValues[0];
+        self.meta.createdBy =                   _addressValues[1];
+        self.meta.owner =                       _addressValues[2];
+        self.paymentData.donationBenefactor =   _addressValues[3];
+        self.paymentData.paymentBenefactor =    _addressValues[4];
+        self.txnData.toAddress =                _addressValues[5];
 
         // Boolean values
-        self.meta.isCancelled = boolValues[0];
-        self.meta.wasCalled = boolValues[1];
-        self.meta.wasSuccessful = boolValues[2];
+        self.meta.isCancelled =     _boolValues[0];
+        self.meta.wasCalled =       _boolValues[1];
+        self.meta.wasSuccessful =   _boolValues[2];
 
         // UInt values
-        self.claimData.claimDeposit = uintValues[0];
-        self.paymentData.gasPrice = uintValues[1];
-        self.paymentData.donation = uintValues[2];
-        self.paymentData.donationOwed = uintValues[3];
-        self.paymentData.payment = uintValues[4];
-        self.paymentData.paymentOwed = uintValues[5];
-        self.schedule.claimWindowSize = uintValues[6];
-        self.schedule.freezePeriod = uintValues[7];
-        self.schedule.reservedWindowSize = uintValues[8];
-        self.schedule.temporalUnit = RequestScheduleLib.TemporalUnit(uintValues[9]);
-        self.schedule.windowSize = uintValues[10];
-        self.schedule.windowStart = uintValues[11];
-        self.txnData.callGas = uintValues[12];
-        self.txnData.callValue = uintValues[13];
-        self.txnData.gasPrice = uintValues[14];
+        self.claimData.claimDeposit =       _uintValues[0];
+        self.paymentData.donation =         _uintValues[1];
+        self.paymentData.donationOwed =     _uintValues[2];
+        self.paymentData.payment =          _uintValues[3];
+        self.paymentData.paymentOwed =      _uintValues[4];
+        self.schedule.claimWindowSize =     _uintValues[5];
+        self.schedule.freezePeriod =        _uintValues[6];
+        self.schedule.reservedWindowSize =  _uintValues[7];
+        self.schedule.temporalUnit =        RequestScheduleLib.TemporalUnit(_uintValues[8]);
+        self.schedule.windowSize =          _uintValues[9];
+        self.schedule.windowStart =         _uintValues[10];
+        self.txnData.callGas =              _uintValues[11];
+        self.txnData.callValue =            _uintValues[12];
+        self.txnData.gasPrice =             _uintValues[13];
 
         // Uint8 values
-        self.claimData.paymentModifier = uint8Values[0];
+        self.claimData.paymentModifier = _uint8Values[0];
 
         deserialized = true;
     }

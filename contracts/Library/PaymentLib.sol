@@ -8,8 +8,6 @@ library PaymentLib {
     using SafeMath for uint;
 
     struct PaymentData {
-        uint gasPrice;              /// The gasPrice needed to execute this TransactionRequest.
-
         uint payment;               /// The amount in wei to be paid to the executor of this TransactionRequest.
 
         address paymentBenefactor;  /// The address that the payment should be sent to.
