@@ -28,13 +28,8 @@ const startScanning = (ms, conf) => {
 /// Main driver function
 const main = async (web3, provider, ms, logfile, chain, walletFile, pw) => {
 
-    /// Parses the chain argument.
-    let contracts
-    if (chain === 'ropsten') {
-        contracts = require('../../ropsten.json')
-    } else {
-        throw new Error(`chain: ${chain} not supported!`)
-    }
+    /// Parses the chain argument, already checked for accuracy in the cli.
+    const contracts = require(`../../${chain}.json`)
 
     /// Loads the contracts we need.
     const requestFactory = new web3.eth.Contract(RequestFactoryABI, contracts.requestFactory)
@@ -58,6 +53,10 @@ const main = async (web3, provider, ms, logfile, chain, walletFile, pw) => {
         walletFile,         //conf.wallet
         pw                  //wallet password
     )
+
+    if (chain == 'rinkeby') {
+        conf.client = 'geth'
+    } else { conf.client = 'parity' }
 
     if (conf.wallet) {
         console.log('Wallet support: Enabled')

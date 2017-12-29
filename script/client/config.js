@@ -12,7 +12,7 @@ class Config {
         provider,
         walletFile,
         password
-    ) {
+        ) {
         this.logger = new Logger(logfile)
 
         this.cache = new Cache(this.logger)

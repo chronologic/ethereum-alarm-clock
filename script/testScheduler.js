@@ -1,33 +1,21 @@
-const Web3 = require('web3')
-
-const provider = new Web3.providers.HttpProvider('http://localhost:8545')
-const web3 = new Web3(Web3.givenProvider || provider)
-
-const RopstenAddresses = require('../ropsten.json')
 
 const { getABI } = require('./util.js')
 const BlockSchedulerABI = getABI('BlockScheduler')
 
 /// Schedules a test transaction.
-const main = async (v) => {
-    const verbose = v 
-    const log = (msg) => {
-        if (verbose) console.log(msg)
-    }
+const main = async (chain, web3) => {
+
+    const contracts = require(`../${chain}.json`)
 
     const me = (await web3.eth.getAccounts())[0]
 
     const windowStart = await web3.eth.getBlockNumber() + 12
     const gasPrice = web3.utils.toWei('100', 'gwei')
 
-    // console.log(BlockSchedulerABI)
     const blockScheduler = new web3.eth.Contract(
         BlockSchedulerABI, 
-        RopstenAddresses.blockScheduler
+        contracts.blockScheduler
     )
-    log(RopstenAddresses.blockScheduler)
-
-    log(await blockScheduler.methods.factoryAddress().call())
 
     await blockScheduler.methods.schedule(
         '0x009f7EfeD908c05df5101DA1557b7CaaB38EE4Ce',
@@ -57,8 +45,3 @@ const main = async (v) => {
 }
 
 module.exports = main
-
-// setInterval(() => {
-    // main()
-    // .catch(err => log(err))
-// }, 30000)

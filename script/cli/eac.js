@@ -28,7 +28,7 @@ program
     .option('-c, --client', 'starts the executing client')
     .option('-m, --milliseconds <ms>', 'tells the client to scan every <ms> seconds', 4000)
     .option('--logfile [path]', 'specifies the output logifle', 'default')
-    .option('--chain [ropsten]', 'selects the chain to use')
+    .option('--chain [ropsten, rinkeby]', 'selects the chain to use')
     .option('--provider <string>', 'set the HttpProvider to use', 'http://localhost:8545')
     .option('-w, --wallet [path]', 'specify the path to the keyfile you would like to unlock', 'none')
     .option('-p, --password [string]', 'the password to unlock your keystore file', 'password')
@@ -42,8 +42,12 @@ const web3 = new Web3(provider)
 const main = async _ => {
     if (program.test) 
     {
-        // console.log(program.test)
-        testScheduler(true)
+        if (program.chain != 'ropsten'
+            && program.chain != 'rinkeby') {
+            throw new Error('Only the ropsten and rinkeby networks are currently supported.')
+        }
+
+        testScheduler(program.chain, web3)
     }
 
     else if (program.createWallet) {
@@ -70,7 +74,10 @@ const main = async _ => {
             clear()
             console.log(chalk.green('⏰⏰⏰ Welcome to the Ethereum Alarm Clock client ⏰⏰⏰\n'))
 
-            if (!program.chain) program.chain = 'ropsten'
+            if (program.chain != 'ropsten'
+                && program.chain != 'rinkeby') {
+                throw new Error('Only the ropsten and rinkeby networks are currently supported.')
+            }
         
             alarmClient(
                 web3,

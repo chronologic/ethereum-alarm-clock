@@ -156,11 +156,11 @@ const executeTxRequestFrom = async (conf, txRequest, index) => {
  * @param {TransactionRequest} txRequest 
  * @returns {Promise<boolean>} True if a pending transaction to this address exists.  
  */
-const hasPendingTx = (confProvider, txRequest) => {
+const hasPendingParity = (conf, txRequest) => {
 
     /// Only available if using parity locally.
     const pApi = require('@parity/api')
-    const provider = new pApi.Provider.Http(`${confProvider}`)
+    const provider = new pApi.Provider.Http(`${conf.provider}`)
     const api = new pApi(provider)
 
     api.parity.pendingTransactions()
@@ -173,6 +173,41 @@ const hasPendingTx = (confProvider, txRequest) => {
 
 }
 
+const hasPendingGeth = (conf, txRequest) => {
+
+    /// Only available if using Geth locally.
+    const Web3 = require('web3')
+    const provider = new Web3.providers.HttpProvider(`${conf.provider}`)
+
+    provider.send({
+        "jsonrpc": "2.0",
+        "method": "txpool_content",
+        "params": [],
+        "id": 007
+    }, (err, res) => {
+        if (err) throw new Error('hasPendingGeth threw an error')
+        else {
+            for (let account in res.result.pending) {
+                for (let nonce in res.result.pending[account]) {
+                    if (res.result.pending[account][nonce].to == txRequest.address) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+    })
+
+}
+
+const hasPendingTx = (conf, txRequest) => {
+    if (conf.client == 'parity') {
+        hasPendingParity(conf, txRequest)
+    } else if (conf.client == 'geth') {
+        hasPendingGeth(conf, txRequest)
+    }
+}
+
 /// General handler for transaction requests
 const handleTxRequest = async (conf, txRequest) => {
     const log = conf.logger 
@@ -183,7 +218,7 @@ const handleTxRequest = async (conf, txRequest) => {
     //   - cancelled
     //   - before claim window
     //   - in freeze period 
-    if (await hasPendingTx(conf.provider, txRequest)) {
+    if (await hasPendingTx(conf, txRequest)) {
         log.debug('Ignoring txRequest with pending transaction in the tx pool.')
         return 
     }
