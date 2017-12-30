@@ -26,7 +26,7 @@ library RequestLib {
     struct SerializedRequest {
         address[6]  addressValues;
         bool[3]     boolValues;
-        uint[15]    uintValues;
+        uint[14]    uintValues;
         uint8[1]    uint8Values;
     }
 

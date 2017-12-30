@@ -5,7 +5,7 @@ const BlockSchedulerABI = getABI('BlockScheduler')
 /// Schedules a test transaction.
 const main = async (chain, web3) => {
 
-    const contracts = require(`../${chain}.json`)
+    const contracts = require(`./assets/${chain}.json`)
 
     const me = (await web3.eth.getAccounts())[0]
 

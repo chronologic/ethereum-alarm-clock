@@ -67,7 +67,7 @@ contract TransactionRequest is TransactionRequestInterface {
     // Declaring this function `view`, although it creates a compiler warning, is
     // necessary to return values from it.
     function requestData() 
-        public view returns (address[6], bool[3], uint[15], uint8[1])
+        public view returns (address[6], bool[3], uint[14], uint8[1])
     {
         if (txnRequest.serialize()) {
             return (

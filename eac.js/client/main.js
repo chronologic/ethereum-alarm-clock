@@ -4,38 +4,44 @@ const RequestTrackerABI = getABI('RequestTracker')
 const TransactionRequestABI = getABI('TransactionRequest')
 
 const { Config } = require('./config.js')
-const { scanCache, scanChain } = require('./scanning.js')
+const Scanner = require('./scanning.js')
 
 const ethUtil = require('ethereumjs-util')
 
-/// Begins scanning
 const startScanning = (ms, conf) => {
     const log = conf.logger
 
     setInterval(_ => {
-        scanChain(conf)
+        Scanner.scanBlockchain(conf)
         .catch(err => log.error(err))
     }, ms)
 
     setInterval(_ => {
-        /// This is also an async function.
-        /// Will scan the cache to perform actions on stored transactions.
-        scanCache(conf)
+        Scanner.scanCache(conf)
         .catch(err => log.error(err))
     }, ms + 1000)
 }
 
-/// Main driver function
+/**
+ * The main driver function that begins the client operation.
+ * @param {*} web3 An instantiate web3 instance.
+ * @param {String} provider The supplied provider host for the web3 instance. (Ex. 'http://localhost:8545)
+ * @param {Number} ms Milliseconds between each conduction of a blockchain scan.
+ * @param {String} logfile The file that the logging utility will log to, or 'console' for logging to console.
+ * @param {String} chain The name of the chain, accepted values are 'ropsten', 'rinkeby' and 'kovan'.
+ * @param {String} walletFile Path to the encrypted wallet file.
+ * @param {String} pw Password to decrypt wallet.
+ */
 const main = async (web3, provider, ms, logfile, chain, walletFile, pw) => {
 
-    /// Parses the chain argument, already checked for accuracy in the cli.
-    const contracts = require(`../../${chain}.json`)
+    // Parses the chain argument
+    const contracts = require(`../assets/${chain}.json`)
 
-    /// Loads the contracts we need.
+    // Loads the contracts
     const requestFactory = new web3.eth.Contract(RequestFactoryABI, contracts.requestFactory)
     const requestTracker = new web3.eth.Contract(RequestTrackerABI, contracts.requestTracker)
 
-    /// Parses the logfile.
+    // Parses the logfile
     if (logfile === 'console') {
         console.log('Logging to console')
     }
@@ -43,7 +49,7 @@ const main = async (web3, provider, ms, logfile, chain, walletFile, pw) => {
         logfile = require('os').homedir() + '/.eac.log'
     }
 
-    /// Loads the config.
+    // Loads conf
     const conf = new Config(
         logfile,            //conf.logfile
         requestFactory,     //conf.factory
@@ -54,10 +60,12 @@ const main = async (web3, provider, ms, logfile, chain, walletFile, pw) => {
         pw                  //wallet password
     )
 
+    // Assigns the client variable
     if (chain == 'rinkeby') {
         conf.client = 'geth'
     } else { conf.client = 'parity' }
 
+    // Determines wallet support
     if (conf.wallet) {
         console.log('Wallet support: Enabled')
     } else { 
@@ -70,7 +78,7 @@ const main = async (web3, provider, ms, logfile, chain, walletFile, pw) => {
         }
     }
 
-    /// Begins
+    // Begin
     startScanning(ms, conf)
 }
 

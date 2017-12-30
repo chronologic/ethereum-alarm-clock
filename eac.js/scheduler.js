@@ -5,7 +5,7 @@ const Web3 = require('web3')
 const provider = new Web3.providers.HttpProvider('http://localhost:8545')
 const web3 = new Web3(Web3.givenProvider || provider)
 
-const RopstenAddresses = require('../ropsten.json')
+const RopstenAddresses = require('./assets/ropsten.json')
 
 const { getABI } = require('./util.js')
 const BlockSchedulerABI = getABI('BlockScheduler')

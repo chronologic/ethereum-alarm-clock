@@ -11,7 +11,6 @@ class TxRequest {
             getABI('TransactionRequest'),
             this.address
         )
-        this.fillData()
     }
 
     async now () {
@@ -24,6 +23,10 @@ class TxRequest {
 
     windowStart () {
         return this.data.schedule.windowStart
+    }
+
+    getWindowSize () {
+        return this.data.schedule.windowSize
     }
 
     wasCalled () {
@@ -39,15 +42,11 @@ class TxRequest {
     }
 
     async beforeClaimWindow () {
-        // console.log(await this.now())
-        // console.log(this.claimWindowStart())
-        // console.log(await this.now() < this.claimWindowStart)
         return await this.now() < this.claimWindowStart()
     }
 
     async inClaimWindow () {
-        // console.log(this.claimWindowStart())
-        // console.log(this.claimWindowEnd())
+
         return this.claimWindowStart() <= await this.now() && await this.now() <  this.claimWindowEnd()
     }
 
@@ -92,10 +91,6 @@ class TxRequest {
     }
 
     async inReservedWindow() {
-        // console.log(await this.now())
-        // console.log(this.executionWindowEnd())
-        // console.log(this.reservedExecutionWindowEnd())
-        // console.log(this.windowStart() <= await this.now() && await this.now() < this.reservedExecutionWindowEnd())
         return this.windowStart() <= await this.now() && await this.now() < this.reservedExecutionWindowEnd()
     }
 
@@ -109,6 +104,10 @@ class TxRequest {
 
     getOwner () {
         return this.data.meta.owner
+    }
+
+    getPayment () {
+        return this.data.paymentData.payment
     }
 
     async fillData () {
