@@ -47,6 +47,26 @@ class Cache {
     stored () {
         return this.mem 
     }
+
+    sweepExpired () {
+        this.mem.forEach(txRequestAddress => {
+            if (this.get(txRequestAddress) === 99) {
+                // expired
+                this.del(txRequestAddress)
+            }
+        })
+    }
 }
 
 module.exports.Cache = Cache
+
+// The cache assigns each key (txRequestAddress) the original value of its WindowStart
+// During certain conditions it will change the value
+// 105 - Failed Execution call (Attempt again)
+// 104 - UNIMPLEMENTED
+// 103 - Failed Claim call (Attempt again)
+// 102 - Attempted Claim call (will not attempt again until result)
+// 101 - UNIMPLEMENTED
+// 100 - Successful Execution call (ready to be expired)
+//  99 - Expired (ready to be swept)
+//  -1 - Failed Execution call (will not attempt again)

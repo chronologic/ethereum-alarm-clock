@@ -47,7 +47,7 @@ const main = async _ => {
             throw new Error('Only the ropsten and rinkeby networks are currently supported.')
         }
 
-        testScheduler(program.chain, web3)
+        setInterval(() => testScheduler(program.chain, web3), 5000)
     }
 
     else if (program.createWallet) {

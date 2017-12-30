@@ -55,9 +55,6 @@ Scanning from ${left} to ${right} bounds.`)
         await txRequest.fillData()
 
         if (txRequest.getWindowStart() !== parseInt(trackerWindowStart)) {
-            console.log(txRequest.getWindowStart())
-            console.log(parseInt(trackerWindowStart))
-            console.log(txRequest.getWindowSize())
             // The data between the txRequest we have and from the requestTracker do not match.
             log.error(`Data mismatch between txRequest and requestTracker. Double check contract addresses.`)
         } else if (txRequest.getWindowStart() <= right) {

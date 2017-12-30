@@ -20,6 +20,11 @@ const startScanning = (ms, conf) => {
         Scanner.scanCache(conf)
         .catch(err => log.error(err))
     }, ms + 1000)
+
+    setInterval(_ => {
+        conf.cache.sweepExpired(),
+        12 * 60 * 1000
+    })
 }
 
 /**
