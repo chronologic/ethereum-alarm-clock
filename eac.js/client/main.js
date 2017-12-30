@@ -22,9 +22,8 @@ const startScanning = (ms, conf) => {
     }, ms + 1000)
 
     setInterval(_ => {
-        conf.cache.sweepExpired(),
-        12 * 60 * 1000
-    })
+        conf.cache.sweepExpired()
+    }, 12 * 60 * 1000)
 }
 
 /**

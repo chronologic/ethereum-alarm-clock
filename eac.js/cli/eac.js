@@ -47,7 +47,8 @@ const main = async _ => {
             throw new Error('Only the ropsten and rinkeby networks are currently supported.')
         }
 
-        setInterval(() => testScheduler(program.chain, web3), 5000)
+        testScheduler(program.chain, web3)
+        // setInterval(() => testScheduler(program.chain, web3), 5000)
     }
 
     else if (program.createWallet) {
@@ -66,7 +67,7 @@ const main = async _ => {
         const password = readlineSync.question(chalk.blue("Please enter a password for the keyfile. Write this down!\n> "))
     
         await require('../wallet/1_createWallet').createWallet(web3, numAccounts, file, password)
-        process.exit(1)
+        process.exit(0)
     }
 
     else if (program.client) 
@@ -175,7 +176,8 @@ const main = async _ => {
             clear()
 
             web3.eth.defaultAccount = (await web3.eth.getAccounts())[0]
-            if (web3.eth.defaultAccount === null) throw new Error('Need to unlock a primary account on your client!')
+            if (web3.eth.defaultAccount === null
+                || !ethUtil.isValidAddress(web3.eth.defaultAccount)) throw new Error('Need to unlock a primary account on your client!')
 
 
             log.debug(`

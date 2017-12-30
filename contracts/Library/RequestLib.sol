@@ -429,7 +429,7 @@ library RequestLib {
         self.paymentData.sendPayment();
 
         // Send all extra ether back to the owner.
-        sendOwnerEther(self);
+        _sendOwnerEther(self);
 
         // +-----------------+
         // | End: Accounting |
@@ -644,16 +644,23 @@ library RequestLib {
         return false;
     }
 
-    function sendOwnerEther(Request storage self) 
-        internal returns (bool)
+    function sendOwnerEther(Request storage self)
+        public returns (bool)
     {
-        if ( self.meta.isCancelled || self.schedule.isAfterWindow() ) {
-            uint ownerRefund = this.balance.sub(self.claimData.claimDeposit)
-                                            .sub(self.paymentData.paymentOwed)
-                                            .sub(self.paymentData.donationOwed);
-            return self.meta.owner.send(ownerRefund);
-            // return true;
+        if( self.meta.isCancelled || self.schedule.isAfterWindow() ) {
+            return _sendOwnerEther(self);
         }
         return false;
+    }
+
+    function _sendOwnerEther(Request storage self) 
+        internal returns (bool)
+    {
+        // Note! This does not do any checks since it is used in the execute function.
+        // The public version of the function should be used for checks and in the cancel function.
+        uint ownerRefund = this.balance.sub(self.claimData.claimDeposit)
+                                        .sub(self.paymentData.paymentOwed)
+                                        .sub(self.paymentData.donationOwed);
+        return self.meta.owner.send(ownerRefund);
     }
 }

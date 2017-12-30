@@ -59,10 +59,12 @@ const routeTxRequest = async (conf, txRequest) => {
 
     if (txRequest.inExecutionWindow()) {
         log.debug(``)
-        if (txRequest.wasCalled()) return
+        if (conf.cache.get(txRequest.address) <= 99) return // waiting to be cleaned
+        if (txRequest.wasCalled()) { log.debug(`Already called.`); cleanup(conf, txRequest); return }
         if (await txRequest.inReservedWindow() && txRequest.isClaimed()) {
             if (conf.wallet.getAccounts().indexOf(txRequest.claimedBy()) == -1
                 && !txRequest.isClaimedBy(web3.eth.defaultAccount)) {
+                    log.debug(`In reserve window and not claimed by our accounts.`)
                     return
                 }
         }
@@ -260,6 +262,7 @@ const cleanup = async (conf, txRequest) => {
 
     const txRequestBalance = parseInt(await web3.eth.getBalance(txRequest.address))
 
+    // If a transaction request has been executed it will route into this option.
     if (txRequestBalance === 0) {
         // set for removal from cache
         conf.cache.set(txRequest.address, 99)
