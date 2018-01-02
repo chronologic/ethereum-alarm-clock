@@ -9,7 +9,7 @@ Source code for the [Ethereum Alarm Clock service](http://www.ethereum-alarm-clo
 
 The Ethereum Alarm Clock is a smart contract protocol for scheduling Ethereum transactions to be executed in the future. It allows any address to set the parameters of a transaction and allow clients to call these transactions during the desired window. The EAC is agnostic to callers so can be used by both human users and other smart contracts. Since all of the scheduling logic is contained in smart contracts, transactions can be scheduled from solidity.
 
-Additionally the EAC faciliates the execution of this pool of scheduled transactions through a client. The EAC client continuously runs and searches for transactions which are scheduled to be executed soon then claims and executes them. The clients run off chain and can be written in any programming language, so far we have a Python implemention (alarm_client/) and are working on a Javascript implementation (script/). The functioning of the EAC depends on people running exeuction clients so there are ways in which these executors can be rewarded for running a client. For more information please look in the docs/ folder.
+Additionally the EAC faciliates the execution of this pool of scheduled transactions through a client. The EAC client continuously runs and searches for transactions which are scheduled to be executed soon then claims and executes them. For the EAC to be successful it depends on users who run execution clients. There are a few ways incentives for running these execution clients are baked in to the protocol itself, notably the claiming mechanism and the reward payment. 
 
 ## Running the tests
 
