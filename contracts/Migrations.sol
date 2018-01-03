@@ -1,5 +1,6 @@
 pragma solidity ^0.4.15;
 
+/// Truffle-specific contract (Not a part of the EAC)
 
 contract Migrations {
     address public owner;

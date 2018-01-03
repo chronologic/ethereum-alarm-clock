@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
 import "contracts/Library/RequestScheduleLib.sol";
 import "contracts/Scheduler/BaseScheduler.sol";
@@ -13,7 +13,7 @@ contract BlockScheduler is BaseScheduler {
      * @dev Constructor
      * @param _factoryAddress Address of the RequestFactory which creates requests for this scheduler.
      */
-    function BlockScheduler(address _factoryAddress) {
+    function BlockScheduler(address _factoryAddress) public {
         // Default temporal unit is block number.
         temporalUnit = RequestScheduleLib.TemporalUnit(1);
 
@@ -21,7 +21,3 @@ contract BlockScheduler is BaseScheduler {
         factoryAddress = _factoryAddress;
     }
 }
-
-
-// contract TestnetBlockScheduler is BlockScheduler(0x6005cb5aa9c4774c9f1f46ef3323c1337809cdb0) {
-// }

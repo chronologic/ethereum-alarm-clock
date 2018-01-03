@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
 import 'contracts/zeppelin/SafeMath.sol';
 
@@ -23,13 +23,13 @@ library ClaimLib {
      */
     function claim(
         ClaimData storage self, 
-        uint8 paymentModifier
+        uint8 _paymentModifier
     ) 
         internal returns (bool)
     {
         self.claimedBy = msg.sender;
         self.claimDeposit = msg.value;
-        self.paymentModifier = paymentModifier;
+        self.paymentModifier = _paymentModifier;
     }
 
     /*

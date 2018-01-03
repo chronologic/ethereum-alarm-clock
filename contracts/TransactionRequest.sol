@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
 import "contracts/Library/RequestLib.sol";
 import "contracts/Library/RequestScheduleLib.sol";
@@ -64,8 +64,10 @@ contract TransactionRequest is TransactionRequestInterface {
      */
      
     // TODO: figure out why returning RequestLib.serialize() isn't working.
+    // Declaring this function `view`, although it creates a compiler warning, is
+    // necessary to return values from it.
     function requestData() 
-        public view returns (address[6], bool[3], uint[15], uint8[1])
+        public view returns (address[6], bool[3], uint[14], uint8[1])
     {
         if (txnRequest.serialize()) {
             return (

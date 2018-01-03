@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
 import "contracts/zeppelin/SafeMath.sol";
 
@@ -45,14 +45,14 @@ library RequestScheduleLib {
     function getNow(ExecutionWindow storage self) 
         public view returns (uint)
     {
-        return getNow(self.temporalUnit);
+        return _getNow(self.temporalUnit);
     }
 
     /**
      * @dev Internal function to return the `now` based on the appropiate temporal units.
      * @param _temporalUnit The assigned TemporalUnit to this transaction.
      */
-    function getNow(TemporalUnit _temporalUnit) 
+    function _getNow(TemporalUnit _temporalUnit) 
         internal view returns (uint)
     {
         if (_temporalUnit == TemporalUnit.Timestamp) {
@@ -159,10 +159,12 @@ library RequestScheduleLib {
         internal view returns (bool)
     {
         /// Checks that the firstClaimBlock is in the past or now.
-        require( firstClaimBlock(self) <= getNow(self) );
         /// Checks that now is before the start of the freezePeriod.
-        require( getNow(self) < freezeStart(self) );
-        return true;
+        if (firstClaimBlock(self) <= getNow(self)
+            && getNow(self) < freezeStart(self)) {
+                return true;
+        }
+        return false;
     }
 
     /*
@@ -212,7 +214,7 @@ library RequestScheduleLib {
                                  uint _windowStart) 
         public view returns (bool)
     {
-        return getNow(_temporalUnit).add(_freezePeriod) <= _windowStart;
+        return _getNow(_temporalUnit).add(_freezePeriod) <= _windowStart;
     }
 
     /*
@@ -221,10 +223,10 @@ library RequestScheduleLib {
     function validateTemporalUnit(uint _temporalUnitAsUInt) 
         public pure returns (bool)
     {
-        return (_temporalUnitAsUInt != uint(TemporalUnit.Null) && (
-            _temporalUnitAsUInt == uint(TemporalUnit.Blocks) || 
-            _temporalUnitAsUInt == uint(TemporalUnit.Timestamp)
-        ));
+        return (_temporalUnitAsUInt != uint(TemporalUnit.Null) 
+                && (_temporalUnitAsUInt == uint(TemporalUnit.Blocks)
+                    || _temporalUnitAsUInt == uint(TemporalUnit.Timestamp))
+        );
     }
 
 }
