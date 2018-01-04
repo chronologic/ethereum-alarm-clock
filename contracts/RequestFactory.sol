@@ -170,6 +170,6 @@ contract RequestFactory is RequestFactoryInterface {
     function isKnownRequest(address _address) 
         public view returns (bool isKnown)
     {
-        isKnown = requests[_address];
+        return requests[_address];
     }
 }
