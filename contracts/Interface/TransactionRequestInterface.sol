@@ -20,7 +20,7 @@ contract TransactionRequestInterface {
     function callData() public view returns (bytes);
 
     // Pull mechanisms for payments.
-    function refundClaimDeposit() public;
+    function refundClaimDeposit() public returns (bool);
     function sendDonation() public returns (bool);
     function sendPayment() public returns (bool);
     function sendOwnerEther() public returns (bool);

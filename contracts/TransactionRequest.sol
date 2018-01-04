@@ -63,7 +63,6 @@ contract TransactionRequest is TransactionRequestInterface {
      *  Data accessor functions.
      */
      
-    // TODO: figure out why returning RequestLib.serialize() isn't working.
     // Declaring this function `view`, although it creates a compiler warning, is
     // necessary to return values from it.
     function requestData() 
@@ -90,7 +89,7 @@ contract TransactionRequest is TransactionRequestInterface {
     /**
      * @dev Proxy a call from this contract to another contract.
      * This function is only callable by the scheduler and can only
-     * be called after the execution window ends. It's purpose is to
+     * be called after the execution window ends. One purpose is to
      * provide a way to transfer assets held by this contract somewhere else.
      * For example, if this request was used to buy tokens during an ICO,
      * it would become the owner of the tokens and this function would need
@@ -107,7 +106,7 @@ contract TransactionRequest is TransactionRequestInterface {
     /*
      *  Pull based payment functions.
      */
-    function refundClaimDeposit() public {
+    function refundClaimDeposit() public returns (bool) {
         txnRequest.refundClaimDeposit();
     }
 

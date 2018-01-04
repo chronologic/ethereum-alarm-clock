@@ -613,10 +613,10 @@ library RequestLib {
      * @dev Refund claimer deposit.
      */
     function refundClaimDeposit(Request storage self)
-        public
+        public returns (bool)
     {
-        assert( self.meta.isCancelled || self.schedule.isAfterWindow() );
-        assert( self.claimData.refundDeposit() );
+        require( self.meta.isCancelled || self.schedule.isAfterWindow() );
+        return self.claimData.refundDeposit();
     }
 
     /*
