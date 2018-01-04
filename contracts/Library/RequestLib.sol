@@ -59,7 +59,7 @@ library RequestLib {
      */
     function validate(
         address[4]  _addressArgs,
-        uint[11]    _uintArgs,
+        uint[12]    _uintArgs,
         bytes       _callData,
         uint        _endowment
     ) 
@@ -99,6 +99,7 @@ library RequestLib {
         request.txnData.callGas =               _uintArgs[8];
         request.txnData.callValue =             _uintArgs[9];
         request.txnData.gasPrice =              _uintArgs[10];
+        request.claimData.requiredDeposit =     _uintArgs[11];
 
         // Uint8 values
         request.claimData.paymentModifier = 0;
@@ -130,7 +131,7 @@ library RequestLib {
         );
         isValid[5] = ExecutionLib.validateToAddress(request.txnData.toAddress);
 
-        /// Automatically returns isValid
+        return isValid;
     }
 
     /**
@@ -139,7 +140,7 @@ library RequestLib {
     function initialize(
         Request storage self,
         address[4]      _addressArgs,
-        uint[11]        _uintArgs,
+        uint[12]        _uintArgs,
         bytes           _callData
     ) 
         public returns (bool initialized)
@@ -156,7 +157,7 @@ library RequestLib {
         bool[3] memory boolValues = [false, false, false];
 
         uint[14] memory uintValues = [
-            0,                  // self.claimData.claimDeposit
+            _uintArgs[11],      // self.claimData.claimDeposit
             _uintArgs[0],       // self.paymentData.donation
             0,                  // self.paymentData.donationOwed
             _uintArgs[1],       // self.paymentData.payment
@@ -178,7 +179,7 @@ library RequestLib {
 
         require( deserialize(self, addressValues, boolValues, uintValues, uint8Values, _callData) );
 
-        initialized = true;
+        return true;
     }
 
     /*
@@ -228,7 +229,7 @@ library RequestLib {
         // Uint8 values
         self.serializedValues.uint8Values[0] = self.claimData.paymentModifier;
 
-        serialized = true;
+        return true;
     }
 
     /**
@@ -308,9 +309,8 @@ library RequestLib {
          *         - block.number <= windowStart + windowSize
          *     else:
          *         - throw (should be impossible)
-         *  6. if (msg.sender != tx.origin):
-         *         - Verify stack can be increased by requiredStackDepth
-         *  7. msg.gas >= callGas
+         *  
+         *  6. msg.gas == callGas
          *
          *  +--------------------+
          *  | Phase 2: Execution |
@@ -590,7 +590,7 @@ library RequestLib {
 
         // Require that it's in the claim window and the value sent is over the min deposit.
         require( self.schedule.inClaimWindow() );
-        require( msg.value >= ClaimLib.requiredDeposit(self.paymentData.payment) ); // requiredDeposit is * 2
+        require( msg.value >= self.claimData.requiredDeposit );
         return true;
     }
 

@@ -27,10 +27,11 @@ contract TransactionRequest is TransactionRequestInterface {
      *  uintArgs[8]  - txnData.callGas
      *  uintArgs[9]  - txnData.callValue
      *  uintArgs[10] - txnData.gasPrice
+     *  uintArgs[11] - claimData.requiredDeposit
      */
     function TransactionRequest(
         address[4]  addressArgs,
-        uint[11]    uintArgs,
+        uint[12]    uintArgs,
         bytes       callData
     )
         public payable

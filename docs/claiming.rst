@@ -65,11 +65,14 @@ Claim Deposit
 -------------
 
 In order to claim a request you must put down a deposit.  This deposit amount
-is equal to twice the ``payment`` amount associated with this request.
+is specified by the scheduler of the transaction. The account claiming 
+the transaction request must send at least the ``claimDeposit`` amount
+when they attempt to claim an execution.
 
-``claim_deposit = 2 * payment``
-
-The deposit is returned during execution, or when the call is cancelled.
+The ``claimDeposit`` is returned to the claiming account when they 
+execute the transaction request or when the call is cancelled. However,
+if the account that claims the call later fails to execute then they will 
+lose their claim deposit to whoever executes instead.
 
 
 How claiming effects payment
