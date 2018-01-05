@@ -14,7 +14,7 @@ contract TransactionRequestInterface {
     // Data accessors
     function requestData() public view returns (address[6],
                                                 bool[3],
-                                                uint[14],
+                                                uint[15],
                                                 uint8[1]);
 
     function callData() public view returns (bytes);

@@ -26,7 +26,7 @@ library RequestLib {
     struct SerializedRequest {
         address[6]  addressValues;
         bool[3]     boolValues;
-        uint[14]    uintValues;
+        uint[15]    uintValues;
         uint8[1]    uint8Values;
     }
 
@@ -156,8 +156,8 @@ library RequestLib {
 
         bool[3] memory boolValues = [false, false, false];
 
-        uint[14] memory uintValues = [
-            _uintArgs[11],      // self.claimData.claimDeposit
+        uint[15] memory uintValues = [
+            0,                  // self.claimData.claimDeposit
             _uintArgs[0],       // self.paymentData.donation
             0,                  // self.paymentData.donationOwed
             _uintArgs[1],       // self.paymentData.payment
@@ -170,7 +170,8 @@ library RequestLib {
             _uintArgs[7],       // self.schedule.windowStart
             _uintArgs[8],       // self.txnData.callGas
             _uintArgs[9],       // self.txnData.callValue
-            _uintArgs[10]       // self.txnData.gasPrice
+            _uintArgs[10],      // self.txnData.gasPrice
+            _uintArgs[11]       // self.claimData.requiredDeposit
         ];
 
         uint8[1] memory uint8Values = [
@@ -225,6 +226,7 @@ library RequestLib {
         self.serializedValues.uintValues[11] = self.txnData.callGas;
         self.serializedValues.uintValues[12] = self.txnData.callValue;
         self.serializedValues.uintValues[13] = self.txnData.gasPrice;
+        self.serializedValues.uintValues[14] = self.claimData.requiredDeposit;
 
         // Uint8 values
         self.serializedValues.uint8Values[0] = self.claimData.paymentModifier;
@@ -241,7 +243,7 @@ library RequestLib {
         Request storage self,
         address[6]  _addressValues,
         bool[3]     _boolValues,
-        uint[14]    _uintValues,
+        uint[15]    _uintValues,
         uint8[1]    _uint8Values,
         bytes       _callData
     )
@@ -278,6 +280,7 @@ library RequestLib {
         self.txnData.callGas =              _uintValues[11];
         self.txnData.callValue =            _uintValues[12];
         self.txnData.gasPrice =             _uintValues[13];
+        self.claimData.requiredDeposit =    _uintValues[14];
 
         // Uint8 values
         self.claimData.paymentModifier = _uint8Values[0];

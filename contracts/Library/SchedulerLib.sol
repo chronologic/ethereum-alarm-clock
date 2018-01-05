@@ -37,16 +37,7 @@ library SchedulerLib {
 
         RequestScheduleLib.TemporalUnit temporalUnit;
     }
-        futureTransaction.toAddress         = _toAddress;
-        futureTransaction.callData          = _callData;
-        futureTransaction.callGas           = _uintArgs[0];
-        futureTransaction.callValue         = _uintArgs[1];
-        futureTransaction.windowSize        = _uintArgs[2];
-        futureTransaction.windowStart       = _uintArgs[3];
-        futureTransaction.gasPrice          = _uintArgs[4];
-        futureTransaction.donation          = _uintArgs[5];
-        futureTransaction.payment           = _uintArgs[6];
-        futureTransaction.requiredDeposit   = _uintArgs[7];
+
     /*
      * @dev Set common default values.
      */
